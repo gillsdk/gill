@@ -273,10 +273,12 @@ blockhash lifetime before (or during) the signing operation:
 
 ```typescript
 import {
-  createTransaction,
-  createSolanaClient,
-  signTransactionMessageWithSigners,
-  setTransactionMessageLifetimeUsingBlockhash,
+  createTransferRequestURL,
+  createTransactionRequestURL,
+  parseSolanaPayURL,
+  validateSolanaPayURL,
+  extractReferenceKeys,
+  type Address,
 } from "gill";
 
 const { rpc } = createSolanaClient(...);
@@ -343,13 +345,12 @@ await sendAndConfirmTransaction(signedTransaction, {
 });
 ```
 
-### Get the signature from a signed transaction
+### Transaction Requests (Interactive)
 
-After you have a transaction signed by the `feePayer` (either a partially or fully signed transaction), you can get the
-transaction signature as follows:
+Transaction requests enable complex payments that require server-side transaction creation:
 
 ```typescript
-import { getSignatureFromTransaction } from "gill";
+import { createTransactionRequestURL } from "gill";
 
 const signature: string = getSignatureFromTransaction(signedTransaction);
 console.log(signature);
@@ -399,44 +400,11 @@ const link: string = getExplorerLink({
 To get an explorer link for an account on Solana's devnet:
 
 ```typescript
-import { getExplorerLink } from "gill";
+import { extractReferenceKeys, findReference, validateTransfer } from "gill";
 
-const link: string = getExplorerLink({
-  cluster: "devnet",
-  account: "nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5",
-});
-```
-
-To get an explorer link for an account on your local test validator:
-
-```typescript
-import { getExplorerLink } from "gill";
-
-const link: string = getExplorerLink({
-  cluster: "localnet",
-  account: "11111111111111111111111111111111",
-});
-```
-
-#### Get a Solana Explorer link for a block
-
-To get an explorer link for a block:
-
-```typescript
-import { getExplorerLink } from "gill";
-
-const link: string = getExplorerLink({
-  cluster: "mainnet",
-  block: "242233124",
-});
-```
-
-### Calculate minimum rent for an account
-
-To calculate the minimum rent balance for an account (aka data storage deposit fee):
-
-```typescript
-import { getMinimumBalanceForRentExemption } from "gill";
+// Extract reference keys from a payment URL
+const references = await extractReferenceKeys(paymentURL);
+console.log("Reference keys:", references);
 
 // when not `space` argument is provided: defaults to `0`
 const rent: bigint = getMinimumBalanceForRentExemption();
@@ -470,13 +438,7 @@ The `gill` package has specific imports for use in NodeJS server backends and/or
 access to Node specific APIs (like the file system via `node:fs`).
 
 ```typescript
-import { ... } from "gill/node"
-```
-
-### Loading a keypair from a file
-
-```typescript
-import { loadKeypairSignerFromFile } from "gill/node";
+import { toQRCodeURL, createSolanaPayQR } from "gill";
 
 // default file path: ~/.config/solana/id.json
 const signer = await loadKeypairSignerFromFile();

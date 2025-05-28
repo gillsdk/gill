@@ -1,0 +1,17 @@
+{
+  "name": "gill-examples-solana-pay",
+  "version": "0.1.0",
+  "description": "Example demonstrating Gill's Solana Pay integration",
+  "type": "module",
+  "author": "chainsona",
+  "license": "MIT",
+  "dependencies": {
+    "gill": "workspace:*",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/qrcode-terminal": "^0.12.0",
+    "typescript": "^5.6.3"
+  }
+}
