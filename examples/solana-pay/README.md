@@ -1,137 +1,266 @@
-# gill examples - solana pay
+# Gill Solana Pay Examples
 
-Gill is aimed at abstracting away many of the complexities and boilerplate
-required to perform common interactions with the Solana blockchain, while still
-offering the low level "escape hatches" when developers need (or want)
-fine-grain control.
+A clean, dependency-free Solana Pay implementation built from scratch for Gill.
 
-This example demonstrates how to use Gill's Solana Pay integration to create payment requests, handle transactions, and integrate Solana Pay into your applications with full TypeScript support.
+## Features
 
-## Tech stack used
+- ✅ Complete Solana Pay specification support
+- ✅ Transfer requests (SOL and SPL tokens)
+- ✅ Transaction requests (interactive payments)
+- ✅ URL validation and parsing
+- ✅ QR code helpers with terminal display
+- ✅ Reference key tracking
+- ✅ Decimal amount support (follows Solana Pay spec)
+- ✅ Full TypeScript support with Gill's Address types
+- ✅ Zero external dependencies
 
-- TypeScript and NodeJS
-- Package manger: `pnpm`
-- Running the scripts: `esrun`
+## Getting Started
 
-## Features Demonstrated
+1. Install dependencies:
+   ```bash
+   pnpm install
+   ```
 
-- ✅ Creating transfer request URLs for SOL and SPL tokens
-- ✅ Creating transaction request URLs for interactive payments
-- ✅ Parsing and validating Solana Pay URLs
-- ✅ Generating QR codes for payments
-- ✅ Reference key tracking for payment verification
-- ✅ Merchant integration patterns
-- ✅ Wallet integration patterns
+2. Run examples in order (recommended):
+   ```bash
+   pnpm run 01-basic        # Start here!
+   pnpm run 02-transfers    # SOL and SPL transfers
+   pnpm run 03-transactions # Transaction requests
+   pnpm run 04-wallet       # Wallet integration
+   ```
 
-## Prerequisites
+Each example displays QR codes in the terminal that you can scan with any Solana wallet!
 
-- Node.js 20.18.0 or higher
-- A Solana wallet (Phantom, Solflare, etc.)
-- Some SOL for testing (use devnet faucet)
+## Examples Overview
 
-## Setup locally
+### 1. Basic (`01-basic.ts`) - Start Here!
+**Run:** `pnpm run 01-basic`
 
-1. Clone this repo to your local system
-2. Install the packages via `pnpm install`
-3. Change into this directory: `cd examples/solana-pay`
+Demonstrates:
+- Creating SOL transfer URLs with decimal amounts
+- Creating transaction request URLs
+- URL validation and parsing
+- QR code generation and terminal display
+- Reference key extraction
 
-### Running the included scripts with esrun
+### 2. Transfers (`02-transfers.ts`)
+**Run:** `pnpm run 02-transfers`
 
-Once setup locally, you will be able to run the scripts included within this
-repo using `esrun`:
+Demonstrates:
+- SOL and SPL token transfer requests with decimal amounts
+- All transfer parameters (amount, label, message, memo)
+- Reference key generation and tracking
+- URL encoding options
+- Complete transfer request workflow
+- QR codes for each payment type
 
-```shell
-npx esrun ./src/<script>
-pnpx esrun ./src/<script>
+### 3. Transactions (`03-transactions.ts`)
+**Run:** `pnpm run 03-transactions`
+
+Demonstrates:
+- Interactive transaction request URLs
+- HTTPS requirement enforcement
+- URL validation and parsing
+- Error handling for invalid URLs
+- QR code generation for transaction requests
+
+### 4. Wallet Integration (`04-wallet.ts`)
+**Run:** `pnpm run 04-wallet`
+
+Demonstrates:
+- Wallet-side URL processing
+- Transfer vs transaction request handling
+- Security validation checks
+- User interaction simulation
+- Error handling patterns
+- QR code display for valid URLs
+
+## Quick Start
+
+```typescript
+import { createTransferRequestURL, parseSolanaPayURL } from "gill/node";
+
+// Create a payment URL with decimal amount
+const url = createTransferRequestURL({
+  recipient: "11111111111111111111111111111112" as Address,
+  amount: 0.001, // 0.001 SOL (decimal amount)
+  label: "Coffee Shop",
+  message: "Thanks for your order"
+});
+
+// Parse a payment URL
+const data = parseSolanaPayURL(url);
+console.log(data.params.recipient);
+console.log(data.params.amount); // 0.001
 ```
 
-> From the [esrun](https://www.npmjs.com/package/esrun) readme:
->
-> esrun is a "work out of the box" library to execute Typescript (as well as
-> modern Javascript with decorators and stuff) without having to use a bundler.
-> This is useful for quick demonstrations or when launching your tests written
-> in Typescript.
+## Amount Handling
 
-## Running the Examples
+Solana Pay URLs use decimal amounts as specified in the [official documentation](https://docs.solanapay.com/core/transfer-request/merchant-integration):
 
-### 1. Basic Transfer Request Example
-```bash
-pnpm run example:1-basic-transfer
+- **SOL**: Use decimal values (e.g., `0.001` for 0.001 SOL)
+- **SPL Tokens**: Use decimal values (e.g., `5` for 5 USDC, `1.5` for 1.5 tokens)
+
+```typescript
+// SOL transfer
+const solURL = createTransferRequestURL({
+  recipient: merchantAddress,
+  amount: 0.001, // 0.001 SOL
+  label: "Coffee Shop"
+});
+
+// USDC transfer  
+const usdcURL = createTransferRequestURL({
+  recipient: merchantAddress,
+  amount: 5, // 5 USDC
+  splToken: usdcMint,
+  label: "Coffee Shop"
+});
 ```
 
-### 2. Transaction Request Example
-```bash
-pnpm run example:2-transaction-request
+## API Reference
+
+### `createTransferRequestURL(params, options?)`
+
+Creates a Solana Pay transfer request URL.
+
+```typescript
+const url = createTransferRequestURL({
+  recipient: merchantAddress,
+  amount: 0.001, // Decimal amount
+  splToken: usdcMint, // Optional: for SPL tokens
+  reference: [referenceKey], // Optional: for tracking
+  label: "Coffee Shop",
+  message: "Thanks",
+  memo: "Order 123"
+});
 ```
 
-### 3. Wallet Integration Example
-```bash
-pnpm run example:3-wallet-integration
+### `createTransactionRequestURL(params, options?)`
+
+Creates a transaction request URL for interactive payments.
+
+```typescript
+const url = createTransactionRequestURL({
+  link: "https://merchant.com/api/pay"
+});
 ```
 
-### 4. Merchant Integration Example
-```bash
-pnpm run example:4-merchant-integration
+### `parseSolanaPayURL(url)`
+
+Parses a Solana Pay URL into structured data.
+
+```typescript
+const data = parseSolanaPayURL(url);
+if (data.type === "transfer" && data.params.amount) {
+  console.log(`Amount: ${data.params.amount} SOL`);
+}
 ```
 
-### 5. Full Payment Flow Example
-```bash
-pnpm run example:5-full-payment-flow
+### Other Functions
+
+- `validateSolanaPayURL(url)` - Validates a URL
+- `extractReferenceKeys(url)` - Gets reference keys
+- `toQRCodeURL(url)` - Prepares URL for QR codes
+
+## Types
+
+```typescript
+interface TransferRequestParams {
+  recipient: Address;
+  amount?: number; // Decimal amount (e.g., 0.001 for 0.001 SOL)
+  splToken?: Address;
+  reference?: Address[];
+  label?: string;
+  message?: string;
+  memo?: string;
+}
+
+interface TransactionRequestParams {
+  link: string;
+}
+
+type SolanaPayData =
+  | { type: "transfer"; params: TransferRequestParams }
+  | { type: "transaction"; params: TransactionRequestParams };
 ```
 
-### Run All Examples in Order
-```bash
-pnpm run example:all
+## Integration Examples
+
+### Merchant Integration
+
+```typescript
+import { createTransferRequestURL, extractReferenceKeys } from "gill/node";
+
+// Create payment request with tracking
+const merchantWallet = "YourMerchantWalletAddress" as Address;
+const referenceKey = "UniqueOrderReference" as Address;
+
+const paymentURL = createTransferRequestURL({
+  recipient: merchantWallet,
+  amount: 0.005, // 0.005 SOL
+  reference: [referenceKey],
+  label: "Acme Coffee Shop",
+  message: "Payment for 1x Latte",
+  memo: "Order 12345"
+});
+
+// Monitor payments using reference key
+const references = extractReferenceKeys(paymentURL);
 ```
 
-## Recommended flow to explore this repo
+### Wallet Integration
 
-After getting setup locally, we recommend exploring the code of the following
-files **in this specific order** for the best learning experience:
+```typescript
+import { parseSolanaPayURL, validateSolanaPayURL } from "gill/node";
 
-### 1. [`1.basic-transfer-example.ts`](./src/1.basic-transfer-example.ts) - Start Here!
-**Concepts**: Basic Solana Pay URLs, SOL transfers, SPL tokens, QR codes
+function handleSolanaPayURL(url: string) {
+  if (!validateSolanaPayURL(url)) {
+    throw new Error("Invalid Solana Pay URL");
+  }
+  
+  const parsed = parseSolanaPayURL(url);
+  
+  if (parsed.type === "transfer") {
+    const { recipient, amount, label, message } = parsed.params;
+    if (amount) {
+      console.log(`Send ${amount} SOL to ${recipient}`);
+    }
+    console.log(`${label}: ${message}`);
+  } else {
+    console.log(`Transaction endpoint: ${parsed.params.link}`);
+  }
+}
+```
 
-Demonstrates how to create Solana Pay transfer request URLs for both SOL and SPL token transfers. Shows URL validation, parsing, reference key extraction, and QR code generation. This is the perfect starting point to understand Solana Pay fundamentals.
+## QR Code Testing
 
-### 2. [`2.transaction-request-example.ts`](./src/2.transaction-request-example.ts) - Interactive Payments
-**Concepts**: Transaction requests, server communication, HTTPS endpoints
+All examples generate QR codes that you can scan with any Solana wallet:
 
-Shows how to create interactive transaction request URLs that require server communication. Includes error handling for invalid URLs and demonstrates the complete transaction request flow.
+1. **Phantom** - Scan QR codes directly from the app
+2. **Solflare** - Use the scan feature to test payments
+3. **Backpack** - Scan codes to initiate transfers
+4. **Any Solana Pay compatible wallet**
 
-### 3. [`3.wallet-integration-example.ts`](./src/3.wallet-integration-example.ts) - Wallet Perspective
-**Concepts**: URL parsing, validation, security checks, user interaction
-
-Demonstrates how a wallet application would handle Solana Pay URLs, including parsing, validation, security checks, and user interaction simulation.
-
-### 4. [`4.merchant-integration-example.ts`](./src/4.merchant-integration-example.ts) - E-commerce Integration
-**Concepts**: Order management, payment tracking, reference keys, validation
-
-A complete e-commerce integration example showing order management, payment creation, tracking with reference keys, and transaction validation workflow.
-
-### 5. [`5.full-payment-flow-example.ts`](./src/5.full-payment-flow-example.ts) - Complete Scenarios
-**Concepts**: End-to-end flows, error handling, real-world scenarios
-
-End-to-end payment scenarios combining both merchant and wallet perspectives, including error handling examples and complete payment flows.
-
-## Key Concepts
-
-### Transfer Requests
-Non-interactive requests for SOL or SPL token transfers. The wallet can directly create and sign the transaction.
-
-### Transaction Requests
-Interactive requests that require communication with a merchant's server to get the actual transaction to sign.
-
-### Reference Keys
-Unique identifiers used to track and validate specific payments on-chain.
-
-### QR Codes
-Visual representation of Solana Pay URLs that can be scanned by mobile wallets.
+The QR codes are displayed directly in your terminal for easy testing!
 
 ## Best Practices
 
-1. **Always validate URLs** before processing
-2. **Use reference keys** for payment tracking
-3. **Validate payments server-side** for security
-4. **Handle errors gracefully** with proper error types
-5. **Use HTTPS** for transaction request endpoints 
+1. **Always validate URLs** before processing them
+2. **Use reference keys** for order tracking and payment verification
+3. **Handle errors gracefully** with proper error types
+4. **Use HTTPS** for transaction request endpoints
+5. **Store reference keys** in your database for payment reconciliation
+6. **Use decimal amounts** as specified in the Solana Pay documentation
+7. **Test with real wallets** using the generated QR codes
+8. **Avoid special characters** in URL parameters (use alphanumeric, spaces, and basic punctuation only)
+
+## Specification Compliance
+
+This implementation follows the [Solana Pay specification](https://docs.solanapay.com/core/transfer-request/merchant-integration) and is compatible with all Solana wallets. Amounts are handled as decimal values exactly as specified in the official documentation.
+
+## Resources
+
+- [Solana Pay Documentation](https://docs.solanapay.com/)
+- [Gill Documentation](https://github.com/solana-foundation/gill)
+- [Solana Developer Resources](https://solana.com/developers)

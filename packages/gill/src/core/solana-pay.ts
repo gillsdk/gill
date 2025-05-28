@@ -1,183 +1,157 @@
 import type { Address } from "@solana/kit";
-import { getAddressEncoder, getAddressDecoder } from "@solana/kit";
-import BigNumber from "bignumber.js";
-import type {
-  CreateSolanaPayURLOptions,
-  GillSolanaPayData,
-  GillTransactionRequestParams,
-  GillTransferRequestParams,
-} from "../types/solana-pay";
-import {
-  SolanaPayError,
-  InvalidSolanaPayURLError,
-} from "../types/solana-pay";
+import { isAddress } from "@solana/kit";
+import type { TransferRequestParams, TransactionRequestParams, SolanaPayData, URLOptions } from "../types/solana-pay";
+import { SolanaPayError } from "../types/solana-pay";
 
-/**
- * Creates a Solana Pay transfer request URL using gill's Address type
- * 
- * @param params - Transfer request parameters
- * @param options - URL creation options
- * @returns The Solana Pay URL string
- * 
- * @example
- * ```typescript
- * const url = createTransferRequestURL({
- *   recipient: "11111111111111111111111111111112" as Address,
- *   amount: 1000000n, // 0.001 SOL in lamports
- *   label: "Coffee Shop",
- *   message: "Thanks for your purchase!"
- * });
- * console.log(url); // "solana:11111111111111111111111111111112?amount=1000000&label=Coffee%20Shop&message=Thanks%20for%20your%20purchase!"
- * ```
- */
-export async function createTransferRequestURL(
-  params: GillTransferRequestParams,
-  options: CreateSolanaPayURLOptions = {}
-): Promise<string> {
-  const { encode = true } = options;
-  
-  // Convert gill Address types to PublicKey for @solana/pay
-  const addressEncoder = getAddressEncoder();
-  
-  // Dynamic import to handle ESM/CommonJS compatibility
-  const { encodeURL } = await import("@solana/pay");
-  
-  // We need to create PublicKey objects for @solana/pay
-  // Since @solana/pay expects @solana/web3.js PublicKey objects, we need to import that
-  const { PublicKey } = await import("@solana/web3.js");
-  
-  // Create the transfer URL using the official @solana/pay package
-  const transferParams = {
-    recipient: new PublicKey(addressEncoder.encode(params.recipient)),
-    amount: params.amount ? new BigNumber(params.amount.toString()) : undefined,
-    splToken: params.splToken ? new PublicKey(addressEncoder.encode(params.splToken)) : undefined,
-    reference: params.reference?.map((ref: Address) => new PublicKey(addressEncoder.encode(ref))),
-    label: params.label,
-    message: params.message,
-    memo: params.memo,
-  };
-  
-  const url = encodeURL(transferParams);
-  const urlString = url.toString();
-  
-  if (!encode) {
-    // Decode both percent encoding and plus signs to spaces
-    return decodeURIComponent(urlString).replace(/\+/g, ' ');
+const SCHEME = "solana:";
+
+function isValidAddress(address: string): boolean {
+  try {
+    return isAddress(address);
+  } catch {
+    return false;
   }
-  
-  return urlString;
+}
+
+function isHttpsUrl(url: string): boolean {
+  try {
+    return new URL(url).protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 /**
- * Creates a Solana Pay transaction request URL
- * 
- * @param params - Transaction request parameters
- * @param options - URL creation options
- * @returns The Solana Pay URL string
- * 
- * @example
- * ```typescript
- * const url = createTransactionRequestURL({
- *   link: "https://merchant.com/api/solana-pay"
- * });
- * console.log(url); // "solana:https://merchant.com/api/solana-pay"
- * ```
+ * Create a Solana Pay transfer request URL
  */
-export async function createTransactionRequestURL(
-  params: GillTransactionRequestParams,
-  options: CreateSolanaPayURLOptions = {}
-): Promise<string> {
+export function createTransferRequestURL(params: TransferRequestParams, options: URLOptions = {}): string {
   const { encode = true } = options;
   
-  // Validate HTTPS URL
-  if (!params.link.startsWith("https://")) {
+  if (!isValidAddress(params.recipient)) {
+    throw new SolanaPayError("Invalid recipient address", "INVALID_RECIPIENT");
+  }
+  
+  let url = SCHEME + params.recipient;
+  const searchParams = new URLSearchParams();
+  
+  if (params.amount !== undefined) {
+    searchParams.set("amount", params.amount.toString());
+  }
+  
+  if (params.splToken) {
+    if (!isValidAddress(params.splToken)) {
+      throw new SolanaPayError("Invalid SPL token address", "INVALID_SPL_TOKEN");
+    }
+    searchParams.set("spl-token", params.splToken);
+  }
+  
+  if (params.reference?.length) {
+    for (const ref of params.reference) {
+      if (!isValidAddress(ref)) {
+        throw new SolanaPayError("Invalid reference address", "INVALID_REFERENCE");
+      }
+      searchParams.append("reference", ref);
+    }
+  }
+  
+  if (params.label) searchParams.set("label", params.label);
+  if (params.message) searchParams.set("message", params.message);
+  if (params.memo) searchParams.set("memo", params.memo);
+  
+  const query = searchParams.toString();
+  if (query) url += "?" + query;
+  
+  return encode ? url : decodeURIComponent(url).replace(/\+/g, ' ');
+}
+
+/**
+ * Create a Solana Pay transaction request URL
+ */
+export function createTransactionRequestURL(params: TransactionRequestParams, options: URLOptions = {}): string {
+  const { encode = true } = options;
+  
+  if (!isHttpsUrl(params.link)) {
     throw new SolanaPayError("Transaction request link must use HTTPS", "INVALID_LINK");
   }
   
-  // Dynamic import to handle ESM/CommonJS compatibility
-  const { encodeURL } = await import("@solana/pay");
-  
-  const url = encodeURL({
-    link: new URL(params.link),
-  });
-  
-  const urlString = url.toString();
-  
-  if (!encode) {
-    // Decode both percent encoding and plus signs to spaces
-    return decodeURIComponent(urlString).replace(/\+/g, ' ');
-  }
-  
-  return urlString;
+  const url = SCHEME + params.link;
+  return encode ? url : decodeURIComponent(url).replace(/\+/g, ' ');
 }
 
 /**
- * Parses a Solana Pay URL and returns the structured data with gill types
- * 
- * @param url - The Solana Pay URL to parse
- * @returns Parsed Solana Pay data
- * 
- * @example
- * ```typescript
- * const data = parseSolanaPayURL("solana:11111111111111111111111111111112?amount=1000000");
- * if (data.type === "transfer") {
- *   console.log(data.params.recipient); // "11111111111111111111111111111112"
- *   console.log(data.params.amount); // 1000000n
- * }
- * ```
+ * Parse a Solana Pay URL into structured data
  */
-export async function parseSolanaPayURL(url: string): Promise<GillSolanaPayData> {
-  try {
-    // Dynamic import to handle ESM/CommonJS compatibility
-    const { parseURL } = await import("@solana/pay");
-    const parsed = parseURL(url);
-    const addressDecoder = getAddressDecoder();
+export function parseSolanaPayURL(url: string): SolanaPayData {
+  if (!url.startsWith(SCHEME)) {
+    throw new SolanaPayError("URL must start with 'solana:' scheme", "INVALID_SCHEME");
+  }
+  
+  const withoutScheme = url.slice(SCHEME.length);
+  
+  if (withoutScheme.startsWith("https://")) {
+    return {
+      type: "transaction",
+      params: { link: withoutScheme },
+    };
+  }
+  
+  const [addressPart, queryPart] = withoutScheme.split("?", 2);
+  
+  if (!isValidAddress(addressPart)) {
+    throw new SolanaPayError("Invalid recipient address in URL", "INVALID_RECIPIENT");
+  }
+  
+  const params: TransferRequestParams = { recipient: addressPart as Address };
+  
+  if (queryPart) {
+    const searchParams = new URLSearchParams(queryPart);
     
-    if ('recipient' in parsed) {
-      // This is a transfer request
-      return {
-        type: "transfer",
-        params: {
-          recipient: addressDecoder.decode(new Uint8Array(parsed.recipient.toBuffer())) as Address,
-          amount: parsed.amount ? BigInt(parsed.amount.toString()) : undefined,
-          splToken: parsed.splToken ? addressDecoder.decode(new Uint8Array(parsed.splToken.toBuffer())) as Address : undefined,
-          reference: parsed.reference?.map((ref: any) => addressDecoder.decode(new Uint8Array(ref.toBuffer())) as Address),
-          label: parsed.label,
-          message: parsed.message,
-          memo: parsed.memo,
-        },
-      };
-    } else {
-      // This is a transaction request
-      return {
-        type: "transaction",
-        params: {
-          link: parsed.link.toString(),
-        },
-      };
+    const amountStr = searchParams.get("amount");
+    if (amountStr) {
+      const amount = parseFloat(amountStr);
+      if (isNaN(amount) || amount < 0) {
+        throw new SolanaPayError("Invalid amount parameter", "INVALID_AMOUNT");
+      }
+      params.amount = amount;
     }
-  } catch (error) {
-    throw new InvalidSolanaPayURLError(`Failed to parse Solana Pay URL: ${error instanceof Error ? error.message : String(error)}`);
+    
+    const splToken = searchParams.get("spl-token");
+    if (splToken) {
+      if (!isValidAddress(splToken)) {
+        throw new SolanaPayError("Invalid SPL token address", "INVALID_SPL_TOKEN");
+      }
+      params.splToken = splToken as Address;
+    }
+    
+    const references = searchParams.getAll("reference");
+    if (references.length) {
+      for (const ref of references) {
+        if (!isValidAddress(ref)) {
+          throw new SolanaPayError("Invalid reference address", "INVALID_REFERENCE");
+        }
+      }
+      params.reference = references as Address[];
+    }
+    
+    const label = searchParams.get("label");
+    if (label) params.label = decodeURIComponent(label);
+    
+    const message = searchParams.get("message");
+    if (message) params.message = decodeURIComponent(message);
+    
+    const memo = searchParams.get("memo");
+    if (memo) params.memo = decodeURIComponent(memo);
   }
+  
+  return { type: "transfer", params };
 }
 
 /**
- * Validates a Solana Pay URL
- * 
- * @param url - The URL to validate
- * @returns True if the URL is valid, false otherwise
- * 
- * @example
- * ```typescript
- * const isValid = validateSolanaPayURL("solana:11111111111111111111111111111112");
- * console.log(isValid); // true
- * ```
+ * Validate a Solana Pay URL
  */
-export async function validateSolanaPayURL(url: string): Promise<boolean> {
+export function validateSolanaPayURL(url: string): boolean {
   try {
-    // Dynamic import to handle ESM/CommonJS compatibility
-    const { parseURL } = await import("@solana/pay");
-    parseURL(url);
+    parseSolanaPayURL(url);
     return true;
   } catch {
     return false;
@@ -185,85 +159,19 @@ export async function validateSolanaPayURL(url: string): Promise<boolean> {
 }
 
 /**
- * Converts a Solana Pay URL to a QR code-friendly format
- * This function URL-encodes the URL to ensure it's safe for QR codes
- * 
- * @param url - The Solana Pay URL
- * @returns URL-encoded string suitable for QR codes
- * 
- * @example
- * ```typescript
- * const qrUrl = toQRCodeURL("solana:11111111111111111111111111111112?label=Coffee Shop");
- * // Use qrUrl with your preferred QR code library
- * ```
+ * Extract reference keys from a Solana Pay URL
  */
-export async function toQRCodeURL(url: string): Promise<string> {
-  if (!(await validateSolanaPayURL(url))) {
-    throw new InvalidSolanaPayURLError("Invalid Solana Pay URL");
+export function extractReferenceKeys(url: string): Address[] {
+  const data = parseSolanaPayURL(url);
+  return data.type === "transfer" && data.params.reference ? data.params.reference : [];
+}
+
+/**
+ * Convert a Solana Pay URL to a QR code-friendly format
+ */
+export function toQRCodeURL(url: string): string {
+  if (!validateSolanaPayURL(url)) {
+    throw new SolanaPayError("Invalid Solana Pay URL", "INVALID_URL");
   }
   return encodeURI(url);
-}
-
-/**
- * Creates a QR code for a Solana Pay URL using the official @solana/pay createQR function
- * 
- * @param url - The Solana Pay URL
- * @param size - QR code size (default: 256)
- * @returns QR code element that can be appended to DOM
- * 
- * @example
- * ```typescript
- * const qrCode = createSolanaPayQR("solana:11111111111111111111111111111112");
- * document.getElementById('qr-container').appendChild(qrCode);
- * ```
- */
-export async function createSolanaPayQR(url: string, size: number = 256) {
-  if (!(await validateSolanaPayURL(url))) {
-    throw new InvalidSolanaPayURLError("Invalid Solana Pay URL");
-  }
-  
-  // Dynamic import to handle ESM/CommonJS compatibility
-  const { createQR } = await import("@solana/pay");
-  return createQR(url, size);
-}
-
-/**
- * Extracts reference keys from a Solana Pay transfer request
- * 
- * @param url - The Solana Pay URL
- * @returns Array of reference addresses
- * 
- * @example
- * ```typescript
- * const references = extractReferenceKeys("solana:11111111111111111111111111111112?reference=22222222222222222222222222222223");
- * console.log(references); // ["22222222222222222222222222222223"]
- * ```
- */
-export async function extractReferenceKeys(url: string): Promise<Address[]> {
-  const data = await parseSolanaPayURL(url);
-  
-  if (data.type === "transfer" && data.params.reference) {
-    return data.params.reference;
-  }
-  
-  return [];
-}
-
-/**
- * Helper function to find reference transactions (uses dynamic import)
- */
-export async function findReference(connection: any, reference: Address, options?: any) {
-  const { findReference: findRef } = await import("@solana/pay");
-  const { PublicKey } = await import("@solana/web3.js");
-  const addressEncoder = getAddressEncoder();
-  const publicKey = new PublicKey(addressEncoder.encode(reference));
-  return findRef(connection, publicKey, options);
-}
-
-/**
- * Helper function to validate transfers (uses dynamic import)
- */
-export async function validateTransfer(connection: any, signature: string, options: any) {
-  const { validateTransfer: validateTx } = await import("@solana/pay");
-  return validateTx(connection, signature, options);
 } 
