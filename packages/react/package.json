@@ -53,9 +53,9 @@
     "wagmi"
   ],
   "author": "Solana Foundation DevRel <devrel@solana.org>",
-  "homepage": "https://github.com/solana-foundation/gill#readme",
+  "homepage": "https://github.com/DecalLabs/gill#readme",
   "bugs": {
-    "url": "https://github.com/solana-foundation/gill/issues"
+    "url": "https://github.com/DecalLabs/gill/issues"
   },
   "browserslist": [
     "supports bigint and not dead",

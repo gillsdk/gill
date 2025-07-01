@@ -7,13 +7,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/solana-foundation/gill/actions/workflows/publish-packages.yml"><img src="https://img.shields.io/github/actions/workflow/status/solana-foundation/gill/publish-packages.yml?logo=GitHub&label=tests" /></a>
+  <a href="https://github.com/DecalLabs/gill/actions/workflows/publish-packages.yml"><img src="https://img.shields.io/github/actions/workflow/status/DecalLabs/gill/publish-packages.yml?logo=GitHub&label=tests" /></a>
   <a href="https://www.npmjs.com/package/gill"><img src="https://img.shields.io/npm/v/gill?logo=npm&color=377CC0" /></a>
   <a href="https://www.npmjs.com/package/gill"><img src="https://img.shields.io/npm/dm/gill?color=377CC0" /></a>
 </p>
 
 <p align="center">
-  <img width="600" alt="gill" src="https://raw.githubusercontent.com/solana-foundation/gill/refs/heads/master/docs/public/cover.png" />
+  <img width="600" alt="gill" src="https://raw.githubusercontent.com/DecalLabs/gill/refs/heads/master/docs/public/cover.png" />
 </p>
 
 ## Overview
@@ -27,7 +27,7 @@ Gill is built on top of the modern javascript libraries for Solana built by Anza
 functions under the hood, `gill` is compatible with `kit`. See [Replacing Kit with gill](#replace-kit-with-gill).
 
 > For a comparison of using gill vs web3js v2, take a look at the
-> [comparison examples](https://github.com/solana-foundation/gill/tree/master/examples/get-started#comparison-of-gill-vs-solanakit-aka-web3js-v2).
+> [comparison examples](https://github.com/DecalLabs/gill/tree/master/examples/get-started#comparison-of-gill-vs-solanakit-aka-web3js-v2).
 
 ## Installation
 
@@ -55,9 +55,9 @@ Simply [install gill](#installation) and replace your imports
 ## Quick start
 
 > Find a collection of example code snippets using `gill` inside the
-> [`/examples` directory](https://github.com/solana-foundation/gill/tree/master/examples), including
-> [basic operations](https://github.com/solana-foundation/gill/tree/master/examples/get-started) and common
-> [token operations](https://github.com/solana-foundation/gill/tree/master/examples/tokens).
+> [`/examples` directory](https://github.com/DecalLabs/gill/tree/master/examples), including
+> [basic operations](https://github.com/DecalLabs/gill/tree/master/examples/get-started) and common
+> [token operations](https://github.com/DecalLabs/gill/tree/master/examples/tokens).
 
 - [Create a Solana RPC connection](#create-a-solana-rpc-connection)
 - [Making Solana RPC calls](#making-solana-rpc-calls)

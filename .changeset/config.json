@@ -5,7 +5,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "solana-foundation/gill"
+      "repo": "DecalLabs/gill"
     }
   ],
   "commit": false,

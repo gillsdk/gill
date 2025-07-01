@@ -103,7 +103,7 @@ Most notably utilized within SolanaPay and Blinks.
 ## Comparison of gill vs @solana/kit (aka web3js v2)
 
 You can find comparison scripts that demonstrates some of the differences
-between [gill](https://github.com/solana-foundation/gill) and
+between [gill](https://github.com/DecalLabs/gill) and
 [@solana/kit](https://github.com/anza-xyz/kit) (formerly known as "web3.js v2").
 
 Both scripts accomplish the same task: send an optimized transaction to the

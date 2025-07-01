@@ -6,7 +6,7 @@ export const siteConfig: SiteConfig = {
   url: "https://gill.site",
   ogImage: "https://gill.site/og.png",
   links: {
-    github: "https://github.com/solana-foundation/gill",
+    github: "https://github.com/DecalLabs/gill",
     // twitter: "https://x.com/nickfrosty",
     // docs: "",
   },
