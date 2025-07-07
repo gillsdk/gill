@@ -5,12 +5,12 @@ on:
     branches:
       - master
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
   push:
     branches:
       - master
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
 
 env:
   # Among other things, opts out of Turborepo telemetry
@@ -43,7 +43,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TOKEN_GITHUB: ${{ secrets.TOKEN_GITHUB }}
 
       - name: Run Pre-Build Step
         run: pnpm prebuild --force=true
@@ -57,7 +57,7 @@ jobs:
       - name: Run Build Step (force)
         run: pnpm turbo ${{ steps.build-step-decider.outputs.step-name }} --force=true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           PUBLISH_TAG: next
 
@@ -67,4 +67,4 @@ jobs:
       #     VERSION_TAG=v$(cd packages/library/ && pnpm pkg get version | sed -n '2p' | grep -o '"\([^"]\)\+"$' | tr -d \")
       #     if ! git ls-remote --tags | grep -q "$VERSION_TAG"; then git tag $VERSION_TAG && git push --tags; fi
       #   env:
-      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}

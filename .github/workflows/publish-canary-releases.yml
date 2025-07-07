@@ -13,7 +13,7 @@ permissions:
 env:
   # Among other things, opts out of Turborepo telemetry
   # See https://consoledonottrack.com/
-  DO_NOT_TRACK: '1'
+  DO_NOT_TRACK: "1"
   # Some tasks slow down considerably on GitHub Actions runners when concurrency is high
   TURBO_CONCURRENCY: 1
   # Enables Turborepo Remote Caching.
@@ -55,8 +55,8 @@ jobs:
           pnpm changeset version --snapshot canary
           pnpm turbo publish-packages --concurrency=${TURBO_CONCURRENCY:-1}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+          TOKEN_GITHUB: ${{ secrets.TOKEN_GITHUB }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           PUBLISH_TAG: canary
 
