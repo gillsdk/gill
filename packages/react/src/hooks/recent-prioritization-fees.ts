@@ -1,4 +1,5 @@
 "use client";
+
 import { useQuery } from "@tanstack/react-query";
 import type { GetRecentPrioritizationFeesApi, Simplify } from "gill";
 import { GILL_HOOK_CLIENT_KEY } from "../const";
@@ -6,10 +7,11 @@ import { useSolanaClient } from "./client";
 import type { GillUseRpcHook } from "./types";
 
 type UseRecentPrioritizationFeesInput = Simplify<
-  {
+  Pick<GillUseRpcHook<{}>, "options" | "abortSignal"> & {
     addresses: Parameters<GetRecentPrioritizationFeesApi["getRecentPrioritizationFees"]>[0];
-  } & Pick<GillUseRpcHook<{}>, "options" | "abortSignal">
+  }
 >;
+
 type UseRecentPrioritizationFeesResponse = ReturnType<GetRecentPrioritizationFeesApi["getRecentPrioritizationFees"]>;
 
 /**

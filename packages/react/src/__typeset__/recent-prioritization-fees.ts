@@ -1,7 +1,7 @@
 import { Address, GetRecentPrioritizationFeesApi } from "gill";
 import { useRecentPrioritizationFees } from "../hooks";
 
-// [DESCRIBE] useGetRecentPrioritizationFees
+// [DESCRIBE] useRecentPrioritizationFees
 {
   {
     const { fees } = useRecentPrioritizationFees({ addresses: [] });
