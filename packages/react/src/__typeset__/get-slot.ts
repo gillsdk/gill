@@ -1,7 +1,7 @@
-import { useSlot } from "../hooks/get-slot";
 import type { GetSlotApi } from "gill";
+import { useSlot } from "../hooks/slot";
 
-// [DESCRIBE] useGetSlot
+// [DESCRIBE] useSlot
 {
   // Should allow no arguments (default usage)
   {
