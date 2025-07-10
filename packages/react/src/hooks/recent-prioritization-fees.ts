@@ -8,7 +8,7 @@ import type { GillUseRpcHook } from "./types";
 
 type UseRecentPrioritizationFeesInput = Simplify<
   Pick<GillUseRpcHook<{}>, "options" | "abortSignal"> & {
-    addresses: Parameters<GetRecentPrioritizationFeesApi["getRecentPrioritizationFees"]>[0];
+    addresses?: Parameters<GetRecentPrioritizationFeesApi["getRecentPrioritizationFees"]>[0];
   }
 >;
 
@@ -18,7 +18,11 @@ type UseRecentPrioritizationFeesResponse = ReturnType<GetRecentPrioritizationFee
  * Get the recent prioritization fees for a list of addresses using the Solana RPC method of
  * [`getRecentPrioritizationFees`](https://solana.com/docs/rpc/http/getrecentprioritizationfees)
  */
-export function useRecentPrioritizationFees({ options, abortSignal, addresses }: UseRecentPrioritizationFeesInput) {
+export function useRecentPrioritizationFees({
+  options,
+  abortSignal,
+  addresses,
+}: UseRecentPrioritizationFeesInput = {}) {
   const { rpc } = useSolanaClient();
 
   const { data, ...rest } = useQuery({
