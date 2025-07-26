@@ -18,7 +18,7 @@ import { isSetComputeLimitInstruction } from "../programs/compute-budget";
 import { transactionToBase64WithSigners } from "./base64-to-transaction";
 import { debug, isDebugEnabled } from "./debug";
 
-type PrepareCompilableTransactionMessage =
+export type PrepareCompilableTransactionMessage =
   | CompilableTransactionMessage
   | (ITransactionMessageWithFeePayer & TransactionMessage);
 

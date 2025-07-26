@@ -46,12 +46,14 @@ type SendTransactionConfigWithoutEncoding = Omit<
   "encoding"
 >;
 
+export type SendAndConfirmTransactionConfig = Omit<
+  SendAndConfirmTransactionWithBlockhashLifetimeConfig,
+  "confirmRecentTransaction" | "rpc" | "transaction"
+>;
+
 export type SendAndConfirmTransactionWithSignersFunction = (
   transaction: (FullySignedTransaction & TransactionWithBlockhashLifetime) | CompilableTransactionMessage,
-  config?: Omit<
-    SendAndConfirmTransactionWithBlockhashLifetimeConfig,
-    "confirmRecentTransaction" | "rpc" | "transaction"
-  >,
+  config?: SendAndConfirmTransactionConfig,
 ) => Promise<Signature>;
 
 type SendAndConfirmTransactionWithSignersFactoryConfig<TCluster> = {
