@@ -66,29 +66,27 @@ export function createTransaction<TVersion extends TransactionVersion, TFeePayer
   return pipe(
     createTransactionMessage({ version }),
     (tx) => {
-      if (latestBlockhash) {
-        tx = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx);
-      }
+      const withLifetime = latestBlockhash ? setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx) : tx;
       if (typeof feePayer !== "string" && "address" in feePayer && isTransactionSigner(feePayer)) {
-        return setTransactionMessageFeePayerSigner(feePayer, tx);
-      } else return setTransactionMessageFeePayer(feePayer, tx);
+        return setTransactionMessageFeePayerSigner(feePayer, withLifetime);
+      } else return setTransactionMessageFeePayer(feePayer, withLifetime);
     },
     (tx) => {
-      if (typeof computeUnitLimit !== "undefined") {
-        tx = appendTransactionMessageInstruction(
-          getSetComputeUnitLimitInstruction({ units: Number(computeUnitLimit) }),
-          tx,
-        );
-      }
+      const withComputeLimit = typeof computeUnitLimit !== "undefined" 
+        ? appendTransactionMessageInstruction(
+            getSetComputeUnitLimitInstruction({ units: Number(computeUnitLimit) }),
+            tx,
+          )
+        : tx;
 
-      if (typeof computeUnitPrice !== "undefined") {
-        tx = appendTransactionMessageInstruction(
-          getSetComputeUnitPriceInstruction({ microLamports: Number(computeUnitPrice) }),
-          tx,
-        );
-      }
+      const withComputePrice = typeof computeUnitPrice !== "undefined"
+        ? appendTransactionMessageInstruction(
+            getSetComputeUnitPriceInstruction({ microLamports: Number(computeUnitPrice) }),
+            withComputeLimit,
+          )
+        : withComputeLimit;
 
-      return appendTransactionMessageInstructions(instructions, tx);
+      return appendTransactionMessageInstructions(instructions, withComputePrice);
     },
   );
 }
