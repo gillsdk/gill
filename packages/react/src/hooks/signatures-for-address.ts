@@ -19,9 +19,9 @@ type UseSignaturesForAddressResponse = ReturnType<GetSignaturesForAddressApi["ge
 
 /**
  * Returns signatures for confirmed transactions that include the given address
- * in their accountKeys list. Returns signatures backwards in time from the
+ * in their `accountKeys` list. Returns signatures backwards in time from the
  * provided signature or most recent confirmed block using the Solana RPC method of
- * [`getsignaturesforaddress`](https://solana.com/docs/rpc/http/getsignaturesforaddress)
+ * [`getSignaturesForAddress`](https://solana.com/docs/rpc/http/getsignaturesforaddress)
  */
 export function useSignaturesForAddress<TConfig extends RpcConfig = RpcConfig>({
   options,
