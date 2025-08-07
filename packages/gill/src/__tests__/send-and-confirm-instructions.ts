@@ -172,9 +172,7 @@ describe("sendAndConfirmInstructions", () => {
     const error = new Error("Transaction failed");
     (mockClient.sendAndConfirmTransaction as jest.Mock).mockRejectedValue(error);
 
-    await expect(sendAndConfirmInstructions(mockClient, signer, [mockInstruction])).rejects.toThrow(
-      "Failed to send and confirm instructions:\n       \n      Transaction failed",
-    );
+    await expect(sendAndConfirmInstructions(mockClient, signer, [mockInstruction])).rejects.toThrow(error);
   });
 
   test("passes through send and confirm config", async () => {

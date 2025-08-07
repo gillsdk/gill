@@ -1,7 +1,6 @@
 import {
   ITransactionMessageWithFeePayer,
   ITransactionMessageWithFeePayerSigner,
-  SolanaError,
   type IInstruction,
   type Signature,
   type TransactionSigner,
@@ -54,30 +53,24 @@ export async function sendAndConfirmInstructions(
   options: SendAndConfirmInstructionsOptions = {},
   config?: SendAndConfirmTransactionConfig,
 ): Promise<Signature> {
-  try {
-    const { computeUnitLimit, computeUnitPrice = 1, version = "legacy", computeUnitLimitMultiplier = 1.1 } = options;
+  const { computeUnitLimit, computeUnitPrice = 1, version = "legacy", computeUnitLimitMultiplier = 1.1 } = options;
 
-    const unpreparedTransaction = createTransaction({
-      version,
-      feePayer,
-      instructions,
-      computeUnitLimit: computeUnitLimit ?? MAX_COMPUTE_UNIT_LIMIT,
-      computeUnitPrice,
-    });
+  const unpreparedTransaction = createTransaction({
+    version,
+    feePayer,
+    instructions,
+    computeUnitLimit: computeUnitLimit ?? MAX_COMPUTE_UNIT_LIMIT,
+    computeUnitPrice,
+  });
 
-    const transaction = await prepareTransaction({
-      transaction: asPreparableTransaction(unpreparedTransaction),
-      rpc: client.rpc,
-      computeUnitLimitMultiplier,
-      computeUnitLimitReset: computeUnitLimit === undefined,
-      blockhashReset: true,
-    });
+  const transaction = await prepareTransaction({
+    transaction: asPreparableTransaction(unpreparedTransaction),
+    rpc: client.rpc,
+    computeUnitLimitMultiplier,
+    computeUnitLimitReset: computeUnitLimit === undefined,
+    blockhashReset: true,
+  });
 
-    const signature = await client.sendAndConfirmTransaction(transaction, config);
-    return signature;
-  } catch (error) {
-    throw new Error(`Failed to send and confirm instructions:
-      ${error instanceof SolanaError ? error.context + " - " : ""} 
-      ${error instanceof Error ? error.message : "Unknown error"}`);
-  }
+  const signature = await client.sendAndConfirmTransaction(transaction, config);
+  return signature;
 }
