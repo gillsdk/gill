@@ -91,7 +91,7 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
       debug("Transaction missing compute unit limit, setting one for simulation.", "debug");
       const provisionalIx = getSetComputeUnitLimitInstruction({ units: MAX_COMPUTE_UNIT_LIMIT });
       const appendedTx = appendTransactionMessageInstruction(provisionalIx, config.transaction);
-      config.transaction = appendedTx;
+      config.transaction = appendedTx as unknown as TMessage;
       computeBudgetIndex.limit = appendedTx.instructions.length - 1;
     }
 

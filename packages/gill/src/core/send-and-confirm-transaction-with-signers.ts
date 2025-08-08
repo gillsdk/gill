@@ -16,18 +16,16 @@ import type {
   TransactionWithBlockhashLifetime,
 } from "@solana/kit";
 import {
-  assertIsTransactionMessageWithBlockhashLifetime,
   Commitment,
   getBase64EncodedWireTransaction,
   getSignatureFromTransaction,
   sendAndConfirmTransactionFactory,
-  setTransactionMessageLifetimeUsingBlockhash,
   signTransactionMessageWithSigners,
 } from "@solana/kit";
 import { type waitForRecentTransactionConfirmation } from "@solana/transaction-confirmation";
 import { debug } from "./debug";
 import { getExplorerLink } from "./explorer";
-import { prepareTransaction } from "./prepare-transaction";
+import { PrepareCompilableTransactionMessage, prepareTransaction } from "./prepare-transaction";
 import { hasSetComputeLimitInstruction } from "../programs/compute-budget/utils";
 
 interface SendAndConfirmTransactionWithBlockhashLifetimeConfig extends SendTransactionConfigWithoutEncoding {
@@ -134,10 +132,11 @@ export function sendAndConfirmTransactionWithSignersFactory<
     const needsBlockhash = !("lifetimeConstraint" in transaction) || prepareTransactionConfig.forceBlockhashReset;
     const needsComputeUnits = "instructions" in transaction && !hasSetComputeLimitInstruction(transaction) && prepareTransactionConfig.allowComputeUnitLimitReset;
     
+    // Always prepare transaction if it needs blockhash or compute units
     if (needsBlockhash || needsComputeUnits) {
       debug("Preparing transaction: fetching blockhash and/or estimating compute units", "debug");
       transaction = await prepareTransaction({
-        transaction: transaction as any,
+        transaction: transaction as PrepareCompilableTransactionMessage,
         rpc,
         computeUnitLimitMultiplier: prepareTransactionConfig.computeUnitLimitMultiplier,
         computeUnitLimitReset: needsComputeUnits,
@@ -146,7 +145,7 @@ export function sendAndConfirmTransactionWithSignersFactory<
     }
     
     if ("messageBytes" in transaction == false) {
-      transaction = (await signTransactionMessageWithSigners(transaction)) as Readonly<
+      transaction = (await signTransactionMessageWithSigners(transaction as any)) as Readonly<
         FullySignedTransaction & TransactionWithBlockhashLifetime
       >;
     }
