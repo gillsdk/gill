@@ -1,0 +1,98 @@
+---
+title: Examples
+description:
+  Collection of example scripts and code snippets on how to use gill, the Solana JavaScript SDK.
+---
+
+Listed here and in gill's open source repository, you can find a collection of example scripts and
+code snippets that demonstrate how to accomplish various common tasks for Solana developers.
+
+[github.com/DecalLabs/gill/tree/master/examples](https://github.com/DecalLabs/gill/tree/master/examples)
+
+## Get started with the basics
+
+Inside of the gill repository, you can find the `get-started` directory that contains gill examples
+scripts on the following:
+
+### intro.ts
+
+<Callout title="Source Code Link">
+  https://github.com/DecalLabs/gill/blob/master/examples/get-started/src/intro.ts
+</Callout>
+
+A brief introduction to the `gill` library. Demonstrating and explaining the commonly used tasks
+involved to interact with the Solana blockchain, including:
+
+- load a keypair signer from the local filesystem
+- create an rpc connection to the blockchain
+- creating basic instructions (like the memo instruction)
+- getting the latest blockhash
+- building a complete transaction
+- signing the transaction with the loaded local keypair signer
+- getting the signature of a transaction (even before it is sent)
+- logging Solana Explorer links
+- sending and confirming a transaction
+
+These are all the most basic tasks required for any application sending transaction to the Solana
+blockchain.
+
+### airdrop.ts
+
+<Callout title="Source Code Link">
+  https://github.com/DecalLabs/gill/blob/master/examples/get-started/src/airdrop.ts
+</Callout>
+
+Demonstrates how to create a client connection to the Solana blockchain on a test cluster (e.g.
+`devnet`, `testnet`, or `localnet`) and request airdrops of testing SOL tokens to a wallet address.
+
+### tokens.ts
+
+<Callout title="Source Code Link">
+  https://github.com/DecalLabs/gill/blob/master/examples/get-started/src/tokens.ts
+</Callout>
+
+Demonstrates how to use gill's "transaction builders" to create a brand new Solana token (with
+onchain metadata) and then mint tokens to another user's wallet:
+
+- load a keypair signer from the local filesystem
+- create an rpc connection to the blockchain
+- getting the latest blockhash
+- build an optimized transaction to create a token
+- sign, send, and confirm that "create token" transaction
+- build an optimized transaction to mint
+- sign, send, and confirm that "mint tokens" transaction
+
+### reference-keys.ts
+
+<Callout title="Source Code Link">
+  https://github.com/DecalLabs/gill/blob/master/examples/get-started/src/reference-keys.ts
+</Callout>
+
+This script demonstrates the process to add a reference key into a transaction.
+
+Adding reference keys to transactions allows developers to be able track the completion of
+transactions given to users, without knowing the signature ahead of time. Then, perform any desired
+logic after detection of the reference keyed transaction landing onchain.
+
+Most notably utilized within SolanaPay and Blinks.
+
+See also: the gill docs for [Reference Keys](https://gill.site/docs/guides/reference-keys) for more
+information.
+
+### Comparison between @solana/kit and gill
+
+You can find comparison scripts that demonstrates some of the differences between
+[gill](https://github.com/DecalLabs/gill) and [@solana/kit](https://github.com/anza-xyz/kit)
+(formerly known as "web3.js v2").
+
+<Callout>
+  Find a more comprehensive comparison in [gill vs @solana/kit comparison
+  docs](https://gill.site/docs/compare/kit)
+</Callout>
+
+Both scripts accomplish the same task: send an optimized transaction to the Solana blockchain.
+
+- Using gill -
+  [`basic.ts`](https://github.com/DecalLabs/gill/blob/master/examples/get-started/src/basic.ts)
+- Using web3js v2 -
+  [`basic-compare.ts`](https://github.com/DecalLabs/gill/blob/master/examples/get-started/src/basic-compare.ts)
