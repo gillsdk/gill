@@ -2,4 +2,4 @@
 "gill": minor
 ---
 
-add `fetchTokenAccount` function
+add `fetchTokenAccounts` function
