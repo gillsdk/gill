@@ -26,8 +26,17 @@ Gill is built on top of the modern javascript libraries for Solana built by Anza
 [@solana/kit](https://github.com/anza-xyz/kit) (formerly known as "web3.js v2"). By utilizing the same types and
 functions under the hood, `gill` is compatible with `kit`. See [Replacing Kit with gill](#replace-kit-with-gill).
 
-> For a comparison of using gill vs web3js v2, take a look at the
+> For a comparison of using gill vs `@solana/kit`, take a look at the
+> [gill vs @solana/kit comparison docs](https://gill.site/docs/compare/kit) and the
 > [comparison examples](https://github.com/DecalLabs/gill/tree/master/examples/get-started#comparison-of-gill-vs-solanakit-aka-web3js-v2).
+
+## Documentation
+
+You can find the gill library docs here:
+
+- [gill docs site](https://gill.site)
+- [gill setup guide](https://gill.site/docs#quick-start)
+- [gill API references](https://gill.site/api)
 
 ## Installation
 
@@ -85,12 +94,16 @@ You can find [transaction builders](#transaction-builders) for common tasks, inc
 - [Minting tokens to a destination wallet](#mint-tokens-to-a-destination-wallet)
 - [Transfer tokens to a destination wallet](#transfer-tokens-to-a-destination-wallet)
 
-For troubleshooting and debugging your Solana transactions, see [Debug mode](#debug-mode) below.
+For troubleshooting and debugging your Solana transactions, see [Debug mode](#debug-mode) below and the gill docs for
+[Debug Mode](https://gill.site/docs/debug-mode).
 
 > You can also consult the documentation for Anza's [JavaScript client](https://github.com/anza-xyz/solana-web3.js)
 > library for more information and helpful resources.
 
 ### Generating keypairs and signers
+
+See also: the docs on
+[Generating a keypair signer](https://gill.site/docs/getting-started/signers#generating-a-keypair-signer).
 
 For most "signing" operations, you will need a `KeyPairSigner` instance, which can be used to sign transactions and
 messages.
@@ -109,6 +122,9 @@ const signer: KeyPairSigner = await generateKeyPairSigner();
 
 ### Generating extractable keypairs and signers
 
+See also: the docs on
+[Generating extractable keypairs and signers](https://gill.site/docs/getting-started/signers#generating-extractable-keypairs-and-signers).
+
 Extractable keypairs are less secure and should not be used unless you REALLY need to save the key for some reason.
 Since there are a few useful cases for saving these keypairs, gill contains a separate explicit function to generate
 these extractable keypairs.
@@ -126,6 +142,8 @@ const signer: KeyPairSigner = await generateExtractableKeyPairSigner();
 > extract the key material (like if you are going to save the key to a file).
 
 ### Create a Solana RPC connection
+
+See also: the docs on [how to create a Solana client](https://gill.site/docs/getting-started/client)
 
 Create a Solana `rpc` and `rpcSubscriptions` client for any RPC URL or standard Solana network moniker (i.e. `devnet`,
 `localnet`, `mainnet` etc).
@@ -660,6 +678,8 @@ const transferTokensTx = await buildTransferTokensTransaction({
 
 ## Debug mode
 
+See also: the docs for [Debug Mode](https://gill.site/docs/debug-mode)
+
 Within `gill`, you can enable "debug mode" to automatically log additional information that will be helpful in
 troubleshooting your transactions.
 
@@ -775,6 +795,9 @@ package to use in conjunction with gill:
 - [Vote program](https://github.com/solana-program/vote) - `@solana-program/vote`
 
 ### Generate a program client from an IDL
+
+See also: this official gill docs and guide on
+[how to generate a program client with codama](https://gill.site/docs/guides/codama)
 
 If you want to easily interact with any custom program with this library, you can use
 [Codama](https://github.com/codama-idl/codama) to generate a compatible JavaScript/TypeScript client using its IDL. You

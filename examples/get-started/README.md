@@ -93,6 +93,10 @@ wallet:
 
 This script demonstrates the process to add a reference key into a transaction.
 
+> See the gill docs for
+> [Reference Keys](https://gill.site/docs/guides/reference-keys) for more
+> information.
+
 Adding reference keys to transactions allows developers to be able track the
 completion of transactions given to users, without knowing the signature ahead
 of time. Then, perform any desired logic after detection of the reference keyed
@@ -105,6 +109,9 @@ Most notably utilized within SolanaPay and Blinks.
 You can find comparison scripts that demonstrates some of the differences
 between [gill](https://github.com/DecalLabs/gill) and
 [@solana/kit](https://github.com/anza-xyz/kit) (formerly known as "web3.js v2").
+
+> Find a more comprehensive comparison in
+> [gill vs @solana/kit comparison docs](https://gill.site/docs/compare/kit)
 
 Both scripts accomplish the same task: send an optimized transaction to the
 Solana blockchain.
