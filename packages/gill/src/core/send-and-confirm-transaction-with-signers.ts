@@ -13,6 +13,7 @@ import type {
   SimulateTransactionApi,
   SlotNotificationsApi,
   TransactionMessageWithFeePayer,
+  TransactionMessageWithSigners,
   TransactionWithBlockhashLifetime,
 } from "@solana/kit";
 import {
@@ -27,6 +28,8 @@ import { debug } from "./debug";
 import { getExplorerLink } from "./explorer";
 import { PrepareCompilableTransactionMessage, prepareTransaction } from "./prepare-transaction";
 import { hasSetComputeLimitInstruction } from "../programs/compute-budget/utils";
+
+type CompilableTransactionMessageWithSigners = CompilableTransactionMessage & TransactionMessageWithSigners;
 
 interface SendAndConfirmTransactionWithBlockhashLifetimeConfig extends SendTransactionConfigWithoutEncoding {
   confirmRecentTransaction: (
@@ -127,25 +130,23 @@ export function sendAndConfirmTransactionWithSignersFactory<
       forceBlockhashReset: false,
       ...config.prepareTransactionConfig,
     };
-    
-    // Check if transaction needs preparation (missing blockhash or compute units)
-    const needsBlockhash = !("lifetimeConstraint" in transaction) || prepareTransactionConfig.forceBlockhashReset;
-    const needsComputeUnits = "instructions" in transaction && !hasSetComputeLimitInstruction(transaction) && prepareTransactionConfig.allowComputeUnitLimitReset;
-    
-    // Always prepare transaction if it needs blockhash or compute units
-    if (needsBlockhash || needsComputeUnits) {
-      debug("Preparing transaction: fetching blockhash and/or estimating compute units", "debug");
-      transaction = await prepareTransaction({
-        transaction: transaction as PrepareCompilableTransactionMessage,
-        rpc,
-        computeUnitLimitMultiplier: prepareTransactionConfig.computeUnitLimitMultiplier,
-        computeUnitLimitReset: needsComputeUnits,
-        blockhashReset: needsBlockhash,
-      });
-    }
-    
     if ("messageBytes" in transaction == false) {
-      transaction = (await signTransactionMessageWithSigners(transaction as any)) as Readonly<
+      // Check if transaction needs preparation (missing blockhash or compute units)
+      const needsBlockhash = !("lifetimeConstraint" in transaction) || prepareTransactionConfig.forceBlockhashReset;
+      const needsComputeUnits = "instructions" in transaction && !hasSetComputeLimitInstruction(transaction) && prepareTransactionConfig.allowComputeUnitLimitReset;
+
+      // Always prepare transaction if it needs blockhash or compute units
+      if (needsBlockhash || needsComputeUnits) {
+        debug(`Preparing transaction: ${needsComputeUnits ? '\n\t- estimating compute units' : ''} ${needsBlockhash ? '\n\t- fetching latest blockhash' : ''}`, 'debug');
+        transaction = await prepareTransaction({
+          transaction: transaction as PrepareCompilableTransactionMessage,
+          rpc,
+          computeUnitLimitMultiplier: prepareTransactionConfig.computeUnitLimitMultiplier,
+          computeUnitLimitReset: needsComputeUnits,
+          blockhashReset: needsBlockhash,
+        });
+      }
+      transaction = (await signTransactionMessageWithSigners(transaction as CompilableTransactionMessageWithSigners)) as Readonly<
         FullySignedTransaction & TransactionWithBlockhashLifetime
       >;
     }
