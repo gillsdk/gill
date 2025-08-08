@@ -1,4 +1,8 @@
-import { COMPUTE_BUDGET_PROGRAM_ADDRESS, getSetComputeUnitLimitInstruction } from "@solana-program/compute-budget";
+import { 
+  COMPUTE_BUDGET_PROGRAM_ADDRESS, 
+  MAX_COMPUTE_UNIT_LIMIT, 
+  getSetComputeUnitLimitInstruction 
+} from "@solana-program/compute-budget";
 import type {
   CompilableTransactionMessage,
   GetLatestBlockhashApi,
@@ -82,22 +86,29 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
 
   // set a compute unit limit instruction
   if (computeBudgetIndex.limit < 0 || config.computeUnitLimitReset) {
+    // Ensure a compute unit limit instruction exists BEFORE simulation
+    if (computeBudgetIndex.limit < 0) {
+      debug("Transaction missing compute unit limit, setting one for simulation.", "debug");
+      const provisionalIx = getSetComputeUnitLimitInstruction({ units: MAX_COMPUTE_UNIT_LIMIT });
+      const appendedTx = appendTransactionMessageInstruction(provisionalIx, config.transaction);
+      config.transaction = appendedTx;
+      computeBudgetIndex.limit = appendedTx.instructions.length - 1;
+    }
+
     const units = await getComputeUnitEstimateForTransactionMessageFactory({ rpc: config.rpc })(config.transaction);
     debug(`Obtained compute units from simulation: ${units}`, "debug");
-    const ix = getSetComputeUnitLimitInstruction({
+    const finalIx = getSetComputeUnitLimitInstruction({
       units: units * config.computeUnitLimitMultiplier,
     });
 
-    if (computeBudgetIndex.limit < 0) {
-      config.transaction = appendTransactionMessageInstruction(ix, config.transaction);
-    } else if (config.computeUnitLimitReset) {
-      const nextInstructions = [...config.transaction.instructions];
-      nextInstructions.splice(computeBudgetIndex.limit, 1, ix);
-      config.transaction = Object.freeze({
-        ...config.transaction,
-        instructions: nextInstructions,
-      } as typeof config.transaction);
-    }
+    // Replace the compute unit limit instruction immutably in all scenarios
+    debug("Replacing the compute unit limit instruction.", "debug");
+    const nextInstructions = [...config.transaction.instructions];
+    nextInstructions.splice(computeBudgetIndex.limit, 1, finalIx);
+    config.transaction = Object.freeze({
+      ...config.transaction,
+      instructions: nextInstructions,
+    } as typeof config.transaction);
   }
 
   // update the latest blockhash
