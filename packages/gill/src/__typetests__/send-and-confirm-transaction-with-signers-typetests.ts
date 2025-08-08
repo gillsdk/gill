@@ -3,6 +3,7 @@ import {
   GetEpochInfoApi,
   GetLatestBlockhashApi,
   GetSignatureStatusesApi,
+  Instruction,
   Rpc,
   RpcDevnet,
   RpcMainnet,
@@ -14,17 +15,30 @@ import {
   SendTransactionApi,
   SignatureNotificationsApi,
   SimulateTransactionApi,
+  signTransactionMessageWithSigners,
   SlotNotificationsApi,
+  TransactionSigner,
+  TransactionWithBlockhashLifetime,
+  TransactionWithDurableNonceLifetime,
 } from "@solana/kit";
+import { createTransaction } from "../core";
 import { 
   sendAndConfirmTransactionWithSignersFactory,
   type SendAndConfirmTransactionPrepareConfig 
 } from "../core/send-and-confirm-transaction-with-signers";
 
-const rpc = null as unknown as Rpc<GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi & SimulateTransactionApi>;
-const rpcDevnet = null as unknown as RpcDevnet<GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi & SimulateTransactionApi>;
-const rpcTestnet = null as unknown as RpcTestnet<GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi & SimulateTransactionApi>;
-const rpcMainnet = null as unknown as RpcMainnet<GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi & SimulateTransactionApi>;
+const rpc = null as unknown as Rpc<
+  GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi & SimulateTransactionApi
+>;
+const rpcDevnet = null as unknown as RpcDevnet<
+  GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi & SimulateTransactionApi
+>;
+const rpcTestnet = null as unknown as RpcTestnet<
+  GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi & SimulateTransactionApi
+>;
+const rpcMainnet = null as unknown as RpcMainnet<
+  GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi & SimulateTransactionApi
+>;
 
 const rpcSubscriptions = null as unknown as RpcSubscriptions<SignatureNotificationsApi & SlotNotificationsApi>;
 const rpcSubscriptionsDevnet = null as unknown as RpcSubscriptionsDevnet<
@@ -36,6 +50,10 @@ const rpcSubscriptionsMainnet = null as unknown as RpcSubscriptionsMainnet<
 const rpcSubscriptionsTestnet = null as unknown as RpcSubscriptionsTestnet<
   SignatureNotificationsApi & SlotNotificationsApi
 >;
+
+const signer = "" as unknown as TransactionSigner;
+const instruction = "" as unknown as Instruction;
+const latestBlockhash = "" as unknown as ReturnType<GetLatestBlockhashApi["getLatestBlockhash"]>["value"];
 
 // [DESCRIBE] sendAndConfirmTransactionWithSignersFactory
 {
@@ -67,6 +85,71 @@ const rpcSubscriptionsTestnet = null as unknown as RpcSubscriptionsTestnet<
     sendAndConfirmTransactionWithSignersFactory({ rpc: rpcMainnet, rpcSubscriptions: rpcSubscriptionsDevnet });
     // @ts-expect-error
     sendAndConfirmTransactionWithSignersFactory({ rpc: rpcMainnet, rpcSubscriptions: rpcSubscriptionsTestnet });
+  }
+
+  {
+    const sendAndConfirmTransaction = sendAndConfirmTransactionWithSignersFactory({ rpc, rpcSubscriptions });
+
+    const signedTransactionWithBlockhashLifetime = "" as unknown as Awaited<
+      ReturnType<typeof signTransactionMessageWithSigners>
+    > &
+      TransactionWithBlockhashLifetime;
+
+    // Should accept a signed transaction with a blockhash based lifetime
+    sendAndConfirmTransaction(signedTransactionWithBlockhashLifetime);
+
+    const signedTransactionWithNonceLifetime = "" as unknown as Awaited<
+      ReturnType<typeof signTransactionMessageWithSigners>
+    > &
+      TransactionWithDurableNonceLifetime;
+
+    // @ts-expect-error - durable nonce transactions are not currently supported
+    // todo: add support for nonce based transactions
+    sendAndConfirmTransaction(signedTransactionWithNonceLifetime);
+
+    // Should accept a legacy transaction, with or without a latest blockhash
+    {
+      const transactionWithoutLatestBlockhash = createTransaction({
+        version: "legacy",
+        feePayer: signer,
+        instructions: [instruction],
+      });
+
+      const transactionWithLatestBlockhash = createTransaction({
+        version: "legacy",
+        feePayer: signer,
+        instructions: [instruction],
+        latestBlockhash,
+      });
+
+      // Should accept a signable transaction WITHOUT the latest blockhash
+      sendAndConfirmTransaction(transactionWithoutLatestBlockhash);
+
+      // Should accept a signable transaction WITH the latest blockhash
+      sendAndConfirmTransaction(transactionWithLatestBlockhash);
+    }
+
+    // Should accept a versioned transaction, with or without a latest blockhash
+    {
+      const transactionWithoutLatestBlockhash = createTransaction({
+        version: 0,
+        feePayer: signer,
+        instructions: [instruction],
+      });
+
+      const transactionWithLatestBlockhash = createTransaction({
+        version: 0,
+        feePayer: signer,
+        instructions: [instruction],
+        latestBlockhash,
+      });
+
+      // Should accept a signable transaction WITHOUT the latest blockhash
+      sendAndConfirmTransaction(transactionWithoutLatestBlockhash);
+
+      // Should accept a signable transaction WITH the latest blockhash
+      sendAndConfirmTransaction(transactionWithLatestBlockhash);
+    }
   }
 }
 

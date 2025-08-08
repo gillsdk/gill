@@ -1,10 +1,10 @@
 import type {
   Address,
   BaseTransactionMessage,
-  IInstruction,
-  ITransactionMessageWithFeePayer,
-  ITransactionMessageWithFeePayerSigner,
+  Instruction,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithFeePayer,
+  TransactionMessageWithFeePayerSigner,
   TransactionSigner,
   TransactionVersion,
 } from "@solana/kit";
@@ -19,10 +19,12 @@ export type CreateTransactionInput<
    * Transaction version (default: "legacy")
    * - `legacy` is commonly used
    * - `0` is needed for use with Address Lookup Tables
+   *
+   * @default `legacy`
    * */
   version?: TVersion;
   /** List of instructions for this transaction */
-  instructions: IInstruction[];
+  instructions: Instruction[];
   /** Address or Signer that will pay transaction fees */
   feePayer: TFeePayer;
   /**
@@ -38,7 +40,7 @@ export type CreateTransactionInput<
 
 export type FullTransaction<
   TVersion extends TransactionVersion,
-  TFeePayer extends ITransactionMessageWithFeePayer | ITransactionMessageWithFeePayerSigner,
+  TFeePayer extends TransactionMessageWithFeePayer | TransactionMessageWithFeePayerSigner,
   TBlockhashLifetime extends TransactionMessageWithBlockhashLifetime | undefined = undefined,
 > = Simplify<
   BaseTransactionMessage<TVersion> &

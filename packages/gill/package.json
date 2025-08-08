@@ -1,7 +1,7 @@
 {
   "name": "gill",
   "license": "MIT",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "description": "a modern javascript/typescript client library for interacting with the Solana blockchain",
   "scripts": {
     "clean": "rimraf coverage dist build node_modules .turbo .docs",
@@ -109,10 +109,10 @@
     "@solana-program/address-lookup-table": "^0.7.0",
     "@solana-program/compute-budget": "^0.8.0",
     "@solana-program/system": "^0.7.0",
-    "@solana-program/token-2022": "^0.4.1",
+    "@solana-program/token-2022": "^0.4.2",
     "@solana/assertions": "^2.1.1",
     "@solana/codecs": "^2.1.1",
-    "@solana/kit": "^2.1.1",
+    "@solana/kit": "^2.3.0",
     "@solana/transaction-confirmation": "^2.1.1"
   },
   "peerDependencies": {

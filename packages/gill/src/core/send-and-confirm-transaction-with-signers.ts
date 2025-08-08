@@ -1,4 +1,5 @@
 import type {
+  BaseTransactionMessage,
   CompilableTransactionMessage,
   FullySignedTransaction,
   GetEpochInfoApi,
@@ -11,13 +12,16 @@ import type {
   SignatureNotificationsApi,
   SimulateTransactionApi,
   SlotNotificationsApi,
+  TransactionMessageWithFeePayer,
   TransactionWithBlockhashLifetime,
 } from "@solana/kit";
 import {
+  assertIsTransactionMessageWithBlockhashLifetime,
   Commitment,
   getBase64EncodedWireTransaction,
   getSignatureFromTransaction,
   sendAndConfirmTransactionFactory,
+  setTransactionMessageLifetimeUsingBlockhash,
   signTransactionMessageWithSigners,
 } from "@solana/kit";
 import { type waitForRecentTransactionConfirmation } from "@solana/transaction-confirmation";
@@ -26,29 +30,26 @@ import { getExplorerLink } from "./explorer";
 import { prepareTransaction } from "./prepare-transaction";
 import { hasSetComputeLimitInstruction } from "../programs/compute-budget/utils";
 
-interface SendAndConfirmTransactionWithBlockhashLifetimeConfig
-  extends SendTransactionBaseConfig,
-    SendTransactionConfigWithoutEncoding {
+interface SendAndConfirmTransactionWithBlockhashLifetimeConfig extends SendTransactionConfigWithoutEncoding {
   confirmRecentTransaction: (
     config: Omit<
       Parameters<typeof waitForRecentTransactionConfirmation>[0],
       "getBlockHeightExceedencePromise" | "getRecentSignatureConfirmationPromise"
     >,
   ) => Promise<void>;
-  transaction: FullySignedTransaction & TransactionWithBlockhashLifetime;
-}
-
-interface SendTransactionBaseConfig extends SendTransactionConfigWithoutEncoding {
   abortSignal?: AbortSignal;
   commitment: Commitment;
-  rpc: Rpc<SendTransactionApi>;
-  transaction: FullySignedTransaction;
 }
 
 type SendTransactionConfigWithoutEncoding = Omit<
   NonNullable<Parameters<SendTransactionApi["sendTransaction"]>[1]>,
   "encoding"
 >;
+
+type SendableTransaction =
+  | CompilableTransactionMessage
+  | (FullySignedTransaction & TransactionWithBlockhashLifetime)
+  | (BaseTransactionMessage & TransactionMessageWithFeePayer);
 
 /**
  * Configuration for automatic transaction preparation
@@ -83,7 +84,7 @@ export type SendAndConfirmTransactionConfig = Omit<
 };
 
 export type SendAndConfirmTransactionWithSignersFunction = (
-  transaction: (FullySignedTransaction & TransactionWithBlockhashLifetime) | CompilableTransactionMessage,
+  transaction: SendableTransaction,
   config?: SendAndConfirmTransactionConfig,
 ) => Promise<Signature>;
 
