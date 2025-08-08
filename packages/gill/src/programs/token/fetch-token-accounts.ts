@@ -1,6 +1,15 @@
 import type { Mint, Token } from "@solana-program/token-2022";
 import { decodeToken, fetchMint } from "@solana-program/token-2022";
-import type { Account, Address, GetAccountInfoApi, GetTokenAccountsByOwnerApi, Rpc } from "@solana/kit";
+import type {
+  Account,
+  Address,
+  Commitment,
+  DataSlice,
+  GetAccountInfoApi,
+  GetTokenAccountsByOwnerApi,
+  Rpc,
+  Slot,
+} from "@solana/kit";
 import {
   isAddress,
   parseBase64RpcAccount,
@@ -21,11 +30,11 @@ export function assertIsMint<TAddress extends string = string>(
   }
 }
 
-export type FetchTokenAccountsConfig = Omit<
-  Parameters<GetTokenAccountsByOwnerApi["getTokenAccountsByOwner"]>["2"],
-  "encoding"
-> & {
+export type FetchTokenAccountsConfig = {
   abortSignal?: AbortSignal;
+  commitment?: Commitment;
+  minContextSlot?: Slot;
+  dataSlice?: DataSlice;
 };
 
 /**
@@ -37,7 +46,7 @@ export type FetchTokenAccountsConfig = Omit<
  * const { mint, accounts, totalBalance } = await fetchTokenAccounts(
  *    rpc,
  *    "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" as Address, // (mint for USDC on mainnet)
- *    "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk" as Address, // owner address
+ *    "nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5" as Address, // owner address
  * );
  * ```
  */
