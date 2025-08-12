@@ -21,7 +21,7 @@ export function PackageBadges({ packageName, className, ...props }: ComponentPro
         <img
           alt=""
           className="!p-0 !m-0"
-          src={`https://img.shields.io/npm/v/gill?logo=npm&color=377CC0`}
+          src={`https://img.shields.io/npm/v/${packageName}?logo=npm&color=377CC0`}
         />
       </a>
       <a className="!p-0 !m-0" href={`https://www.npmjs.com/package/${packageName}`}>
