@@ -154,7 +154,7 @@ export class TransactionBuilder {
       computeUnitLimitMultiplier: config?.computeUnitLimitMultiplier ?? DEFAULT_PREPARE_CONFIG.computeUnitLimitMultiplier,
       computeUnitLimitReset: config?.computeUnitLimitReset ?? DEFAULT_PREPARE_CONFIG.computeUnitLimitReset,
       blockhashReset: config?.blockhashReset ?? DEFAULT_PREPARE_CONFIG.blockhashReset,
-    };
+    } as unknown as PrepareTransactionConfig<CompilableTransactionMessage>;
 
     this.transactionMessage = await prepareTransaction(prepareConfig);
     debug("Transaction prepared successfully", "info");
