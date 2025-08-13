@@ -7,10 +7,10 @@ import {
   type Instruction,
   type MicroLamports,
 } from "@solana/kit";
-import { 
+import {
   getTransferSolInstruction,
   getAddMemoInstruction
- } from "../programs";
+} from "../programs";
 import { TransactionBuilder } from "../core/transaction-builder";
 import { createSolanaClient } from "../core/create-solana-client";
 import type { SolanaClient } from "../types/rpc";
@@ -59,6 +59,7 @@ describe("TransactionBuilder", () => {
       assert.equal(config.priorityFee, DEFAULTS.priorityFee);
       assert.equal(config.instructions.length, 0);
       assert.equal(config.isPrepared, false);
+      assert.equal(config.version, 'legacy');
     });
 
     test("creates a builder with custom configuration", () => {
@@ -69,11 +70,13 @@ describe("TransactionBuilder", () => {
         feePayer,
         computeLimit,
         priorityFee,
+        version: 0,
       });
 
       const config = builder.getConfig();
       assert.equal(config.computeLimit, computeLimit);
       assert.equal(config.priorityFee, priorityFee);
+      assert.equal(config.version, 0);
     });
 
     test("static create method works", () => {

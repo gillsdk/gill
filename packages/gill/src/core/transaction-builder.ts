@@ -1,8 +1,4 @@
 import {
-  pipe,
-  createTransactionMessage,
-  setTransactionMessageFeePayerSigner,
-  appendTransactionMessageInstructions,
   signTransactionMessageWithSigners,
   getSignatureFromTransaction,
   type CompilableTransactionMessage,
@@ -13,13 +9,11 @@ import {
   type MicroLamports,
   type Commitment,
   type FullySignedTransaction,
+  TransactionVersion,
 } from "@solana/kit";
-import {
-  updateOrAppendSetComputeUnitLimitInstruction,
-  updateOrAppendSetComputeUnitPriceInstruction,
-} from "@solana-program/compute-budget";
 import type { SolanaClient } from "../types/rpc";
 import { debug } from "./debug";
+import { createTransaction } from "./create-transaction";
 import { prepareTransaction, type PrepareTransactionConfig } from "./prepare-transaction";
 
 export interface TransactionBuilderConfig {
@@ -27,6 +21,7 @@ export interface TransactionBuilderConfig {
   feePayer: KeyPairSigner;
   computeLimit?: number;
   priorityFee?: MicroLamports | bigint | number;
+  version?: TransactionVersion;
 }
 
 export interface SimpleSendAndConfirmConfig {
@@ -43,8 +38,8 @@ const DEFAULT_PREPARE_CONFIG = {
 };
 
 const DEFAULT_COMPUTE_LIMIT = 200_000;
-
 const DEFAULT_PRIORITY_FEE = 1n;
+const DEFAULT_VERSION = 'legacy';
 
 
 export class TransactionBuilder {
@@ -54,12 +49,14 @@ export class TransactionBuilder {
   private computeLimit: number;
   private priorityFee: MicroLamports;
   private transactionMessage: (CompilableTransactionMessage & TransactionMessageWithBlockhashLifetime) | null = null;
+  private version: TransactionVersion;
 
   constructor(config: TransactionBuilderConfig) {
     this.client = config.client;
     this.feePayer = config.feePayer;
     this.computeLimit = this.validateComputeLimit(config.computeLimit ?? DEFAULT_COMPUTE_LIMIT);
     this.priorityFee = this.getMicroLamports(config.priorityFee ?? DEFAULT_PRIORITY_FEE);
+    this.version = config.version ?? DEFAULT_VERSION;
   }
 
   static create(config: TransactionBuilderConfig): TransactionBuilder {
@@ -143,21 +140,16 @@ export class TransactionBuilder {
 
     debug(`Preparing transaction with ${this.instructions.length} instructions`, "info");
 
-    let transaction = pipe(
-      createTransactionMessage({ version: 0 }),
-      (msg) => setTransactionMessageFeePayerSigner(this.feePayer, msg),
-      (msg) => updateOrAppendSetComputeUnitLimitInstruction(this.computeLimit, msg),
-      (msg) => appendTransactionMessageInstructions(this.instructions, msg)
-    );
+    let unpreparedTransaction = createTransaction({
+      version: this.version,
+      feePayer: this.feePayer,
+      instructions: this.instructions,
+      computeUnitLimit: this.computeLimit,
+      computeUnitPrice: this.priorityFee,
+    });
 
-    if (this.priorityFee > 0n) {
-      transaction = updateOrAppendSetComputeUnitPriceInstruction(this.priorityFee, transaction);
-    }
-
-    const compilableTransaction = transaction as unknown as CompilableTransactionMessage;
-
-    const prepareConfig: PrepareTransactionConfig<CompilableTransactionMessage> = {
-      transaction: compilableTransaction,
+    const prepareConfig = {
+      transaction: unpreparedTransaction,
       rpc: this.client.rpc,
       computeUnitLimitMultiplier: config?.computeUnitLimitMultiplier ?? DEFAULT_PREPARE_CONFIG.computeUnitLimitMultiplier,
       computeUnitLimitReset: config?.computeUnitLimitReset ?? DEFAULT_PREPARE_CONFIG.computeUnitLimitReset,
@@ -217,6 +209,7 @@ export class TransactionBuilder {
     priorityFee: MicroLamports;
     instructions: Instruction[];
     isPrepared: boolean;
+    version: TransactionVersion;
   } {
     return {
       feePayer: this.feePayer.address,
@@ -224,6 +217,7 @@ export class TransactionBuilder {
       priorityFee: this.priorityFee,
       instructions: this.instructions,
       isPrepared: this.transactionMessage !== null,
+      version: this.version,
     };
   }
 
