@@ -7,7 +7,7 @@ import {
   createNoopSigner,
   type Blockhash,
   type MicroLamports,
-  type Rpc
+  type Rpc,
 } from "@solana/kit";
 import { getTransferSolInstruction, COMPUTE_BUDGET_PROGRAM_ADDRESS } from "../programs";
 import { prepareTransaction } from "../core/prepare-transaction";
@@ -20,15 +20,16 @@ describe("prepareTransaction", () => {
     // Create a transaction without compute budget instructions
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     // Mock the RPC calls with proper estimateComputeUnitLimitFactory response
@@ -58,9 +59,9 @@ describe("prepareTransaction", () => {
       computeUnitLimitMultiplier: 1.2,
     });
 
-    // Check that compute unit limit instruction was added  
+    // Check that compute unit limit instruction was added
     const hasComputeUnitLimit = prepared.instructions.some(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS)
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
     expect(hasComputeUnitLimit).toBe(true);
 
@@ -71,15 +72,16 @@ describe("prepareTransaction", () => {
   it("should add priority fee when provided", async () => {
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -110,7 +112,7 @@ describe("prepareTransaction", () => {
 
     // Should have both compute unit limit and price instructions
     const computeBudgetInstructions = prepared.instructions.filter(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS)
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
     expect(computeBudgetInstructions.length).toBe(2);
   });
@@ -119,15 +121,16 @@ describe("prepareTransaction", () => {
     // First, create a transaction with a compute unit limit instruction
     let transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     // Add a compute unit limit instruction first
@@ -169,15 +172,16 @@ describe("prepareTransaction", () => {
   it("should throw when simulation fails", async () => {
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     // Mock RPC that will cause the estimateComputeUnitLimitFactory to throw
@@ -197,25 +201,28 @@ describe("prepareTransaction", () => {
       }),
     } as Rpc<any>;
 
-    await expect(prepareTransaction({
-      transaction,
-      rpc: mockRpc,
-    })).rejects.toThrow();
+    await expect(
+      prepareTransaction({
+        transaction,
+        rpc: mockRpc,
+      }),
+    ).rejects.toThrow();
   });
 
   // Compute unit edge cases
   it("should cap compute units at MAX_COMPUTE_UNIT_LIMIT when estimation exceeds it", async () => {
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -246,8 +253,7 @@ describe("prepareTransaction", () => {
 
     // Find the compute unit limit instruction
     const computeLimitInstruction = prepared.instructions.find(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) &&
-        ix.data && ix.data[0] === 2 // SetComputeUnitLimit instruction discriminator
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) && ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
     );
 
     expect(computeLimitInstruction).toBeDefined();
@@ -265,15 +271,16 @@ describe("prepareTransaction", () => {
   it("should accept computeUnitPrice as number", async () => {
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -304,28 +311,29 @@ describe("prepareTransaction", () => {
 
     // Should have both compute limit and price instructions
     const computeBudgetInstructions = prepared.instructions.filter(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS)
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
     expect(computeBudgetInstructions.length).toBe(2);
 
     // Find the price instruction
     const priceInstruction = computeBudgetInstructions.find(
-      ix => ix.data && ix.data[0] === 3 // SetComputeUnitPrice instruction discriminator
+      (ix) => ix.data && ix.data[0] === 3, // SetComputeUnitPrice instruction discriminator
     );
     expect(priceInstruction).toBeDefined();
   });
   it("should accept computeUnitPrice as bigint", async () => {
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -356,23 +364,23 @@ describe("prepareTransaction", () => {
 
     // Should have both compute limit and price instructions
     const computeBudgetInstructions = prepared.instructions.filter(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS)
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
     expect(computeBudgetInstructions.length).toBe(2);
   });
   it("should accept computeUnitPrice as MicroLamports", async () => {
-
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -403,7 +411,7 @@ describe("prepareTransaction", () => {
 
     // Should have both compute limit and price instructions
     const computeBudgetInstructions = prepared.instructions.filter(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS)
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
     expect(computeBudgetInstructions.length).toBe(2);
   });
@@ -414,22 +422,23 @@ describe("prepareTransaction", () => {
 
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => ({
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) => ({
         ...tx,
         lifetimeConstraint: {
           blockhash: existingBlockhash as Blockhash,
           lastValidBlockHeight: 50n,
         },
       }),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -468,22 +477,23 @@ describe("prepareTransaction", () => {
 
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => ({
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) => ({
         ...tx,
         lifetimeConstraint: {
           blockhash: existingBlockhash as Blockhash,
           lastValidBlockHeight: 50n,
         },
       }),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -520,15 +530,16 @@ describe("prepareTransaction", () => {
     // Create transaction without blockhash
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const newBlockhash = "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d";
@@ -571,22 +582,23 @@ describe("prepareTransaction", () => {
 
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => ({
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) => ({
         ...tx,
         lifetimeConstraint: {
           blockhash: existingBlockhash as Blockhash,
           lastValidBlockHeight: 50n,
         },
       }),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -622,8 +634,7 @@ describe("prepareTransaction", () => {
 
     // Should have compute unit limit instruction added
     const hasComputeUnitLimit = prepared.instructions.some(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) &&
-        ix.data && ix.data[0] === 2 // SetComputeUnitLimit instruction discriminator
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) && ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
     );
     expect(hasComputeUnitLimit).toBe(true);
   });
@@ -635,23 +646,24 @@ describe("prepareTransaction", () => {
 
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => ({
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) => ({
         ...tx,
         lifetimeConstraint: {
           blockhash: existingBlockhash as Blockhash,
           lastValidBlockHeight: 50n,
         },
       }),
-      tx => updateOrAppendSetComputeUnitLimitInstruction(100_000, tx), // Pre-add compute limit
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => updateOrAppendSetComputeUnitLimitInstruction(100_000, tx), // Pre-add compute limit
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -687,8 +699,7 @@ describe("prepareTransaction", () => {
 
     // Should have kept the existing compute unit limit instruction (no re-estimation)
     const computeLimitInstructions = prepared.instructions.filter(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) &&
-        ix.data && ix.data[0] === 2 // SetComputeUnitLimit instruction discriminator
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) && ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
     );
     expect(computeLimitInstructions.length).toBe(1);
   });
@@ -699,23 +710,24 @@ describe("prepareTransaction", () => {
 
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => ({
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) => ({
         ...tx,
         lifetimeConstraint: {
           blockhash: existingBlockhash as Blockhash,
           lastValidBlockHeight: 50n,
         },
       }),
-      tx => updateOrAppendSetComputeUnitLimitInstruction(100_000, tx), // Pre-add compute limit
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => updateOrAppendSetComputeUnitLimitInstruction(100_000, tx), // Pre-add compute limit
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -751,29 +763,31 @@ describe("prepareTransaction", () => {
 
     // Should have kept the existing compute unit limit instruction unchanged
     const computeLimitInstructions = prepared.instructions.filter(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) &&
-        ix.data && ix.data[0] === 2 // SetComputeUnitLimit instruction discriminator
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) && ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
     );
     expect(computeLimitInstructions.length).toBe(1);
   });
 
   // Complex scenarios
   it("should handle transactions that already have both compute limit and price instructions", async () => {
-    const { updateOrAppendSetComputeUnitLimitInstruction, updateOrAppendSetComputeUnitPriceInstruction } = await import("@solana-program/compute-budget");
+    const { updateOrAppendSetComputeUnitLimitInstruction, updateOrAppendSetComputeUnitPriceInstruction } = await import(
+      "@solana-program/compute-budget"
+    );
 
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => updateOrAppendSetComputeUnitLimitInstruction(80_000, tx), // Pre-add compute limit
-      tx => updateOrAppendSetComputeUnitPriceInstruction(1000n as MicroLamports, tx), // Pre-add priority fee
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) => updateOrAppendSetComputeUnitLimitInstruction(80_000, tx), // Pre-add compute limit
+      (tx) => updateOrAppendSetComputeUnitPriceInstruction(1000n as MicroLamports, tx), // Pre-add priority fee
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -805,19 +819,19 @@ describe("prepareTransaction", () => {
 
     // Should still have both compute limit and price instructions
     const computeBudgetInstructions = prepared.instructions.filter(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS)
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
     expect(computeBudgetInstructions.length).toBe(2);
 
     // Should have updated limit through re-estimation (5000 * 1.1 = 5500)
     const computeLimitInstruction = computeBudgetInstructions.find(
-      ix => ix.data && ix.data[0] === 2 // SetComputeUnitLimit instruction discriminator
+      (ix) => ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
     );
     expect(computeLimitInstruction).toBeDefined();
 
     // Should have updated price instruction
     const computePriceInstruction = computeBudgetInstructions.find(
-      ix => ix.data && ix.data[0] === 3 // SetComputeUnitPrice instruction discriminator
+      (ix) => ix.data && ix.data[0] === 3, // SetComputeUnitPrice instruction discriminator
     );
     expect(computePriceInstruction).toBeDefined();
   });
@@ -826,15 +840,16 @@ describe("prepareTransaction", () => {
   it("should use default computeUnitLimitMultiplier of 1.1 when not specified", async () => {
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
-      tx => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      tx => appendTransactionMessageInstruction(
-        getTransferSolInstruction({
-          source: mockFeePayer,
-          destination: mockDestination,
-          amount: 1_000_000n,
-        }),
-        tx
-      )
+      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
+      (tx) =>
+        appendTransactionMessageInstruction(
+          getTransferSolInstruction({
+            source: mockFeePayer,
+            destination: mockDestination,
+            amount: 1_000_000n,
+          }),
+          tx,
+        ),
     );
 
     const mockRpc = {
@@ -865,8 +880,7 @@ describe("prepareTransaction", () => {
 
     // Find the compute unit limit instruction and verify it used the 1.1 multiplier
     const computeLimitInstruction = prepared.instructions.find(
-      ix => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) &&
-        ix.data && ix.data[0] === 2 // SetComputeUnitLimit instruction discriminator
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) && ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
     );
 
     expect(computeLimitInstruction).toBeDefined();
@@ -877,5 +891,4 @@ describe("prepareTransaction", () => {
       expect(units).toBe(11000); // 10000 * 1.1 = 11000
     }
   });
-
 });

@@ -1,4 +1,4 @@
-import { 
+import {
   updateOrAppendSetComputeUnitLimitInstruction,
   updateOrAppendSetComputeUnitPriceInstruction,
   estimateComputeUnitLimitFactory,
@@ -29,9 +29,9 @@ type PrepareCompilableTransactionMessage =
   | (TransactionMessageWithFeePayer & TransactionMessage);
 
 const SIMULATION_BLOCKHASH = {
-  blockhash: '11111111111111111111111111111111' as Blockhash,
+  blockhash: "11111111111111111111111111111111" as Blockhash,
   lastValidBlockHeight: 0n,
-}
+};
 
 export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransactionMessage> = {
   /**
@@ -56,7 +56,7 @@ export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransacti
   computeUnitLimitReset?: boolean;
   /**
    * Priority fee to set for the transaction (in microlamports per compute unit)
-   * 
+   *
    * If not provided, no compute unit price instruction will be added
    **/
   computeUnitPrice?: MicroLamports | bigint | number;
@@ -79,9 +79,8 @@ function validatePrepareTransactionConfig(config: PrepareTransactionConfig<any>)
   }
 
   if (config.computeUnitPrice !== undefined) {
-    const price = typeof config.computeUnitPrice === 'bigint'
-      ? config.computeUnitPrice
-      : BigInt(config.computeUnitPrice);
+    const price =
+      typeof config.computeUnitPrice === "bigint" ? config.computeUnitPrice : BigInt(config.computeUnitPrice);
 
     if (price < 0n) {
       throw new Error("computeUnitPrice must be >= 0");
@@ -95,8 +94,8 @@ function validatePrepareTransactionConfig(config: PrepareTransactionConfig<any>)
  * @returns True if the transaction has a compute unit limit instruction, false otherwise
  */
 function hasComputeUnitInstruction(transaction: TransactionMessage) {
-  return transaction.instructions.some((ix) => 
-    ix.programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS && isSetComputeLimitInstruction(ix)
+  return transaction.instructions.some(
+    (ix) => ix.programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS && isSetComputeLimitInstruction(ix),
   );
 }
 
@@ -114,15 +113,16 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
   // set the config defaults
   const computeUnitLimitMultiplier = config.computeUnitLimitMultiplier ?? 1.1;
   const blockhashReset = config.blockhashReset ?? true;
-  
+
   let transaction = config.transaction;
 
   // Add compute unit price instruction if provided
   if (config.computeUnitPrice !== undefined) {
-    const microLamports = typeof config.computeUnitPrice === 'bigint' 
-      ? config.computeUnitPrice as MicroLamports
-      : BigInt(config.computeUnitPrice) as MicroLamports;
-    
+    const microLamports =
+      typeof config.computeUnitPrice === "bigint"
+        ? (config.computeUnitPrice as MicroLamports)
+        : (BigInt(config.computeUnitPrice) as MicroLamports);
+
     transaction = updateOrAppendSetComputeUnitPriceInstruction(microLamports, transaction) as TMessage;
   }
 
@@ -136,13 +136,16 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
     // First, ensure we have a blockhash for simulation
     let simulationTransaction = transaction;
     if (!("lifetimeConstraint" in simulationTransaction)) {
-      simulationTransaction = setTransactionMessageLifetimeUsingBlockhash(SIMULATION_BLOCKHASH, simulationTransaction) as TMessage;
+      simulationTransaction = setTransactionMessageLifetimeUsingBlockhash(
+        SIMULATION_BLOCKHASH,
+        simulationTransaction,
+      ) as TMessage;
     }
 
     // Add max compute units for simulation to get accurate estimate
     simulationTransaction = updateOrAppendSetComputeUnitLimitInstruction(
-      MAX_COMPUTE_UNIT_LIMIT, 
-      simulationTransaction
+      MAX_COMPUTE_UNIT_LIMIT,
+      simulationTransaction,
     ) as TMessage;
 
     try {
@@ -168,10 +171,11 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
   // Update the latest blockhash
   if (blockhashReset || !("lifetimeConstraint" in transaction)) {
     const { value: latestBlockhash } = await config.rpc.getLatestBlockhash().send();
-    
+
     if (!("lifetimeConstraint" in transaction)) {
       debug("Transaction missing latest blockhash, fetching one.", "debug");
-      transaction = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, transaction) as TMessage & TransactionMessageWithBlockhashLifetime;
+      transaction = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, transaction) as TMessage &
+        TransactionMessageWithBlockhashLifetime;
     } else if (blockhashReset) {
       debug("Auto resetting the latest blockhash.", "debug");
       transaction = {
