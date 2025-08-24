@@ -27,7 +27,6 @@ type PrepareCompilableTransactionMessage =
   | CompilableTransactionMessage
   | (TransactionMessageWithFeePayer & TransactionMessage);
 
-
 export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransactionMessage> = {
   /**
    * Transaction to prepare for sending to the blockchain
@@ -69,7 +68,7 @@ export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransacti
  * @throws Error if the config is invalid
  */
 function validatePrepareTransactionConfig(config: PrepareTransactionConfig<any>) {
-  if (config.computeUnitLimitMultiplier && config.computeUnitLimitMultiplier <= 1) {
+  if (config.computeUnitLimitMultiplier !== undefined && config.computeUnitLimitMultiplier <= 1) {
     throw new Error("computeUnitLimitMultiplier must be >= 1");
   }
 
@@ -149,20 +148,12 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
   }
 
   // Update the latest blockhash
-  if (blockhashReset || !("lifetimeConstraint" in transaction)) {
+  const shouldResetBlockhash = blockhashReset || !("lifetimeConstraint" in transaction);
+  if (shouldResetBlockhash) {
     const { value: latestBlockhash } = await config.rpc.getLatestBlockhash().send();
-
-    if (!("lifetimeConstraint" in transaction)) {
-      debug("Transaction missing latest blockhash, fetching one.", "debug");
-      transaction = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, transaction) as TMessage &
-        TransactionMessageWithBlockhashLifetime;
-    } else if (blockhashReset) {
-      debug("Auto resetting the latest blockhash.", "debug");
-      transaction = {
-        ...transaction,
-        lifetimeConstraint: latestBlockhash,
-      } as TMessage & TransactionMessageWithBlockhashLifetime;
-    }
+    debug("Resetting the latest blockhash.", "debug");
+    transaction = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, transaction) as TMessage &
+      TransactionMessageWithBlockhashLifetime;
   }
 
   assertIsTransactionMessageWithBlockhashLifetime(transaction);
