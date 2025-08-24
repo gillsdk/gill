@@ -9,7 +9,15 @@ import {
   type MicroLamports,
   type Rpc,
 } from "@solana/kit";
-import { getTransferSolInstruction, COMPUTE_BUDGET_PROGRAM_ADDRESS } from "../programs";
+import {
+  getTransferSolInstruction,
+  COMPUTE_BUDGET_PROGRAM_ADDRESS,
+  updateOrAppendSetComputeUnitLimitInstruction,
+  updateOrAppendSetComputeUnitPriceInstruction,
+  getSetComputeUnitLimitInstruction,
+  getSetComputeUnitPriceInstruction,
+  MAX_COMPUTE_UNIT_LIMIT,
+} from "../programs";
 import { prepareTransaction } from "../core/prepare-transaction";
 
 describe("prepareTransaction", () => {
@@ -59,11 +67,19 @@ describe("prepareTransaction", () => {
       computeUnitLimitMultiplier: 1.2,
     });
 
-    // Check that compute unit limit instruction was added
-    const hasComputeUnitLimit = prepared.instructions.some(
+    // Check that compute unit limit instruction was added using introspection
+    const computeLimitInstructions = prepared.instructions.filter(
       (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
-    expect(hasComputeUnitLimit).toBe(true);
+
+    expect(computeLimitInstructions).toHaveLength(1);
+
+    // Verify it's the expected instruction with the expected value
+    const expectedInstruction = getSetComputeUnitLimitInstruction({
+      units: 6000, // 5000 * 1.2
+    });
+
+    expect(computeLimitInstructions[0]).toEqual(expectedInstruction);
 
     // Check that blockhash was set
     expect(prepared.lifetimeConstraint.blockhash).toBe("GHtXQBsoZHVnNFa9YevAzFr17DJjgHXk3ycTKD5xD3Zi");
@@ -114,59 +130,19 @@ describe("prepareTransaction", () => {
     const computeBudgetInstructions = prepared.instructions.filter(
       (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
-    expect(computeBudgetInstructions.length).toBe(2);
-  });
+    expect(computeBudgetInstructions).toHaveLength(2);
 
-  it("should not re-estimate when computeUnitLimitReset is false and limit exists", async () => {
-    // First, create a transaction with a compute unit limit instruction
-    let transaction = pipe(
-      createTransactionMessage({ version: 0 }),
-      (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
-      (tx) =>
-        appendTransactionMessageInstruction(
-          getTransferSolInstruction({
-            source: mockFeePayer,
-            destination: mockDestination,
-            amount: 1_000_000n,
-          }),
-          tx,
-        ),
-    );
-
-    // Add a compute unit limit instruction first
-    const { updateOrAppendSetComputeUnitLimitInstruction } = await import("@solana-program/compute-budget");
-    transaction = updateOrAppendSetComputeUnitLimitInstruction(100_000, transaction);
-
-    // Create a mock that tracks if estimation is called
-    let estimationCalled = false;
-    const mockRpc = {
-      getLatestBlockhash: () => ({
-        send: async () => ({
-          value: {
-            blockhash: "GHtXQBsoZHVnNFa9YevAzFr17DJjgHXk3ycTKD5xD3Zi" as Blockhash,
-            lastValidBlockHeight: 100n,
-          },
-        }),
-      }),
-    } as Rpc<any>;
-
-    // Mock the estimation factory to track if it's called
-    jest.mock("@solana-program/compute-budget", () => ({
-      ...jest.requireActual("@solana-program/compute-budget"),
-      estimateComputeUnitLimitFactory: () => () => {
-        estimationCalled = true;
-        return Promise.resolve(5000);
-      },
-    }));
-
-    await prepareTransaction({
-      transaction,
-      rpc: mockRpc,
-      computeUnitLimitReset: false,
+    // Verify the instructions are what we expect
+    const expectedLimitInstruction = getSetComputeUnitLimitInstruction({
+      units: 5500, // 5000 * 1.1 (default multiplier)
+    });
+    const expectedPriceInstruction = getSetComputeUnitPriceInstruction({
+      microLamports: 5000n as MicroLamports,
     });
 
-    // Since computeUnitLimitReset is false and we already have a limit, estimation should not be called
-    expect(estimationCalled).toBe(false);
+    // Check both instructions are present (order may vary)
+    expect(computeBudgetInstructions).toContainEqual(expectedLimitInstruction);
+    expect(computeBudgetInstructions).toContainEqual(expectedPriceInstruction);
   });
 
   it("should throw when simulation fails", async () => {
@@ -252,19 +228,17 @@ describe("prepareTransaction", () => {
     });
 
     // Find the compute unit limit instruction
-    const computeLimitInstruction = prepared.instructions.find(
-      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) && ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
+    const computeBudgetInstructions = prepared.instructions.filter(
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
 
-    expect(computeLimitInstruction).toBeDefined();
-    // The compute limit should be capped at MAX_COMPUTE_UNIT_LIMIT (1.4M)
-    // We can verify this by checking the instruction data
-    if (computeLimitInstruction?.data) {
-      // Extract units from instruction data (bytes 1-4 in little-endian format)
-      const unitsBytes = computeLimitInstruction.data.slice(1, 5);
-      const units = new DataView(unitsBytes.buffer).getUint32(0, true);
-      expect(units).toBe(1_400_000); // MAX_COMPUTE_UNIT_LIMIT
-    }
+    expect(computeBudgetInstructions).toHaveLength(1);
+
+    const expectedInstruction = getSetComputeUnitLimitInstruction({
+      units: MAX_COMPUTE_UNIT_LIMIT,
+    });
+
+    expect(computeBudgetInstructions[0]).toEqual(expectedInstruction);
   });
 
   // Priority fee scenarios
@@ -313,13 +287,17 @@ describe("prepareTransaction", () => {
     const computeBudgetInstructions = prepared.instructions.filter(
       (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
-    expect(computeBudgetInstructions.length).toBe(2);
+    expect(computeBudgetInstructions).toHaveLength(2);
 
-    // Find the price instruction
-    const priceInstruction = computeBudgetInstructions.find(
-      (ix) => ix.data && ix.data[0] === 3, // SetComputeUnitPrice instruction discriminator
-    );
-    expect(priceInstruction).toBeDefined();
+    const expectedLimitInstruction = getSetComputeUnitLimitInstruction({
+      units: 5500,
+    });
+    const expectedPriceInstruction = getSetComputeUnitPriceInstruction({
+      microLamports: 1000n as MicroLamports,
+    });
+
+    expect(computeBudgetInstructions).toContainEqual(expectedLimitInstruction);
+    expect(computeBudgetInstructions).toContainEqual(expectedPriceInstruction);
   });
   it("should accept computeUnitPrice as bigint", async () => {
     const transaction = pipe(
@@ -366,7 +344,17 @@ describe("prepareTransaction", () => {
     const computeBudgetInstructions = prepared.instructions.filter(
       (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
-    expect(computeBudgetInstructions.length).toBe(2);
+    expect(computeBudgetInstructions).toHaveLength(2);
+
+    const expectedLimitInstruction = getSetComputeUnitLimitInstruction({
+      units: 5500,
+    });
+    const expectedPriceInstruction = getSetComputeUnitPriceInstruction({
+      microLamports: 2000n as MicroLamports,
+    });
+
+    expect(computeBudgetInstructions).toContainEqual(expectedLimitInstruction);
+    expect(computeBudgetInstructions).toContainEqual(expectedPriceInstruction);
   });
   it("should accept computeUnitPrice as MicroLamports", async () => {
     const transaction = pipe(
@@ -413,12 +401,23 @@ describe("prepareTransaction", () => {
     const computeBudgetInstructions = prepared.instructions.filter(
       (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
-    expect(computeBudgetInstructions.length).toBe(2);
+    expect(computeBudgetInstructions).toHaveLength(2);
+
+    const expectedLimitInstruction = getSetComputeUnitLimitInstruction({
+      units: 5500,
+    });
+    const expectedPriceInstruction = getSetComputeUnitPriceInstruction({
+      microLamports: 3000n as MicroLamports,
+    });
+
+    expect(computeBudgetInstructions).toContainEqual(expectedLimitInstruction);
+    expect(computeBudgetInstructions).toContainEqual(expectedPriceInstruction);
   });
 
   // Blockhash scenarios
   it("should preserve existing blockhash when blockhashReset is false", async () => {
     const existingBlockhash = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
+    const existingLastValidBlockHeight = 50n;
 
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
@@ -427,7 +426,7 @@ describe("prepareTransaction", () => {
         ...tx,
         lifetimeConstraint: {
           blockhash: existingBlockhash as Blockhash,
-          lastValidBlockHeight: 50n,
+          lastValidBlockHeight: existingLastValidBlockHeight,
         },
       }),
       (tx) =>
@@ -469,11 +468,13 @@ describe("prepareTransaction", () => {
 
     // Should preserve the original blockhash
     expect(prepared.lifetimeConstraint.blockhash).toBe(existingBlockhash);
-    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(50n);
+    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(existingLastValidBlockHeight);
   });
   it("should update existing blockhash when blockhashReset is true", async () => {
     const existingBlockhash = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
+    const existingLastValidBlockHeight = 50n;
     const newBlockhash = "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d";
+    const newLastValidBlockHeight = 100n;
 
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
@@ -482,7 +483,7 @@ describe("prepareTransaction", () => {
         ...tx,
         lifetimeConstraint: {
           blockhash: existingBlockhash as Blockhash,
-          lastValidBlockHeight: 50n,
+          lastValidBlockHeight: existingLastValidBlockHeight,
         },
       }),
       (tx) =>
@@ -501,7 +502,7 @@ describe("prepareTransaction", () => {
         send: async () => ({
           value: {
             blockhash: newBlockhash as Blockhash,
-            lastValidBlockHeight: 100n,
+            lastValidBlockHeight: newLastValidBlockHeight,
           },
         }),
       }),
@@ -524,7 +525,7 @@ describe("prepareTransaction", () => {
 
     // Should use the new blockhash
     expect(prepared.lifetimeConstraint.blockhash).toBe(newBlockhash);
-    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(100n);
+    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(newLastValidBlockHeight);
   });
   it("should add blockhash when transaction has none and blockhashReset is false", async () => {
     // Create transaction without blockhash
@@ -543,13 +544,14 @@ describe("prepareTransaction", () => {
     );
 
     const newBlockhash = "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d";
+    const newLastValidBlockHeight = 100n;
 
     const mockRpc = {
       getLatestBlockhash: () => ({
         send: async () => ({
           value: {
             blockhash: newBlockhash as Blockhash,
-            lastValidBlockHeight: 100n,
+            lastValidBlockHeight: newLastValidBlockHeight,
           },
         }),
       }),
@@ -573,12 +575,13 @@ describe("prepareTransaction", () => {
 
     // Should add the blockhash even when blockhashReset is false
     expect(prepared.lifetimeConstraint.blockhash).toBe(newBlockhash);
-    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(100n);
+    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(newLastValidBlockHeight);
   });
 
   // Configuration combinations
   it("should handle computeUnitLimitReset=true and blockhashReset=false", async () => {
     const existingBlockhash = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
+    const existingLastValidBlockHeight = 50n;
 
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
@@ -587,7 +590,7 @@ describe("prepareTransaction", () => {
         ...tx,
         lifetimeConstraint: {
           blockhash: existingBlockhash as Blockhash,
-          lastValidBlockHeight: 50n,
+          lastValidBlockHeight: existingLastValidBlockHeight,
         },
       }),
       (tx) =>
@@ -630,19 +633,24 @@ describe("prepareTransaction", () => {
 
     // Should preserve the original blockhash
     expect(prepared.lifetimeConstraint.blockhash).toBe(existingBlockhash);
-    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(50n);
+    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(existingLastValidBlockHeight);
 
     // Should have compute unit limit instruction added
-    const hasComputeUnitLimit = prepared.instructions.some(
-      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) && ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
+    const computeBudgetInstructions = prepared.instructions.filter(
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
-    expect(hasComputeUnitLimit).toBe(true);
+    expect(computeBudgetInstructions).toHaveLength(1);
+
+    const expectedInstruction = getSetComputeUnitLimitInstruction({
+      units: 5500,
+    });
+    expect(computeBudgetInstructions[0]).toEqual(expectedInstruction);
   });
   it("should handle computeUnitLimitReset=false and blockhashReset=true", async () => {
-    const { updateOrAppendSetComputeUnitLimitInstruction } = await import("@solana-program/compute-budget");
-
     const existingBlockhash = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
+    const existingLastValidBlockHeight = 50n;
     const newBlockhash = "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d";
+    const newLastValidBlockHeight = 100n;
 
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
@@ -651,7 +659,7 @@ describe("prepareTransaction", () => {
         ...tx,
         lifetimeConstraint: {
           blockhash: existingBlockhash as Blockhash,
-          lastValidBlockHeight: 50n,
+          lastValidBlockHeight: existingLastValidBlockHeight,
         },
       }),
       (tx) => updateOrAppendSetComputeUnitLimitInstruction(100_000, tx), // Pre-add compute limit
@@ -671,7 +679,7 @@ describe("prepareTransaction", () => {
         send: async () => ({
           value: {
             blockhash: newBlockhash as Blockhash,
-            lastValidBlockHeight: 100n,
+            lastValidBlockHeight: newLastValidBlockHeight,
           },
         }),
       }),
@@ -695,19 +703,22 @@ describe("prepareTransaction", () => {
 
     // Should use the new blockhash
     expect(prepared.lifetimeConstraint.blockhash).toBe(newBlockhash);
-    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(100n);
+    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(newLastValidBlockHeight);
 
     // Should have kept the existing compute unit limit instruction (no re-estimation)
-    const computeLimitInstructions = prepared.instructions.filter(
-      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) && ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
+    const computeBudgetInstructions = prepared.instructions.filter(
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
-    expect(computeLimitInstructions.length).toBe(1);
+    expect(computeBudgetInstructions).toHaveLength(1);
+
+    const expectedInstruction = getSetComputeUnitLimitInstruction({
+      units: 100_000,
+    });
+    expect(computeBudgetInstructions[0]).toEqual(expectedInstruction);
   });
   it("should handle both computeUnitLimitReset=false and blockhashReset=false", async () => {
-    const { updateOrAppendSetComputeUnitLimitInstruction } = await import("@solana-program/compute-budget");
-
     const existingBlockhash = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
-
+    const existingLastValidBlockHeight = 50n;
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
       (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
@@ -715,7 +726,7 @@ describe("prepareTransaction", () => {
         ...tx,
         lifetimeConstraint: {
           blockhash: existingBlockhash as Blockhash,
-          lastValidBlockHeight: 50n,
+          lastValidBlockHeight: existingLastValidBlockHeight,
         },
       }),
       (tx) => updateOrAppendSetComputeUnitLimitInstruction(100_000, tx), // Pre-add compute limit
@@ -759,21 +770,22 @@ describe("prepareTransaction", () => {
 
     // Should preserve the original blockhash
     expect(prepared.lifetimeConstraint.blockhash).toBe(existingBlockhash);
-    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(50n);
+    expect(prepared.lifetimeConstraint.lastValidBlockHeight).toBe(existingLastValidBlockHeight);
 
     // Should have kept the existing compute unit limit instruction unchanged
-    const computeLimitInstructions = prepared.instructions.filter(
-      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) && ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
+    const computeBudgetInstructions = prepared.instructions.filter(
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
-    expect(computeLimitInstructions.length).toBe(1);
+    expect(computeBudgetInstructions).toHaveLength(1);
+
+    const expectedInstruction = getSetComputeUnitLimitInstruction({
+      units: 100_000,
+    });
+    expect(computeBudgetInstructions[0]).toEqual(expectedInstruction);
   });
 
   // Complex scenarios
   it("should handle transactions that already have both compute limit and price instructions", async () => {
-    const { updateOrAppendSetComputeUnitLimitInstruction, updateOrAppendSetComputeUnitPriceInstruction } = await import(
-      "@solana-program/compute-budget"
-    );
-
     const transaction = pipe(
       createTransactionMessage({ version: 0 }),
       (tx) => setTransactionMessageFeePayerSigner(mockFeePayer, tx),
@@ -821,19 +833,17 @@ describe("prepareTransaction", () => {
     const computeBudgetInstructions = prepared.instructions.filter(
       (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
-    expect(computeBudgetInstructions.length).toBe(2);
+    expect(computeBudgetInstructions).toHaveLength(2);
 
-    // Should have updated limit through re-estimation (5000 * 1.1 = 5500)
-    const computeLimitInstruction = computeBudgetInstructions.find(
-      (ix) => ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
-    );
-    expect(computeLimitInstruction).toBeDefined();
+    const expectedLimitInstruction = getSetComputeUnitLimitInstruction({
+      units: 5500,
+    });
+    const expectedPriceInstruction = getSetComputeUnitPriceInstruction({
+      microLamports: 2000n as MicroLamports,
+    });
 
-    // Should have updated price instruction
-    const computePriceInstruction = computeBudgetInstructions.find(
-      (ix) => ix.data && ix.data[0] === 3, // SetComputeUnitPrice instruction discriminator
-    );
-    expect(computePriceInstruction).toBeDefined();
+    expect(computeBudgetInstructions).toContainEqual(expectedLimitInstruction);
+    expect(computeBudgetInstructions).toContainEqual(expectedPriceInstruction);
   });
 
   // Default values
@@ -879,16 +889,16 @@ describe("prepareTransaction", () => {
     });
 
     // Find the compute unit limit instruction and verify it used the 1.1 multiplier
-    const computeLimitInstruction = prepared.instructions.find(
-      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS) && ix.data && ix.data[0] === 2, // SetComputeUnitLimit instruction discriminator
+    const computeBudgetInstructions = prepared.instructions.filter(
+      (ix) => String(ix.programAddress) === String(COMPUTE_BUDGET_PROGRAM_ADDRESS),
     );
 
-    expect(computeLimitInstruction).toBeDefined();
-    if (computeLimitInstruction?.data) {
-      // Extract units from instruction data (bytes 1-4 in little-endian format)
-      const unitsBytes = computeLimitInstruction.data.slice(1, 5);
-      const units = new DataView(unitsBytes.buffer).getUint32(0, true);
-      expect(units).toBe(11000); // 10000 * 1.1 = 11000
-    }
+    expect(computeBudgetInstructions).toHaveLength(1);
+
+    const expectedInstruction = getSetComputeUnitLimitInstruction({
+      units: 11000,
+    });
+
+    expect(computeBudgetInstructions[0]).toEqual(expectedInstruction);
   });
 });
