@@ -14,7 +14,6 @@ import type {
   TransactionMessage,
   TransactionMessageWithBlockhashLifetime,
   MicroLamports,
-  Blockhash,
 } from "@solana/kit";
 import {
   assertIsTransactionMessageWithBlockhashLifetime,
@@ -28,10 +27,6 @@ type PrepareCompilableTransactionMessage =
   | CompilableTransactionMessage
   | (TransactionMessageWithFeePayer & TransactionMessage);
 
-const SIMULATION_BLOCKHASH = {
-  blockhash: "11111111111111111111111111111111" as Blockhash,
-  lastValidBlockHeight: 0n,
-};
 
 export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransactionMessage> = {
   /**
@@ -133,25 +128,10 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
   const shouldEstimate = config.computeUnitLimitReset || !hasComputeUnitLimit;
 
   if (shouldEstimate) {
-    // First, ensure we have a blockhash for simulation
-    let simulationTransaction = transaction;
-    if (!("lifetimeConstraint" in simulationTransaction)) {
-      simulationTransaction = setTransactionMessageLifetimeUsingBlockhash(
-        SIMULATION_BLOCKHASH,
-        simulationTransaction,
-      ) as TMessage;
-    }
-
-    // Add max compute units for simulation to get accurate estimate
-    simulationTransaction = updateOrAppendSetComputeUnitLimitInstruction(
-      MAX_COMPUTE_UNIT_LIMIT,
-      simulationTransaction,
-    ) as TMessage;
-
     try {
-      // Simulate the transaction
-      const getComputeUnitEstimate = estimateComputeUnitLimitFactory({ rpc: config.rpc });
-      const consumedUnits = await getComputeUnitEstimate(simulationTransaction);
+      // Use estimateComputeUnitLimitFactory which handles provisional blockhash and max CU for simulation
+      const estimateComputeUnitLimit = estimateComputeUnitLimitFactory({ rpc: config.rpc });
+      const consumedUnits = await estimateComputeUnitLimit(transaction);
 
       // Calculate compute units with multiplier
       const estimatedUnits = Math.ceil(consumedUnits * computeUnitLimitMultiplier);
