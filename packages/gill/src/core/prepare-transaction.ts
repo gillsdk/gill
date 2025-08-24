@@ -1,10 +1,7 @@
 import {
-  updateOrAppendSetComputeUnitLimitInstruction,
-  updateOrAppendSetComputeUnitPriceInstruction,
-  estimateComputeUnitLimitFactory,
-  MAX_COMPUTE_UNIT_LIMIT,
-  COMPUTE_BUDGET_PROGRAM_ADDRESS,
-} from "@solana-program/compute-budget";
+  setTransactionMessageLifetimeUsingBlockhash,
+  assertIsTransactionMessageWithBlockhashLifetime,
+} from "@solana/kit";
 import type {
   CompilableTransactionMessage,
   GetLatestBlockhashApi,
@@ -16,10 +13,12 @@ import type {
   MicroLamports,
 } from "@solana/kit";
 import {
-  assertIsTransactionMessageWithBlockhashLifetime,
-  setTransactionMessageLifetimeUsingBlockhash,
-} from "@solana/kit";
-import { isSetComputeLimitInstruction } from "../programs/compute-budget";
+  hasSetComputeLimitInstruction,
+  updateOrAppendSetComputeUnitLimitInstruction,
+  updateOrAppendSetComputeUnitPriceInstruction,
+  estimateComputeUnitLimitFactory,
+  MAX_COMPUTE_UNIT_LIMIT,
+} from "../programs/compute-budget";
 import { transactionToBase64WithSigners } from "./base64-to-transaction";
 import { debug, isDebugEnabled } from "./debug";
 
@@ -83,17 +82,6 @@ function validatePrepareTransactionConfig(config: PrepareTransactionConfig<any>)
 }
 
 /**
- * Check if the transaction has a compute unit limit instruction
- * @param transaction - The transaction to check
- * @returns True if the transaction has a compute unit limit instruction, false otherwise
- */
-function hasComputeUnitInstruction(transaction: TransactionMessage) {
-  return transaction.instructions.some(
-    (ix) => ix.programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS && isSetComputeLimitInstruction(ix),
-  );
-}
-
-/**
  * Prepare a Transaction to be signed and sent to the network. Including:
  * - setting a compute unit price (priority fee) if provided
  * - setting a compute unit limit (via simulation if needed)
@@ -121,7 +109,7 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
   }
 
   // Check if transaction already has a compute unit limit instruction
-  const hasComputeUnitLimit = hasComputeUnitInstruction(transaction);
+  const hasComputeUnitLimit = hasSetComputeLimitInstruction(transaction);
 
   // Determine if we should estimate compute units
   const shouldEstimate = config.computeUnitLimitReset || !hasComputeUnitLimit;
