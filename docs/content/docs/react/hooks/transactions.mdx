@@ -1,0 +1,147 @@
+---
+title: Transaction Hooks
+description: Hooks for sending and managing Solana transactions
+---
+
+<Callout type="info">
+  Transaction hooks are coming soon to gill-react. This page documents the planned API.
+</Callout>
+
+These hooks will provide an easy way to send, confirm, and manage Solana transactions with automatic error handling and retry logic.
+
+## Planned Hooks
+
+### useSendTransaction
+
+Send and confirm transactions with automatic retry and confirmation handling.
+
+```tsx
+// Coming soon
+const { sendTransaction, isLoading, error } = useSendTransaction();
+
+const handleTransfer = async () => {
+  const signature = await sendTransaction({
+    transaction,
+    signers: [keypair],
+    options: {
+      skipPreflight: false,
+      commitment: "confirmed",
+    },
+  });
+};
+```
+
+### useSimulateTransaction
+
+Simulate transactions before sending to check for errors.
+
+```tsx
+// Coming soon
+const { simulate, result } = useSimulateTransaction();
+
+const checkTransaction = async () => {
+  const simulation = await simulate({
+    transaction,
+    signers: [keypair],
+  });
+  
+  if (simulation.err) {
+    console.error("Transaction would fail:", simulation.err);
+  }
+};
+```
+
+### useTransactionStatus
+
+Monitor transaction confirmation status in real-time.
+
+```tsx
+// Coming soon
+const { status, confirmations } = useTransactionStatus({
+  signature: "...",
+  targetConfirmations: 10,
+});
+```
+
+## Current Approach
+
+Until transaction hooks are available, you can use the Solana client directly:
+
+```tsx
+"use client";
+
+import { useSolanaClient } from "gill-react";
+import { createTransaction } from "gill";
+
+export function SendTransaction() {
+  const { rpc, sendAndConfirmTransaction } = useSolanaClient();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSend = async () => {
+    setIsLoading(true);
+    try {
+      // Create your transaction
+      const transaction = createTransaction({
+        // ... transaction params
+      });
+
+      // Send and confirm
+      const signature = await sendAndConfirmTransaction(
+        transaction,
+        { commitment: "confirmed" }
+      );
+
+      console.log("Transaction confirmed:", signature);
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <button onClick={handleSend} disabled={isLoading}>
+      {isLoading ? "Sending..." : "Send Transaction"}
+    </button>
+  );
+}
+```
+
+## With Wallet Adapter
+
+If you're using a wallet adapter, combine it with gill-react:
+
+```tsx
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useSolanaClient } from "gill-react";
+
+export function WalletTransaction() {
+  const { publicKey, signTransaction } = useWallet();
+  const { rpc } = useSolanaClient();
+
+  const sendTransaction = async () => {
+    if (!publicKey || !signTransaction) return;
+
+    // Create transaction
+    const transaction = createTransaction({
+      // ... params
+    });
+
+    // Sign with wallet
+    const signedTx = await signTransaction(transaction);
+
+    // Send via RPC
+    const signature = await rpc
+      .sendTransaction(signedTx, { skipPreflight: false })
+      .send();
+
+    console.log("Sent:", signature);
+  };
+
+  // ... rest of component
+}
+```
+
+## Contributing
+
+Transaction hooks are actively being developed. If you have suggestions or want to contribute, please check out the [gill-react repository](https://github.com/DecalLabs/gill) on GitHub.
