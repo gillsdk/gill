@@ -115,24 +115,16 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
   const shouldEstimate = config.computeUnitLimitReset || !hasComputeUnitLimit;
 
   if (shouldEstimate) {
-    try {
-      // Use estimateComputeUnitLimitFactory which handles provisional blockhash and max CU for simulation
-      const estimateComputeUnitLimit = estimateComputeUnitLimitFactory({ rpc: config.rpc });
-      const consumedUnits = await estimateComputeUnitLimit(transaction);
-
-      // Calculate compute units with multiplier
-      const estimatedUnits = Math.ceil(consumedUnits * computeUnitLimitMultiplier);
-      // Ensure our multiplier doesn't exceed the max compute unit limit
-      const finalUnits = Math.min(estimatedUnits, MAX_COMPUTE_UNIT_LIMIT);
-
-      debug(`Compute units - consumed: ${consumedUnits}, estimated: ${estimatedUnits}, final: ${finalUnits}`, "debug");
-
-      // Update transaction with estimated compute units
-      transaction = updateOrAppendSetComputeUnitLimitInstruction(finalUnits, transaction) as TMessage;
-    } catch (error) {
-      debug(`Failed to estimate compute units: ${error}`, "error");
-      throw error;
-    }
+    // Use estimateComputeUnitLimitFactory which handles provisional blockhash and max CU for simulation
+    const estimateComputeUnitLimit = estimateComputeUnitLimitFactory({ rpc: config.rpc });
+    const consumedUnits = await estimateComputeUnitLimit(transaction);
+    // Calculate compute units with multiplier
+    const estimatedUnits = Math.ceil(consumedUnits * computeUnitLimitMultiplier);
+    // Ensure our multiplier doesn't exceed the max compute unit limit
+    const finalUnits = Math.min(estimatedUnits, MAX_COMPUTE_UNIT_LIMIT);
+    debug(`Compute units - consumed: ${consumedUnits}, estimated: ${estimatedUnits}, final: ${finalUnits}`, "debug");
+    // Update transaction with estimated compute units
+    transaction = updateOrAppendSetComputeUnitLimitInstruction(finalUnits, transaction) as TMessage;
   }
 
   // Update the latest blockhash
