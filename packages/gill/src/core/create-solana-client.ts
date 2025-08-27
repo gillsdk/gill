@@ -1,7 +1,13 @@
 import type { DevnetUrl, MainnetUrl, TestnetUrl } from "@solana/kit";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 
-import type { CreateSolanaClientArgs, LocalnetUrl, ModifiedClusterUrl, SolanaClient } from "../types/rpc";
+import type {
+  CreateSolanaClientArgs,
+  LocalnetUrl,
+  ModifiedClusterUrl,
+  SolanaClient,
+  SolanaClientUrlOrMoniker,
+} from "../types/rpc";
 import { getPublicSolanaRpcUrl } from "./rpc";
 import { sendAndConfirmTransactionWithSignersFactory } from "./send-and-confirm-transaction-with-signers";
 import { simulateTransactionFactory } from "./simulate-transaction";
@@ -32,12 +38,12 @@ export function createSolanaClient(
 export function createSolanaClient<TClusterUrl extends ModifiedClusterUrl>(
   props: CreateSolanaClientArgs<TClusterUrl>,
 ): SolanaClient<TClusterUrl>;
-export function createSolanaClient<TCluster extends ModifiedClusterUrl>({
-  urlOrMoniker,
-  rpcConfig,
-  rpcSubscriptionsConfig,
-}: CreateSolanaClientArgs<TCluster>) {
-  if (!urlOrMoniker) throw new Error("Cluster url or moniker is required");
+export function createSolanaClient(
+  props: CreateSolanaClientArgs<SolanaClientUrlOrMoniker>,
+): SolanaClient<ModifiedClusterUrl> {
+  let { urlOrMoniker = "mainnet", rpcConfig = {}, rpcSubscriptionsConfig = {} } = props;
+  const cluster: SolanaClientUrlOrMoniker = urlOrMoniker as ModifiedClusterUrl;
+
   if (urlOrMoniker instanceof URL == false) {
     try {
       urlOrMoniker = new URL(urlOrMoniker.toString());
@@ -58,9 +64,9 @@ export function createSolanaClient<TCluster extends ModifiedClusterUrl>({
     urlOrMoniker.port = rpcConfig.port.toString();
   }
 
-  const rpc = createSolanaRpc<TCluster>(urlOrMoniker.toString() as TCluster, rpcConfig);
+  const rpc = createSolanaRpc(urlOrMoniker.toString(), rpcConfig);
 
-  urlOrMoniker.protocol = urlOrMoniker.protocol.replace('http', 'ws');
+  urlOrMoniker.protocol = urlOrMoniker.protocol.replace("http", "ws");
 
   if (rpcSubscriptionsConfig?.port) {
     urlOrMoniker.port = rpcSubscriptionsConfig.port.toString();
@@ -68,12 +74,10 @@ export function createSolanaClient<TCluster extends ModifiedClusterUrl>({
     urlOrMoniker.port = "8900";
   }
 
-  const rpcSubscriptions = createSolanaRpcSubscriptions<TCluster>(
-    urlOrMoniker.toString() as TCluster,
-    rpcSubscriptionsConfig,
-  );
+  const rpcSubscriptions = createSolanaRpcSubscriptions(urlOrMoniker.toString(), rpcSubscriptionsConfig);
 
   return {
+    cluster,
     rpc,
     rpcSubscriptions,
     sendAndConfirmTransaction: sendAndConfirmTransactionWithSignersFactory({
@@ -84,5 +88,5 @@ export function createSolanaClient<TCluster extends ModifiedClusterUrl>({
     }),
     // @ts-ignore
     simulateTransaction: simulateTransactionFactory({ rpc }),
-  };
+  } as SolanaClient<ModifiedClusterUrl>;
 }
