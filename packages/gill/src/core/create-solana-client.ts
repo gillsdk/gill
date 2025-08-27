@@ -38,7 +38,7 @@ export function createSolanaClient(
 export function createSolanaClient<TClusterUrl extends ModifiedClusterUrl>(
   props: CreateSolanaClientArgs<TClusterUrl>,
 ): SolanaClient<TClusterUrl>;
-export function createSolanaClient(
+export function createSolanaClient<TCluster extends ModifiedClusterUrl>(
   props: CreateSolanaClientArgs<SolanaClientUrlOrMoniker>,
 ): SolanaClient<ModifiedClusterUrl> {
   let { urlOrMoniker = "mainnet", rpcConfig = {}, rpcSubscriptionsConfig = {} } = props;
@@ -64,7 +64,7 @@ export function createSolanaClient(
     urlOrMoniker.port = rpcConfig.port.toString();
   }
 
-  const rpc = createSolanaRpc(urlOrMoniker.toString(), rpcConfig);
+  const rpc = createSolanaRpc<TCluster>(urlOrMoniker.toString() as TCluster, rpcConfig);
 
   urlOrMoniker.protocol = urlOrMoniker.protocol.replace("http", "ws");
 
@@ -74,7 +74,10 @@ export function createSolanaClient(
     urlOrMoniker.port = "8900";
   }
 
-  const rpcSubscriptions = createSolanaRpcSubscriptions(urlOrMoniker.toString(), rpcSubscriptionsConfig);
+  const rpcSubscriptions = createSolanaRpcSubscriptions<TCluster>(
+    urlOrMoniker.toString() as TCluster,
+    rpcSubscriptionsConfig,
+  );
 
   return {
     network,
