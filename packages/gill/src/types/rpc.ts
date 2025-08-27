@@ -36,8 +36,8 @@ export type CreateSolanaClientArgs<TClusterUrl extends SolanaClientUrlOrMoniker 
 };
 
 export type SolanaClient<TClusterUrl extends ModifiedClusterUrl | string = string> = {
-  /** Defaults to Mainnet */
-  cluster?: SolanaClientUrlOrMoniker;
+  /** Sets the network to use for the client. Defaults to Mainnet */
+  network?: SolanaClientUrlOrMoniker;
   /** Used to make RPC calls to your RPC provider */
   rpc: RpcFromTransport<
     SolanaRpcApiFromTransport<RpcTransportFromClusterUrl<TClusterUrl>>,

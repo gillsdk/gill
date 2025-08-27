@@ -42,7 +42,7 @@ export function createSolanaClient(
   props: CreateSolanaClientArgs<SolanaClientUrlOrMoniker>,
 ): SolanaClient<ModifiedClusterUrl> {
   let { urlOrMoniker = "mainnet", rpcConfig = {}, rpcSubscriptionsConfig = {} } = props;
-  const cluster: SolanaClientUrlOrMoniker = urlOrMoniker as ModifiedClusterUrl;
+  const network: SolanaClientUrlOrMoniker = urlOrMoniker as ModifiedClusterUrl;
 
   if (urlOrMoniker instanceof URL == false) {
     try {
@@ -77,7 +77,7 @@ export function createSolanaClient(
   const rpcSubscriptions = createSolanaRpcSubscriptions(urlOrMoniker.toString(), rpcSubscriptionsConfig);
 
   return {
-    cluster,
+    network,
     rpc,
     rpcSubscriptions,
     sendAndConfirmTransaction: sendAndConfirmTransactionWithSignersFactory({
