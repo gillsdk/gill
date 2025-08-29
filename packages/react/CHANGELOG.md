@@ -1,4 +1,4 @@
-# gill-react
+# @gillsdk/react
 
 ## 0.5.0
 
