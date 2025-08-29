@@ -2,11 +2,11 @@ import { COMPUTE_BUDGET_PROGRAM_ADDRESS, getSetComputeUnitLimitInstruction } fro
 import type {
   CompilableTransactionMessage,
   GetLatestBlockhashApi,
-  ITransactionMessageWithFeePayer,
   Rpc,
   SimulateTransactionApi,
   TransactionMessage,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithFeePayer,
 } from "@solana/kit";
 import {
   appendTransactionMessageInstruction,
@@ -20,7 +20,7 @@ import { debug, isDebugEnabled } from "./debug";
 
 type PrepareCompilableTransactionMessage =
   | CompilableTransactionMessage
-  | (ITransactionMessageWithFeePayer & TransactionMessage);
+  | (TransactionMessageWithFeePayer & TransactionMessage);
 
 export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransactionMessage> = {
   /**
@@ -105,7 +105,10 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
     const { value: latestBlockhash } = await config.rpc.getLatestBlockhash().send();
     if ("lifetimeConstraint" in config.transaction == false) {
       debug("Transaction missing latest blockhash, fetching one.", "debug");
-      config.transaction = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, config.transaction) as unknown as TMessage;
+      config.transaction = setTransactionMessageLifetimeUsingBlockhash(
+        latestBlockhash,
+        config.transaction,
+      ) as unknown as TMessage;
     } else if (config.blockhashReset) {
       debug("Auto resetting the latest blockhash.", "debug");
       config.transaction = Object.freeze({

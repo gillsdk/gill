@@ -1,7 +1,7 @@
 {
   "name": "gill",
   "license": "MIT",
-  "version": "0.10.3",
+  "version": "0.11.0",
   "description": "a modern javascript/typescript client library for interacting with the Solana blockchain",
   "scripts": {
     "clean": "rimraf coverage dist build node_modules .turbo .docs",
@@ -93,10 +93,10 @@
     "@solana-developers/helpers",
     "treeshake"
   ],
-  "author": "Solana Foundation DevRel <devrel@solana.org>",
-  "homepage": "https://gill.site",
+  "author": "Nick Frostbutter <maintainers@gillsdk.com>",
+  "homepage": "https://gillsdk.com",
   "bugs": {
-    "url": "https://github.com/DecalLabs/gill/issues"
+    "url": "https://github.com/gillsdk/gill/issues"
   },
   "browserslist": [
     "supports bigint and not dead",

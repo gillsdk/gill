@@ -1,1 +1,1 @@
-# gill-svelte
+# @gillsdk/svelte

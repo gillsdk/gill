@@ -1,5 +1,5 @@
 <h1 align="center">
-  gill-react
+  @gillsdk/react
 </h1>
 
 <p align="center">
@@ -8,10 +8,11 @@
 
 ## Overview
 
-Welcome to `gill-react`, a React hooks library for easily interacting with the [Solana](http://solana.com/) blockchain.
+Welcome to `@gillsdk/react`, a React hooks library for easily interacting with the [Solana](http://solana.com/)
+blockchain.
 
-> Notice: `gill-react` is in active development. All APIs are subject to change until reaching the first major version
-> (v1.0.0).
+> Notice: `@gillsdk/react` is in active development. All APIs are subject to change until reaching the first major
+> version (v1.0.0).
 
 This React hooks library is built on top of two core libraries:
 
@@ -22,22 +23,22 @@ This React hooks library is built on top of two core libraries:
 
 ## Installation
 
-Install `gill-react` with your package manager of choice:
+Install `@gillsdk/react` with your package manager of choice:
 
 ```shell
-npm install gill gill-react @tanstack/react-query
+npm install gill @gillsdk/react @tanstack/react-query
 ```
 
 ```shell
-pnpm add gill gill-react @tanstack/react-query
+pnpm add gill @gillsdk/react @tanstack/react-query
 ```
 
 ```shell
-yarn add gill gill-react @tanstack/react-query
+yarn add gill @gillsdk/react @tanstack/react-query
 ```
 
-> Note: `gill` and `@tanstack/react-query` are peer dependencies of `gill-react` so you need to explicitly install them.
-> This allows you have more/easier control over managing dependencies yourself.
+> Note: `gill` and `@tanstack/react-query` are peer dependencies of `@gillsdk/react` so you need to explicitly install
+> them. This allows you have more/easier control over managing dependencies yourself.
 
 ## Quick start
 
@@ -71,7 +72,7 @@ Wrap your app with the `SolanaProvider` React context provider and pass your Sol
 
 ```tsx
 import { createSolanaClient } from "gill";
-import { SolanaProvider } from "gill-react";
+import { SolanaProvider } from "@gillsdk/react";
 
 const client = createSolanaClient({
   urlOrMoniker: "devnet",
@@ -85,13 +86,13 @@ function App() {
 ### Create a client-only provider for NextJs and React server components
 
 For application that use React server components, like NextJS, you will need to create a "client only" wrapper for the
-`SolanaProvider` exported from `gill-react`:
+`SolanaProvider` exported from `@gillsdk/react`:
 
 ```tsx
 "use client"; // <--- this "use client" directive is required!
 
 import { createSolanaClient } from "gill";
-import { SolanaProvider } from "gill-react";
+import { SolanaProvider } from "@gillsdk/react";
 
 const client = createSolanaClient({
   urlOrMoniker: "devnet",
@@ -125,7 +126,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 ### Using React hooks in React server component applications
 
 After you have setup your client-only provider, you must set the `use client` directive in any component that uses the
-`gill-react` library. Signifying this component is required to be "client only".
+`@gillsdk/react` library. Signifying this component is required to be "client only".
 
 See React's [`use client` directive docs](https://react.dev/reference/rsc/use-client).
 
@@ -133,9 +134,9 @@ See React's [`use client` directive docs](https://react.dev/reference/rsc/use-cl
 > [here](https://react.dev/reference/rsc/use-client) on the `use client` directive.
 
 ```tsx
-"use client"; // <--- directive required anywhere you use `gill-react`
+"use client"; // <--- directive required anywhere you use `@gillsdk/react`
 
-import { useBalance, ... } from "gill-react";
+import { useBalance, ... } from "@gillsdk/react";
 // ... other imports
 
 export function PageClient() {
@@ -158,7 +159,7 @@ including the `rpc` and `rpcSubscriptions` connections:
 ```tsx
 "use client";
 
-import { useSolanaClient } from "gill-react";
+import { useSolanaClient } from "@gillsdk/react";
 
 export function PageClient() {
   const { rpc, rpcSubscriptions } = useSolanaClient();
@@ -178,7 +179,7 @@ Get an account's balance (in lamports) using the Solana RPC method of
 "use client";
 
 import { lamportsToSol } from "gill";
-import { useBalance } from "gill-react";
+import { useBalance } from "@gillsdk/react";
 
 export function PageClient() {
   const { balance, isLoading, isError, error } = useBalance({
@@ -204,7 +205,7 @@ Get the latest blockhash using the Solana RPC method of
 ```tsx
 "use client";
 
-import { useLatestBlockhash } from "gill-react";
+import { useLatestBlockhash } from "@gillsdk/react";
 
 export function PageClient() {
   const { latestBlockhash, isLoading, isError, error } = useLatestBlockhash();
@@ -230,7 +231,7 @@ Get the account info for an address using the Solana RPC method of
 ```tsx
 "use client";
 
-import { useAccount } from "gill-react";
+import { useAccount } from "@gillsdk/react";
 
 export function PageClient() {
   const { account, isLoading, isError, error } = useAccount({
@@ -259,7 +260,7 @@ object:
 ```tsx
 "use client";
 
-import { useAccount } from "gill-react";
+import { useAccount } from "@gillsdk/react";
 import { getMintDecoder } from "gill/programs/token";
 
 export function PageClient() {
@@ -288,7 +289,7 @@ Get the statuses of signatures using the Solana RPC method of
 ```tsx
 "use client";
 
-import { useSignatureStatuses } from "gill-react";
+import { useSignatureStatuses } from "@gillsdk/react";
 
 export function PageClient() {
   const { statuses, isLoading, isError, error } = useSignatureStatuses({
@@ -314,7 +315,7 @@ Get all the accounts owned by a `program` using the Solana RPC method of
 ```tsx
 "use client";
 
-import { useProgramAccounts } from "gill-react";
+import { useProgramAccounts } from "@gillsdk/react";
 
 export function PageClient() {
   const { accounts, isLoading, isError, error } = useProgramAccounts({
@@ -354,7 +355,7 @@ Get a decoded [Mint account](https://solana.com/docs/tokens#mint-account) for a 
 ```tsx
 "use client";
 
-import { useTokenMint } from "gill-react";
+import { useTokenMint } from "@gillsdk/react";
 
 export function PageClient() {
   const { account, isLoading, isError, error } = useTokenMint({
@@ -380,7 +381,7 @@ Get the token account for a given mint and owner:
 ```tsx
 "use client";
 
-import { useTokenAccount } from "gill-react";
+import { useTokenAccount } from "@gillsdk/react";
 
 export function PageClient() {
   const { account, isLoading, isError, error } = useTokenAccount({
@@ -408,7 +409,7 @@ by providing the `ata` address:
 ```tsx
 "use client";
 
-import { useTokenAccount } from "gill-react";
+import { useTokenAccount } from "@gillsdk/react";
 
 export function PageClient() {
   const { account, isLoading, isError, error } = useTokenAccount({
@@ -428,19 +429,20 @@ export function PageClient() {
 
 ### Get Signatures for address
 
-Get the signatures for confirmed transactions using the RPC method of [getSignaturesForAddress](https://solana.com/docs/rpc/http/getsignaturesforaddress)
+Get the signatures for confirmed transactions using the RPC method of
+[getSignaturesForAddress](https://solana.com/docs/rpc/http/getsignaturesforaddress)
 
 ```tsx
 "use client";
 
-import { useSignaturesForAddress } from "gill-react";
+import { useSignaturesForAddress } from "@gillsdk/react";
 
 export function PageClient() {
   const { signatures, isLoading, isError, error } = useSignaturesForAddress({
     address: "nicktrLHhYzLmoVbuZQzHUTicd2sfP571orwo9jfc8c",
-    config : {
-      limit: 10
-    }
+    config: {
+      limit: 10,
+    },
   });
 
   // if (isLoading) { return ... }

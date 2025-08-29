@@ -1,5 +1,5 @@
 {
-  "name": "gill-examples-tokens",
+  "name": "@gillsdk/examples-tokens",
   "version": "1.0.0",
   "description": "",
   "type": "module",

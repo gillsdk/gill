@@ -1,5 +1,5 @@
 {
-  "name": "gill-e2e",
+  "name": "@gillsdk/tests-e2e",
   "license": "MIT",
   "private": true,
   "type": "module",
