@@ -13,7 +13,7 @@
     "@gillsdk/vue", "@gillsdk/svelte", 
     "@gillsdk/tsconfig", "@gillsdk/build-scripts", "@gillsdk/test-config"
   ],
-  "fixed": [["gill-!({build-scripts,test-*,tsconfig})"]],
+  "fixed": [["@gillsdk/!({build-scripts,test-*,tsconfig})"]],
   "linked": [],
   "updateInternalDependencies": "patch"
 }
