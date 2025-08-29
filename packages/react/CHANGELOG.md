@@ -1,5 +1,13 @@
 # @gillsdk/react
 
+## 0.5.2
+
+### Patch Changes
+
+- Updated dependencies [[`55e5628`](https://github.com/gillsdk/gill/commit/55e562846a0865c0c9773f638e5a48b35e89ed5b),
+  [`ee23f2a`](https://github.com/gillsdk/gill/commit/ee23f2a3fbabd31c3ca040e7def970aa552afdf9)]:
+  - gill@0.12.0
+
 ## 0.5.1
 
 ### Patch Changes
