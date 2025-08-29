@@ -10,7 +10,7 @@
   ],
   "commit": false,
   "ignore": [
-    "gill-vue", "gill-svelte", 
+    "@gillsdk/vue", "@gillsdk/svelte", 
     "@gillsdk/tsconfig", "@gillsdk/build-scripts", "@gillsdk/test-config"
   ],
   "fixed": [["gill-!({build-scripts,test-*,tsconfig})"]],
