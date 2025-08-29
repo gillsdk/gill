@@ -5,7 +5,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "DecalLabs/gill"
+      "repo": "gillsdk/gill"
     }
   ],
   "commit": false,

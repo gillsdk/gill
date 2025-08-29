@@ -1,14 +1,14 @@
 {
-  "name": "gill-monorepo",
+  "name": "gillsdk",
   "license": "MIT",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "repository": {
-    "name": "DecalLabs/gill",
+    "name": "gillsdk/gill",
     "type": "git",
-    "url": "https://github.com/DecalLabs/gill"
+    "url": "https://github.com/gillsdk/gill"
   },
   "scripts": {
     "clean": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} clean && pnpm clean:root",
@@ -73,10 +73,10 @@
     "typedoc-plugin-mdn-links": "^5.0.2"
   },
   "packageManager": "pnpm@9.1.0",
-  "author": "Solana Foundation DevRel <devrel@solana.org>",
-  "homepage": "https://gill.site",
+  "author": "Nick Frostbutter <maintainers@gillsdk.com>",
+  "homepage": "https://gillsdk.com",
   "bugs": {
-    "url": "https://github.com/DecalLabs/gill/issues"
+    "url": "https://github.com/gillsdk/gill/issues"
   },
   "contributors": [
     {

@@ -7,13 +7,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/DecalLabs/gill/actions/workflows/publish-packages.yml"><img src="https://img.shields.io/github/actions/workflow/status/DecalLabs/gill/publish-packages.yml?logo=GitHub&label=tests" /></a>
+  <a href="https://github.com/gillsdk/gill/actions/workflows/publish-packages.yml"><img src="https://img.shields.io/github/actions/workflow/status/gillsdk/gill/publish-packages.yml?logo=GitHub&label=tests" /></a>
   <a href="https://www.npmjs.com/package/gill"><img src="https://img.shields.io/npm/v/gill?logo=npm&color=377CC0" /></a>
   <a href="https://www.npmjs.com/package/gill"><img src="https://img.shields.io/npm/dm/gill?color=377CC0" /></a>
 </p>
 
 <p align="center">
-  <img width="600" alt="gill" src="https://raw.githubusercontent.com/DecalLabs/gill/refs/heads/master/docs/public/cover.png" />
+  <img width="600" alt="gill" src="https://raw.githubusercontent.com/gillsdk/gill/refs/heads/master/docs/public/cover.png" />
 </p>
 
 ## Overview
@@ -27,16 +27,16 @@ Gill is built on top of the modern javascript libraries for Solana built by Anza
 functions under the hood, `gill` is compatible with `kit`. See [Replacing Kit with gill](#replace-kit-with-gill).
 
 > For a comparison of using gill vs `@solana/kit`, take a look at the
-> [gill vs @solana/kit comparison docs](https://gill.site/docs/compare/kit) and the
-> [comparison examples](https://github.com/DecalLabs/gill/tree/master/examples/get-started#comparison-of-gill-vs-solanakit-aka-web3js-v2).
+> [gill vs @solana/kit comparison docs](https://gillsdk.com/docs/compare/kit) and the
+> [comparison examples](https://github.com/gillsdk/gill/tree/master/examples/get-started#comparison-of-gill-vs-solanakit-aka-web3js-v2).
 
 ## Documentation
 
 You can find the gill library docs here:
 
-- [gill docs site](https://gill.site)
-- [gill setup guide](https://gill.site/docs#quick-start)
-- [gill API references](https://gill.site/api)
+- [gill docs site](https://gillsdk.com)
+- [gill setup guide](https://gillsdk.com/docs#quick-start)
+- [gill API references](https://gillsdk.com/api)
 
 ## Installation
 
@@ -64,9 +64,9 @@ Simply [install gill](#installation) and replace your imports
 ## Quick start
 
 > Find a collection of example code snippets using `gill` inside the
-> [`/examples` directory](https://github.com/DecalLabs/gill/tree/master/examples), including
-> [basic operations](https://github.com/DecalLabs/gill/tree/master/examples/get-started) and common
-> [token operations](https://github.com/DecalLabs/gill/tree/master/examples/tokens).
+> [`/examples` directory](https://github.com/gillsdk/gill/tree/master/examples), including
+> [basic operations](https://github.com/gillsdk/gill/tree/master/examples/get-started) and common
+> [token operations](https://github.com/gillsdk/gill/tree/master/examples/tokens).
 
 - [Create a Solana RPC connection](#create-a-solana-rpc-connection)
 - [Making Solana RPC calls](#making-solana-rpc-calls)
@@ -95,7 +95,7 @@ You can find [transaction builders](#transaction-builders) for common tasks, inc
 - [Transfer tokens to a destination wallet](#transfer-tokens-to-a-destination-wallet)
 
 For troubleshooting and debugging your Solana transactions, see [Debug mode](#debug-mode) below and the gill docs for
-[Debug Mode](https://gill.site/docs/debug-mode).
+[Debug Mode](https://gillsdk.com/docs/debug-mode).
 
 > You can also consult the documentation for Anza's [JavaScript client](https://github.com/anza-xyz/solana-web3.js)
 > library for more information and helpful resources.
@@ -103,7 +103,7 @@ For troubleshooting and debugging your Solana transactions, see [Debug mode](#de
 ### Generating keypairs and signers
 
 See also: the docs on
-[Generating a keypair signer](https://gill.site/docs/getting-started/signers#generating-a-keypair-signer).
+[Generating a keypair signer](https://gillsdk.com/docs/getting-started/signers#generating-a-keypair-signer).
 
 For most "signing" operations, you will need a `KeyPairSigner` instance, which can be used to sign transactions and
 messages.
@@ -123,7 +123,7 @@ const signer: KeyPairSigner = await generateKeyPairSigner();
 ### Generating extractable keypairs and signers
 
 See also: the docs on
-[Generating extractable keypairs and signers](https://gill.site/docs/getting-started/signers#generating-extractable-keypairs-and-signers).
+[Generating extractable keypairs and signers](https://gillsdk.com/docs/getting-started/signers#generating-extractable-keypairs-and-signers).
 
 Extractable keypairs are less secure and should not be used unless you REALLY need to save the key for some reason.
 Since there are a few useful cases for saving these keypairs, gill contains a separate explicit function to generate
@@ -143,7 +143,7 @@ const signer: KeyPairSigner = await generateExtractableKeyPairSigner();
 
 ### Create a Solana RPC connection
 
-See also: the docs on [how to create a Solana client](https://gill.site/docs/getting-started/client)
+See also: the docs on [how to create a Solana client](https://gillsdk.com/docs/getting-started/client)
 
 Create a Solana `rpc` and `rpcSubscriptions` client for any RPC URL or standard Solana network moniker (i.e. `devnet`,
 `localnet`, `mainnet` etc).
@@ -678,7 +678,7 @@ const transferTokensTx = await buildTransferTokensTransaction({
 
 ## Debug mode
 
-See also: the docs for [Debug Mode](https://gill.site/docs/debug-mode)
+See also: the docs for [Debug Mode](https://gillsdk.com/docs/debug-mode)
 
 Within `gill`, you can enable "debug mode" to automatically log additional information that will be helpful in
 troubleshooting your transactions.
@@ -797,7 +797,7 @@ package to use in conjunction with gill:
 ### Generate a program client from an IDL
 
 See also: this official gill docs and guide on
-[how to generate a program client with codama](https://gill.site/docs/guides/codama)
+[how to generate a program client with codama](https://gillsdk.com/docs/guides/codama)
 
 If you want to easily interact with any custom program with this library, you can use
 [Codama](https://github.com/codama-idl/codama) to generate a compatible JavaScript/TypeScript client using its IDL. You
