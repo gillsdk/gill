@@ -1,0 +1,406 @@
+---
+title: Examples
+description: Real-world examples of using gill-react in your applications
+---
+
+Learn how to use gill-react through practical examples that demonstrate common patterns and use cases.
+
+## Basic Examples
+
+### Display Wallet Balance
+
+A simple component to display a wallet's SOL balance:
+
+```tsx
+"use client";
+
+import { lamportsToSol } from "gill";
+import { useBalance } from "gill-react";
+
+export function WalletBalance({ address }: { address: string }) {
+  const { balance, isLoading, isError, error } = useBalance({
+    address,
+    refetchInterval: 10000, // Refetch every 10 seconds
+  });
+
+  if (isLoading) return <div>Loading balance...</div>;
+  if (isError) return <div>Error: {error?.message}</div>;
+
+  return (
+    <div className="p-4 border rounded">
+      <h3 className="font-bold">Wallet Balance</h3>
+      <p className="text-2xl">{lamportsToSol(balance)} SOL</p>
+    </div>
+  );
+}
+```
+
+### Token Balance Display
+
+Display a specific SPL token balance:
+
+```tsx
+"use client";
+
+import { useTokenAccount, useTokenMint } from "gill-react";
+
+export function TokenBalance({ 
+  mint, 
+  owner 
+}: { 
+  mint: string; 
+  owner: string;
+}) {
+  const { account: tokenAccount, isLoading: loadingAccount } = useTokenAccount({
+    mint,
+    owner,
+  });
+
+  const { account: mintAccount, isLoading: loadingMint } = useTokenMint({
+    mint,
+  });
+
+  if (loadingAccount || loadingMint) return <div>Loading...</div>;
+
+  const decimals = mintAccount?.data?.decimals || 0;
+  const amount = tokenAccount?.data?.amount || 0n;
+  const displayAmount = Number(amount) / Math.pow(10, decimals);
+
+  return (
+    <div className="p-4 border rounded">
+      <h3 className="font-bold">Token Balance</h3>
+      <p className="text-2xl">{displayAmount.toLocaleString()}</p>
+    </div>
+  );
+}
+```
+
+## Advanced Examples
+
+### Transaction History
+
+Display recent transactions for an address:
+
+```tsx
+"use client";
+
+import { useSignaturesForAddress } from "gill-react";
+
+export function TransactionHistory({ address }: { address: string }) {
+  const { signatures, isLoading, refetch } = useSignaturesForAddress({
+    address,
+    config: {
+      limit: 10,
+    },
+  });
+
+  if (isLoading) return <div>Loading transactions...</div>;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between items-center">
+        <h3 className="font-bold">Recent Transactions</h3>
+        <button 
+          onClick={() => refetch()}
+          className="px-3 py-1 bg-blue-500 text-white rounded"
+        >
+          Refresh
+        </button>
+      </div>
+      
+      {signatures?.map((sig) => (
+        <div key={sig.signature} className="p-3 border rounded">
+          <p className="font-mono text-sm truncate">
+            {sig.signature}
+          </p>
+          <div className="flex justify-between text-sm text-gray-600">
+            <span>Slot: {sig.slot}</span>
+            <span>
+              {sig.blockTime && 
+                new Date(sig.blockTime * 1000).toLocaleString()}
+            </span>
+          </div>
+          {sig.err && (
+            <p className="text-red-500 text-sm">
+              Error: {JSON.stringify(sig.err)}
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### NFT Gallery
+
+Display NFTs owned by a wallet:
+
+```tsx
+"use client";
+
+import { useProgramAccounts } from "gill-react";
+import { TOKEN_PROGRAM_ID } from "gill/programs/token";
+
+export function NFTGallery({ owner }: { owner: string }) {
+  const { accounts, isLoading } = useProgramAccounts({
+    program: TOKEN_PROGRAM_ID,
+    config: {
+      filters: [
+        { dataSize: 165n }, // Token account size
+        {
+          memcmp: {
+            offset: 32n, // Owner offset in token account
+            bytes: owner,
+            encoding: "base58",
+          },
+        },
+      ],
+    },
+  });
+
+  if (isLoading) return <div>Loading NFTs...</div>;
+
+  // Filter for NFTs (amount = 1, decimals = 0)
+  const nftAccounts = accounts?.filter((account) => {
+    const data = account.data;
+    return data?.amount === 1n && data?.decimals === 0;
+  });
+
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {nftAccounts?.map((nft, index) => (
+        <div key={index} className="border rounded p-4">
+          <div className="h-32 bg-gray-200 rounded mb-2" />
+          <p className="text-sm truncate">
+            {nft.pubkey.toString()}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Integration Examples
+
+### With Next.js App Router
+
+Create a providers file:
+
+```tsx filename="app/providers.tsx"
+"use client";
+
+import { createSolanaClient } from "gill";
+import { SolanaProvider } from "gill-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
+
+const solanaClient = createSolanaClient({
+  urlOrMoniker: process.env.NEXT_PUBLIC_RPC_URL || "mainnet",
+});
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SolanaProvider client={solanaClient}>
+        {children}
+      </SolanaProvider>
+    </QueryClientProvider>
+  );
+}
+```
+
+Use in layout:
+
+```tsx filename="app/layout.tsx"
+import { Providers } from "./providers";
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+### With Wallet Adapter
+
+Combine gill-react with Solana wallet adapter:
+
+```tsx
+"use client";
+
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useBalance } from "gill-react";
+import { lamportsToSol } from "gill";
+
+export function ConnectedWalletInfo() {
+  const { publicKey, connected } = useWallet();
+  
+  const { balance, isLoading } = useBalance({
+    address: publicKey?.toString() || "",
+    enabled: !!publicKey, // Only fetch when wallet is connected
+  });
+
+  if (!connected) {
+    return <div>Please connect your wallet</div>;
+  }
+
+  return (
+    <div className="p-4 border rounded">
+      <p className="text-sm text-gray-600">Connected Wallet</p>
+      <p className="font-mono truncate">{publicKey?.toString()}</p>
+      {isLoading ? (
+        <p>Loading balance...</p>
+      ) : (
+        <p className="text-xl font-bold">
+          {lamportsToSol(balance)} SOL
+        </p>
+      )}
+    </div>
+  );
+}
+```
+
+## Performance Patterns
+
+### Dependent Queries
+
+Fetch data conditionally based on other data:
+
+```tsx
+"use client";
+
+import { useAccount, useTokenAccount } from "gill-react";
+
+export function ConditionalTokenBalance({ address }: { address: string }) {
+  // First, check if the address exists
+  const { account, isLoading: loadingAccount } = useAccount({
+    address,
+  });
+
+  // Only fetch token balance if account exists
+  const { account: tokenAccount, isLoading: loadingToken } = useTokenAccount({
+    mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
+    owner: address,
+    enabled: !!account, // Only fetch if account exists
+  });
+
+  if (loadingAccount) return <div>Checking account...</div>;
+  if (!account) return <div>Account not found</div>;
+  if (loadingToken) return <div>Loading token balance...</div>;
+
+  return (
+    <div>
+      <p>USDC Balance: {tokenAccount?.data?.amount.toString()}</p>
+    </div>
+  );
+}
+```
+
+### Optimistic Updates
+
+Update UI immediately while transaction confirms:
+
+```tsx
+"use client";
+
+import { useBalance } from "gill-react";
+import { useQueryClient } from "@tanstack/react-query";
+
+export function OptimisticBalance({ address }: { address: string }) {
+  const queryClient = useQueryClient();
+  const { balance } = useBalance({ address });
+
+  const handleTransfer = async (amount: bigint) => {
+    // Optimistically update the balance
+    queryClient.setQueryData(
+      ["gill", "balance", address],
+      (old: bigint) => old - amount
+    );
+
+    try {
+      // Send transaction...
+      // await sendTransaction(...)
+      
+      // Refetch to get real balance
+      queryClient.invalidateQueries({
+        queryKey: ["gill", "balance", address],
+      });
+    } catch (error) {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({
+        queryKey: ["gill", "balance", address],
+      });
+    }
+  };
+
+  return (
+    <div>
+      <p>Balance: {balance?.toString()}</p>
+      {/* Transfer UI */}
+    </div>
+  );
+}
+```
+
+## Error Handling
+
+### Global Error Boundary
+
+```tsx
+"use client";
+
+import { ErrorBoundary } from "react-error-boundary";
+import { useQueryErrorResetBoundary } from "@tanstack/react-query";
+
+function ErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    <div className="p-4 bg-red-50 border border-red-200 rounded">
+      <h2 className="text-red-800 font-bold">Something went wrong</h2>
+      <pre className="text-sm">{error.message}</pre>
+      <button
+        onClick={resetErrorBoundary}
+        className="mt-2 px-4 py-2 bg-red-600 text-white rounded"
+      >
+        Try again
+      </button>
+    </div>
+  );
+}
+
+export function AppWithErrorBoundary({ children }) {
+  const { reset } = useQueryErrorResetBoundary();
+
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onReset={reset}
+    >
+      {children}
+    </ErrorBoundary>
+  );
+}
+```
+
+## Resources
+
+- [Full Example App](https://github.com/DecalLabs/gill/tree/main/examples/react-app) - Complete React application using gill-react
+- [gill Documentation](/docs) - Core gill library documentation
+- [TanStack Query Docs](https://tanstack.com/query) - Learn more about React Query

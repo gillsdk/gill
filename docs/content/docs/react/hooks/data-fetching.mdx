@@ -1,0 +1,493 @@
+---
+title: Data Fetching Hooks
+description: Hooks for fetching data from the Solana blockchain
+---
+
+These hooks provide easy access to common Solana blockchain data with automatic caching, refetching, and error handling.
+
+## useAccount
+
+Get the account info for an address using the Solana RPC method [`getAccountInfo`](https://solana.com/docs/rpc/http/getaccountinfo).
+
+### Usage
+
+```tsx
+"use client";
+
+import { useAccount } from "gill-react";
+
+export function AccountInfo() {
+  const { account, isLoading, isError, error } = useAccount({
+    address: "nicktrLHhYzLmoVbuZQzHUTicd2sfP571orwo9jfc8c",
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error: {error?.message}</div>;
+
+  return (
+    <div>
+      <pre>{JSON.stringify(account, null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+### With Decoder
+
+Decode account data into a typed object:
+
+```tsx
+"use client";
+
+import { useAccount } from "gill-react";
+import { getMintDecoder } from "gill/programs/token";
+
+export function MintInfo() {
+  const { account, isLoading } = useAccount({
+    // USDC mint account on mainnet
+    address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    decoder: getMintDecoder(),
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      <p>Supply: {account?.data?.supply.toString()}</p>
+      <p>Decimals: {account?.data?.decimals}</p>
+    </div>
+  );
+}
+```
+
+### Parameters
+
+```typescript
+interface UseAccountOptions {
+  address: Address | string;
+  decoder?: Decoder<T>;
+  commitment?: Commitment;
+  minContextSlot?: number;
+  enabled?: boolean;
+  // ... other TanStack Query options
+}
+```
+
+## useBalance
+
+Get an account's balance in lamports using [`getBalance`](https://solana.com/docs/rpc/http/getbalance).
+
+### Usage
+
+```tsx
+"use client";
+
+import { lamportsToSol } from "gill";
+import { useBalance } from "gill-react";
+
+export function WalletBalance() {
+  const { balance, isLoading, isError, error } = useBalance({
+    address: "nicktrLHhYzLmoVbuZQzHUTicd2sfP571orwo9jfc8c",
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error: {error?.message}</div>;
+
+  return (
+    <div>
+      <p>Balance: {lamportsToSol(balance)} SOL</p>
+    </div>
+  );
+}
+```
+
+### With Automatic Refetch
+
+```tsx
+const { balance } = useBalance({
+  address: walletAddress,
+  refetchInterval: 5000, // Refetch every 5 seconds
+  refetchOnWindowFocus: true,
+});
+```
+
+### Parameters
+
+```typescript
+interface UseBalanceOptions {
+  address: Address | string;
+  commitment?: Commitment;
+  minContextSlot?: number;
+  enabled?: boolean;
+  // ... other TanStack Query options
+}
+```
+
+## useLatestBlockhash
+
+Get the latest blockhash using [`getLatestBlockhash`](https://solana.com/docs/rpc/http/getlatestblockhash).
+
+### Usage
+
+```tsx
+"use client";
+
+import { useLatestBlockhash } from "gill-react";
+
+export function BlockhashDisplay() {
+  const { latestBlockhash, isLoading } = useLatestBlockhash();
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      <p>Blockhash: {latestBlockhash?.blockhash}</p>
+      <p>Last Valid Height: {latestBlockhash?.lastValidBlockHeight}</p>
+    </div>
+  );
+}
+```
+
+### For Transactions
+
+```tsx
+const { latestBlockhash } = useLatestBlockhash({
+  commitment: "finalized", // Use finalized for transactions
+});
+
+// Use in transaction
+const transaction = createTransaction({
+  blockhash: latestBlockhash.blockhash,
+  // ... other transaction params
+});
+```
+
+### Parameters
+
+```typescript
+interface UseLatestBlockhashOptions {
+  commitment?: Commitment;
+  minContextSlot?: number;
+  enabled?: boolean;
+  // ... other TanStack Query options
+}
+```
+
+## useSignatureStatuses
+
+Get the statuses of signatures using [`getSignatureStatuses`](https://solana.com/docs/rpc/http/getSignatureStatuses).
+
+### Usage
+
+```tsx
+"use client";
+
+import { useSignatureStatuses } from "gill-react";
+
+export function TransactionStatus({ signature }) {
+  const { statuses, isLoading } = useSignatureStatuses({
+    signatures: [signature],
+  });
+
+  if (isLoading) return <div>Checking status...</div>;
+
+  const status = statuses?.[0];
+  return (
+    <div>
+      <p>Confirmed: {status?.confirmationStatus}</p>
+      <p>Confirmations: {status?.confirmations}</p>
+      {status?.err && <p>Error: {JSON.stringify(status.err)}</p>}
+    </div>
+  );
+}
+```
+
+### Multiple Signatures
+
+```tsx
+const { statuses } = useSignatureStatuses({
+  signatures: [sig1, sig2, sig3],
+  searchTransactionHistory: true,
+});
+
+statuses?.forEach((status, index) => {
+  console.log(`Signature ${index}:`, status);
+});
+```
+
+### Parameters
+
+```typescript
+interface UseSignatureStatusesOptions {
+  signatures: string[];
+  searchTransactionHistory?: boolean;
+  enabled?: boolean;
+  // ... other TanStack Query options
+}
+```
+
+## useSignaturesForAddress
+
+Get signatures for confirmed transactions using [`getSignaturesForAddress`](https://solana.com/docs/rpc/http/getsignaturesforaddress).
+
+### Usage
+
+```tsx
+"use client";
+
+import { useSignaturesForAddress } from "gill-react";
+
+export function TransactionHistory({ address }) {
+  const { signatures, isLoading } = useSignaturesForAddress({
+    address,
+    config: {
+      limit: 10,
+    },
+  });
+
+  if (isLoading) return <div>Loading history...</div>;
+
+  return (
+    <ul>
+      {signatures?.map((sig) => (
+        <li key={sig.signature}>
+          <p>Signature: {sig.signature}</p>
+          <p>Slot: {sig.slot}</p>
+          <p>Time: {new Date(sig.blockTime * 1000).toLocaleString()}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### With Pagination
+
+```tsx
+const { signatures, refetch } = useSignaturesForAddress({
+  address,
+  config: {
+    limit: 20,
+    before: lastSignature, // For pagination
+    until: firstSignature,
+  },
+});
+```
+
+### Parameters
+
+```typescript
+interface UseSignaturesForAddressOptions {
+  address: Address | string;
+  config?: {
+    limit?: number;
+    before?: string;
+    until?: string;
+    commitment?: Commitment;
+  };
+  enabled?: boolean;
+  // ... other TanStack Query options
+}
+```
+
+## useProgramAccounts
+
+Get all accounts owned by a program using [`getProgramAccounts`](https://solana.com/docs/rpc/http/getProgramAccounts).
+
+### Usage
+
+```tsx
+"use client";
+
+import { useProgramAccounts } from "gill-react";
+
+export function ProgramAccounts() {
+  const { accounts, isLoading } = useProgramAccounts({
+    program: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    config: {
+      encoding: "base64",
+      filters: [
+        { dataSize: 165n }, // Token account size
+      ],
+    },
+  });
+
+  if (isLoading) return <div>Loading accounts...</div>;
+
+  return (
+    <div>
+      <p>Found {accounts?.length} accounts</p>
+    </div>
+  );
+}
+```
+
+### With Memcmp Filter
+
+```tsx
+const { accounts } = useProgramAccounts({
+  program: programId,
+  config: {
+    filters: [
+      {
+        memcmp: {
+          offset: 0n,
+          bytes: base58.encode(ownerPubkey),
+          encoding: "base58",
+        },
+      },
+    ],
+  },
+});
+```
+
+### Parameters
+
+```typescript
+interface UseProgramAccountsOptions {
+  program: Address | string;
+  config?: {
+    encoding?: "base64" | "jsonParsed";
+    filters?: Filter[];
+    commitment?: Commitment;
+    minContextSlot?: number;
+    withContext?: boolean;
+  };
+  decoder?: Decoder<T>;
+  enabled?: boolean;
+  // ... other TanStack Query options
+}
+```
+
+## useTokenMint
+
+Get a decoded [Mint account](https://solana.com/docs/tokens#mint-account) for a token.
+
+### Usage
+
+```tsx
+"use client";
+
+import { useTokenMint } from "gill-react";
+
+export function TokenInfo() {
+  const { account, isLoading } = useTokenMint({
+    // USDC mint on mainnet
+    mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+
+  const mintData = account?.data;
+  return (
+    <div>
+      <p>Supply: {mintData?.supply.toString()}</p>
+      <p>Decimals: {mintData?.decimals}</p>
+      <p>Mint Authority: {mintData?.mintAuthority?.toString()}</p>
+    </div>
+  );
+}
+```
+
+### Parameters
+
+```typescript
+interface UseTokenMintOptions {
+  mint: Address | string;
+  commitment?: Commitment;
+  enabled?: boolean;
+  // ... other TanStack Query options
+}
+```
+
+## useTokenAccount
+
+Get the token account for a given mint and owner.
+
+### Usage
+
+```tsx
+"use client";
+
+import { useTokenAccount } from "gill-react";
+
+export function TokenBalance() {
+  const { account, isLoading } = useTokenAccount({
+    mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    owner: "nicktrLHhYzLmoVbuZQzHUTicd2sfP571orwo9jfc8c",
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+
+  const tokenData = account?.data;
+  return (
+    <div>
+      <p>Balance: {tokenData?.amount.toString()}</p>
+      <p>Delegated: {tokenData?.delegatedAmount.toString()}</p>
+    </div>
+  );
+}
+```
+
+### With ATA Address
+
+```tsx
+const { account } = useTokenAccount({
+  ata: "CCMCWh4FudPEmY6Q1AVi5o8mQMXkHYkJUmZfzRGdcJ9P",
+});
+```
+
+### Parameters
+
+```typescript
+interface UseTokenAccountOptions {
+  // Option 1: Provide mint and owner
+  mint?: Address | string;
+  owner?: Address | string;
+  
+  // Option 2: Provide ATA address directly
+  ata?: Address | string;
+  
+  commitment?: Commitment;
+  enabled?: boolean;
+  // ... other TanStack Query options
+}
+```
+
+## Performance Optimization
+
+### Conditional Fetching
+
+```tsx
+const { balance } = useBalance({
+  address: walletAddress,
+  enabled: !!walletAddress, // Only fetch if address exists
+});
+```
+
+### Stale Time Configuration
+
+```tsx
+const { account } = useAccount({
+  address,
+  staleTime: 30000, // Consider data fresh for 30 seconds
+  cacheTime: 300000, // Keep in cache for 5 minutes
+});
+```
+
+### Query Invalidation
+
+```tsx
+import { useQueryClient } from "@tanstack/react-query";
+
+function RefreshButton() {
+  const queryClient = useQueryClient();
+
+  const refreshAll = () => {
+    // Invalidate all gill-react queries
+    queryClient.invalidateQueries({ queryKey: ["gill"] });
+  };
+
+  return <button onClick={refreshAll}>Refresh All</button>;
+}
+```

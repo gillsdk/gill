@@ -1,0 +1,276 @@
+---
+title: Client Management Hooks
+description: Hooks for managing and accessing the Solana client connection
+---
+
+These hooks allow you to access and manage the Solana client configured in your `SolanaProvider`.
+
+## useSolanaClient
+
+Get the current Solana client configured in the `SolanaProvider`, including the `rpc` and `rpcSubscriptions` connections.
+
+### Usage
+
+```tsx
+"use client";
+
+import { useSolanaClient } from "gill-react";
+
+export function MyComponent() {
+  const { rpc, rpcSubscriptions } = useSolanaClient();
+
+  // You can now use rpc to access any Solana JSON RPC methods
+  const getSlot = async () => {
+    const slot = await rpc.getSlot().send();
+    console.log("Current slot:", slot);
+  };
+
+  return (
+    <button onClick={getSlot}>
+      Get Current Slot
+    </button>
+  );
+}
+```
+
+### Return Value
+
+```typescript
+interface SolanaClient {
+  rpc: SolanaRpc;
+  rpcSubscriptions: SolanaRpcSubscriptions;
+  sendAndConfirmTransaction: SendAndConfirmTransaction;
+}
+```
+
+### Advanced Example
+
+Using the client to make custom RPC calls:
+
+```tsx
+"use client";
+
+import { useSolanaClient } from "gill-react";
+import { address } from "gill";
+
+export function AccountExplorer({ accountAddress }: { accountAddress: string }) {
+  const { rpc } = useSolanaClient();
+  const [accountInfo, setAccountInfo] = useState(null);
+
+  const fetchAccountInfo = async () => {
+    try {
+      const info = await rpc
+        .getAccountInfo(address(accountAddress), {
+          encoding: "base64",
+        })
+        .send();
+      
+      setAccountInfo(info);
+    } catch (error) {
+      console.error("Failed to fetch account info:", error);
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={fetchAccountInfo}>
+        Fetch Account Info
+      </button>
+      {accountInfo && (
+        <pre>{JSON.stringify(accountInfo, null, 2)}</pre>
+      )}
+    </div>
+  );
+}
+```
+
+## useUpdateSolanaClient
+
+Update the current Solana client in the `SolanaProvider`. This is useful for switching between different networks or RPC endpoints.
+
+### Usage
+
+```tsx
+"use client";
+
+import { createSolanaClient } from "gill";
+import { useUpdateSolanaClient } from "gill-react";
+
+export function NetworkSwitcher() {
+  const updateClient = useUpdateSolanaClient();
+
+  const switchNetwork = (network: "mainnet" | "devnet" | "testnet") => {
+    const newClient = createSolanaClient({
+      urlOrMoniker: network,
+    });
+    updateClient(newClient);
+  };
+
+  return (
+    <div>
+      <button onClick={() => switchNetwork("mainnet")}>
+        Mainnet
+      </button>
+      <button onClick={() => switchNetwork("devnet")}>
+        Devnet
+      </button>
+      <button onClick={() => switchNetwork("testnet")}>
+        Testnet
+      </button>
+    </div>
+  );
+}
+```
+
+### Parameters
+
+```typescript
+updateClient(client: SolanaClient): void
+```
+
+- `client` - The new Solana client to set
+
+### Advanced Example
+
+Switching to a custom RPC endpoint with error handling:
+
+```tsx
+"use client";
+
+import { createSolanaClient } from "gill";
+import { useUpdateSolanaClient, useSolanaClient } from "gill-react";
+
+export function CustomRPCManager() {
+  const currentClient = useSolanaClient();
+  const updateClient = useUpdateSolanaClient();
+  const [rpcUrl, setRpcUrl] = useState("");
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const connectToCustomRPC = async () => {
+    if (!rpcUrl) return;
+
+    setIsConnecting(true);
+    try {
+      const newClient = createSolanaClient({
+        urlOrMoniker: rpcUrl,
+      });
+
+      // Test the connection
+      await newClient.rpc.getSlot().send();
+      
+      // If successful, update the client
+      updateClient(newClient);
+      alert("Successfully connected to custom RPC!");
+    } catch (error) {
+      alert(`Failed to connect: ${error.message}`);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={rpcUrl}
+        onChange={(e) => setRpcUrl(e.target.value)}
+        placeholder="Enter custom RPC URL"
+      />
+      <button 
+        onClick={connectToCustomRPC}
+        disabled={isConnecting}
+      >
+        {isConnecting ? "Connecting..." : "Connect"}
+      </button>
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### Client Initialization
+
+Initialize your client with appropriate configuration for your use case:
+
+```typescript
+// Development
+const devClient = createSolanaClient({
+  urlOrMoniker: "devnet",
+});
+
+// Production with custom RPC
+const prodClient = createSolanaClient({
+  urlOrMoniker: process.env.NEXT_PUBLIC_RPC_URL || "mainnet",
+});
+
+// With custom configuration
+const customClient = createSolanaClient({
+  urlOrMoniker: "https://your-rpc.com",
+  config: {
+    commitment: "confirmed",
+    wsEndpoint: "wss://your-rpc.com/ws",
+  },
+});
+```
+
+### Network Switching
+
+When implementing network switching, consider:
+
+1. **Clear caches** when switching networks to avoid stale data
+2. **Update wallet connections** if using wallet adapters
+3. **Notify users** of network changes
+4. **Persist preferences** in local storage
+
+```tsx
+function NetworkManager() {
+  const updateClient = useUpdateSolanaClient();
+  const queryClient = useQueryClient();
+
+  const switchNetwork = async (network: string) => {
+    // Create new client
+    const newClient = createSolanaClient({
+      urlOrMoniker: network,
+    });
+
+    // Update client
+    updateClient(newClient);
+
+    // Clear all cached queries
+    await queryClient.invalidateQueries();
+
+    // Save preference
+    localStorage.setItem("preferred-network", network);
+  };
+
+  // ... rest of component
+}
+```
+
+## Troubleshooting
+
+### Client Not Available
+
+If `useSolanaClient` returns undefined, ensure:
+1. Your component is wrapped in `SolanaProvider`
+2. The provider is properly initialized with a client
+3. You're not calling the hook during SSR (use `"use client"` directive)
+
+### RPC Connection Issues
+
+When updating clients, handle connection failures gracefully:
+
+```tsx
+const updateClientSafely = async (url: string) => {
+  try {
+    const newClient = createSolanaClient({ urlOrMoniker: url });
+    // Test connection
+    await newClient.rpc.getHealth().send();
+    updateClient(newClient);
+  } catch (error) {
+    console.error("Failed to connect to RPC:", error);
+    // Fallback to previous client or default
+  }
+};
+```
