@@ -17,9 +17,6 @@ describe("createSolanaClient", () => {
   });
   test("throws on invalid and unsupported urls", () => {
     assert.throws(() => createSolanaClient({ urlOrMoniker: "http//invalid" }), "Invalid url");
-    assert.throws(
-      () => createSolanaClient({ urlOrMoniker: "ftp://invalid" }),
-      "Unsupported protocol",
-    );
+    assert.throws(() => createSolanaClient({ urlOrMoniker: "ftp://invalid" }), "Unsupported protocol");
   });
 });

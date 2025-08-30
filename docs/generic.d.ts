@@ -4,7 +4,9 @@ type Entries<T> = {
   [K in keyof T]: [K, T[K]];
 }[keyof T][];
 
-type SearchParams<TKeys extends string = string> = Promise<Record<TKeys, string | string[] | undefined>>;
+type SearchParams<TKeys extends string = string> = Promise<
+  Record<TKeys, string | string[] | undefined>
+>;
 
 type SiteConfig = {
   name: string;
