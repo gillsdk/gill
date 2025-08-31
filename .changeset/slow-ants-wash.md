@@ -2,4 +2,4 @@
 "gill": patch
 ---
 
-update kit imports to not use deprecated "I" symbols
+update `useProgramAccounts` hook by removeing the base58 encodings
