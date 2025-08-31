@@ -28,6 +28,7 @@ import { Base64EncodedWireTransaction, SendTransactionApi} from "gill";
   }
 
   {
+    // Should require `signature` input
     const transaction = useSendTransaction({
       signature: "5Pj5fCupXLUePYn18JkY8SrRaWFiUctuDTRwvUy2ML9yvkENLb1QMYbcBGcBXRrSVDjp7RjUwk9a3rLC6gpvtYpZ",
     });

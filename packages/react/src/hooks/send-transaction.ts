@@ -24,7 +24,7 @@ type UseSendTransactionInput<TConfig extends RpConfig = RpConfig> = GillUseRpcHo
  * Send a transaction using the Solana RPC method of
  * [`sendTransaction`](https://solana.com/docs/rpc/http/sendtransaction)
  *
- * @returns An object from useMutation, including `data` (the transaction signature)
+ * @returns An object from useMutation, including `signature`(the transaction signature) in an object
  */
 export function useSendTransaction<TConfig extends RpConfig = RpConfig>({
   signature,
@@ -43,7 +43,7 @@ export function useSendTransaction<TConfig extends RpConfig = RpConfig>({
           ...(config || {}),
         })
         .send();
-      // return the transaction signature as a base-58 encoded string
+      // return the transaction signature as a base-64 encoded string
       return response;
     },
     mutationKey: [GILL_HOOK_CLIENT_KEY, "sendTransaction"],
