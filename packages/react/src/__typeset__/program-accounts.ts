@@ -1,11 +1,10 @@
 import {
-  AccountInfoWithBase58EncodedData,
   AccountInfoWithBase64EncodedData,
   AccountInfoWithBase64EncodedZStdCompressedData,
   AccountInfoWithJsonData,
   Address,
   Base58EncodedBytes,
-  Base58EncodedDataResponse,
+  Base64EncodedBytes,
   SolanaRpcResponse,
 } from "gill";
 import { useProgramAccounts } from "../hooks/program-accounts";
@@ -17,7 +16,7 @@ import { useProgramAccounts } from "../hooks/program-accounts";
   // default encoded data as bytes
   {
     const { accounts: baseConfigAccounts } = useProgramAccounts({ program });
-    baseConfigAccounts[0].account.data satisfies Base58EncodedBytes;
+    baseConfigAccounts[0].account.data satisfies Base64EncodedBytes;
 
     const { accounts: baseConfigAccounts2 } = useProgramAccounts({
       program,
@@ -25,7 +24,7 @@ import { useProgramAccounts } from "../hooks/program-accounts";
         commitment: "finalized",
       },
     });
-    baseConfigAccounts2[0].account.data satisfies Base58EncodedBytes;
+    baseConfigAccounts2[0].account.data satisfies Base64EncodedBytes;
 
     const { accounts: baseConfigContextAccounts } = useProgramAccounts({
       program,
@@ -36,33 +35,7 @@ import { useProgramAccounts } from "../hooks/program-accounts";
 
     // Should include context in response
     baseConfigContextAccounts satisfies SolanaRpcResponse<any>;
-    baseConfigContextAccounts.value[0].account.data satisfies Base58EncodedBytes;
-  }
-
-  // base58 encoded `data`
-  {
-    const { accounts: base58Accounts } = useProgramAccounts({
-      program,
-      config: {
-        encoding: "base58",
-      },
-    });
-    base58Accounts[0].account.data satisfies Base58EncodedDataResponse;
-
-    const { accounts: base58ContextAccounts } = useProgramAccounts({
-      program,
-      config: {
-        encoding: "base58",
-        withContext: true,
-      },
-    });
-
-    // Should include context in response
-    base58ContextAccounts satisfies SolanaRpcResponse<any>;
-    base58ContextAccounts.value[0].account satisfies AccountInfoWithBase58EncodedData;
-
-    // @ts-expect-error Should not be base58 encoded bytes
-    base58ContextAccounts.value[0].account.data satisfies Base58EncodedBytes;
+    baseConfigContextAccounts.value[0].account.data satisfies Base64EncodedBytes;
   }
 
   // base64 encoded `data`
