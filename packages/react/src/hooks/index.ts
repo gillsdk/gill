@@ -10,3 +10,4 @@ export * from "./slot";
 export * from "./token-account";
 export * from "./token-mint";
 export * from "./transaction";
+export * from "./send-transaction";
