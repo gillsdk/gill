@@ -66,6 +66,9 @@ Fetch data from the Solana blockchain with the gill hooks:
 - [`useTokenMint`](#get-token-mint-account) - get a decoded token's Mint account
 - [`useTokenAccount`](#get-token-account) - get the token account for a given mint and owner (or ATA)
 
+Send data to the Solana blockchain with the gill hooks:
+- [`useSendTransaction`](#send-transaction) - send a transaction to the Solana blockchain
+
 ### Wrap your React app in a context provider
 
 Wrap your app with the `SolanaProvider` React context provider and pass your Solana client to it:
