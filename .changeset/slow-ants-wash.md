@@ -2,4 +2,4 @@
 "gill": patch
 ---
 
-added `useSendTransaction` hook
+update kit imports to not use deprecated "I" symbols
