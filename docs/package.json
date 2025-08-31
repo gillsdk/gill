@@ -10,7 +10,8 @@
     "start": "next start",
     "postinstall": "fumadocs-mdx",
     "clean": "rimraf coverage dist build node_modules .turbo .next .docs ./content/api/gill*",
-    "style:fix": "prettier --write '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'"
+    "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
+    "style:fix": "pnpm style:check --write"
   },
   "engines": {
     "node": ">=20.18.0",

@@ -1,13 +1,12 @@
 # gill examples - tokens
 
-Gill is aimed at abstracting away many of the complexities and boilerplate
-required to perform common interactions with the Solana blockchain, while still
-offering the low level "escape hatches" when developers need (or want)
-fine-grain control.
+Gill is aimed at abstracting away many of the complexities and boilerplate required to perform
+common interactions with the Solana blockchain, while still offering the low level "escape hatches"
+when developers need (or want) fine-grain control.
 
 Take a look through these examples to see how gill works and even
-[how it compares](../get-started/README.md#comparison-of-gill-vs-solanakit-aka-web3js-v2) to
-using the vanilla web3js v2 library.
+[how it compares](../get-started/README.md#comparison-of-gill-vs-solanakit-aka-web3js-v2) to using
+the vanilla web3js v2 library.
 
 ## Tech stack used
 
@@ -23,8 +22,7 @@ using the vanilla web3js v2 library.
 
 ### Running the included scripts with esrun
 
-Once setup locally, you will be able to run the scripts included within this
-repo using `esrun`:
+Once setup locally, you will be able to run the scripts included within this repo using `esrun`:
 
 ```shell
 npx esrun ./src/<script>
@@ -33,15 +31,13 @@ pnpx esrun ./src/<script>
 
 > From the [esrun](https://www.npmjs.com/package/esrun) readme:
 >
-> esrun is a "work out of the box" library to execute Typescript (as well as
-> modern Javascript with decorators and stuff) without having to use a bundler.
-> This is useful for quick demonstrations or when launching your tests written
-> in Typescript.
+> esrun is a "work out of the box" library to execute Typescript (as well as modern Javascript with
+> decorators and stuff) without having to use a bundler. This is useful for quick demonstrations or
+> when launching your tests written in Typescript.
 
 ## Recommended flow to explore this repo
 
-After getting setup locally, we recommend exploring the code of the following
-files (in order):
+After getting setup locally, we recommend exploring the code of the following files (in order):
 
 - [`1.intro.ts`](./src/1.intro.ts)
 - [`2.create-token-mint.ts`](./src/2.create-token-mint.ts)

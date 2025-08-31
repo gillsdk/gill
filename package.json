@@ -22,7 +22,8 @@
     "test:treeshakability:native": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:treeshakability:native",
     "test:treeshakability:browser": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:treeshakability:browser",
     "test:treeshakability:node": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:treeshakability:node",
-    "style:fix": "prettier --write '{*,**/*}.{ts,tsx,js,jsx,css,json,md}'"
+    "style:check": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} style:check",
+    "style:fix": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} style:fix"
   },
   "version": "0.0.1",
   "description": "",
