@@ -116,53 +116,6 @@ export function TransactionHistory({ address }: { address: string }) {
 }
 ```
 
-### NFT Gallery
-
-Display NFTs owned by a wallet:
-
-```tsx
-"use client";
-
-import { useProgramAccounts } from "@gillsdk/react";
-import { TOKEN_PROGRAM_ID } from "gill/programs";
-
-export function NFTGallery({ owner }: { owner: string }) {
-  const { accounts, isLoading } = useProgramAccounts({
-    program: TOKEN_PROGRAM_ID,
-    config: {
-      filters: [
-        { dataSize: 165n }, // Token account size
-        {
-          memcmp: {
-            offset: 32n, // Owner offset in token account
-            bytes: owner,
-            encoding: "base58",
-          },
-        },
-      ],
-    },
-  });
-
-  if (isLoading) return <div>Loading NFTs...</div>;
-
-  // Filter for NFTs (amount = 1, decimals = 0)
-  const nftAccounts = accounts?.filter((account) => {
-    const data = account.data;
-    return data?.amount === 1n && data?.decimals === 0;
-  });
-
-  return (
-    <div className="grid grid-cols-3 gap-4">
-      {nftAccounts?.map((nft, index) => (
-        <div key={index} className="border rounded p-4">
-          <div className="h-32 bg-gray-200 rounded mb-2" />
-          <p className="text-sm truncate">{nft.pubkey.toString()}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-```
 
 ## Integration Examples
 
