@@ -48,7 +48,6 @@ Using the client to make custom RPC calls:
 "use client";
 
 import { useSolanaClient } from "@gillsdk/react";
-import { address } from "gill";
 import type { Address } from "gill";
 
 export function AccountExplorer({ accountAddress }: { accountAddress: Address }) {
@@ -58,7 +57,7 @@ export function AccountExplorer({ accountAddress }: { accountAddress: Address })
   const fetchAccountInfo = async () => {
     try {
       const info = await rpc
-        .getAccountInfo(address(accountAddress), {
+        .getAccountInfo(accountAddress, {
           encoding: "base64",
         })
         .send();
