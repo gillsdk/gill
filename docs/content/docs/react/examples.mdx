@@ -44,7 +44,7 @@ Display a specific SPL token balance:
 "use client";
 
 import { useTokenAccount, useTokenMint } from "@gillsdk/react";
-import { tokenAmountToUiAmount } from "gill/programs";
+import { tokenAmountToUiAmount } from "@gillsdk/programs";
 
 export function TokenBalance({ mint, owner }: { mint: string; owner: string }) {
   const { account: tokenAccount, isLoading: loadingAccount } = useTokenAccount({
