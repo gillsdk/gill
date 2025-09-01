@@ -36,7 +36,7 @@ export function AccountInfo() {
 
 ### With Decoder
 
-Decode account data into a typed object:
+Fetch and decode an account's data into a typed object using an appropriate `decoder` function:
 
 ```tsx
 "use client";
@@ -155,9 +155,7 @@ export function BlockhashDisplay() {
 ### For Transactions
 
 ```tsx
-const { latestBlockhash } = useLatestBlockhash({
-  commitment: "finalized", // Use finalized for transactions
-});
+const { latestBlockhash } = useLatestBlockhash();
 
 // Use in transaction
 const transaction = createTransaction({
@@ -301,6 +299,15 @@ interface UseSignaturesForAddressOptions {
 Get all accounts owned by a program using the
 [`getProgramAccounts`](https://solana.com/docs/rpc/http/getProgramAccounts) RPC method.
 
+<Callout type="warning">
+  **Important getProgramAccounts (GPA) Limitations:**
+  - `getProgramAccounts` can return large amounts of data and is resource-intensive
+  - Many RPC providers return errors or have rate limits due to the system load
+  - Public RPC endpoints often have getProgramAccounts disabled entirely
+  - Consider using filters to reduce the data returned and always use a paid RPC provider for production
+  - For large programs, consider alternative approaches like indexers or specialized APIs
+</Callout>
+
 ### Usage
 
 ```tsx
@@ -437,6 +444,8 @@ export function TokenBalance() {
 ```
 
 ### With ATA Address
+
+If you need to fetch and decode a specific Token Account's address (like for ancillary token accounts), you can manually derive the address and provide it to the hook:
 
 ```tsx
 const { account } = useTokenAccount({
