@@ -42,7 +42,7 @@ Decode account data into a typed object:
 "use client";
 
 import { useAccount } from "@gillsdk/react";
-import { getMintDecoder } from "gill/programs/token";
+import { getMintDecoder } from "gill/programs";
 
 export function MintInfo() {
   const { account, isLoading } = useAccount({

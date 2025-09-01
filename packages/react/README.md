@@ -261,7 +261,7 @@ object:
 "use client";
 
 import { useAccount } from "@gillsdk/react";
-import { getMintDecoder } from "gill/programs/token";
+import { getMintDecoder } from "gill/programs";
 
 export function PageClient() {
   const { account, isLoading, isError, error } = useAccount({
