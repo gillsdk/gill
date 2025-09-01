@@ -85,9 +85,8 @@ RSC-enabled frameworks), you need to create a client-side wrapper component.
   **What is the "use client" directive?** The `"use client"` directive tells the bundler that this
   component and its children should run on the client side (in the browser) rather than on the
   server. This is necessary because: - `@gillsdk/react` uses React hooks (useState, useEffect, etc.)
-  which only works on the client - Solana RPC calls and wallet interactions need to happen in the
-  browser - The provider creates a React context, which is a client-side feature, without this
-  directive, you'll get errors about using hooks in Server Components.
+  which only work on the client - The provider creates and hooks consume React context, which is a 
+  client-side feature - Without this directive, you'll get errors about using hooks in Server Components.
 </Callout>
 
 Here's how to create a client-side provider wrapper:
