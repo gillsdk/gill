@@ -107,7 +107,7 @@ All hooks provide built-in error handling. You can handle errors at the componen
 
 ```tsx
 function MyComponent() {
-  const { data, isError, error } = useBalance({
+  const { balance, isError, error } = useBalance({
     address: "...",
   });
 
