@@ -3,18 +3,20 @@ title: Data Fetching Hooks
 description: Hooks for fetching data from the Solana blockchain
 ---
 
-These hooks provide easy access to common Solana blockchain data with automatic caching, refetching, and error handling.
+These hooks provide easy access to common Solana blockchain data with automatic caching, refetching,
+and error handling.
 
 ## useAccount
 
-Get the account info for an address using the Solana RPC method [`getAccountInfo`](https://solana.com/docs/rpc/http/getaccountinfo).
+Get the account info for an address using the Solana RPC method
+[`getAccountInfo`](https://solana.com/docs/rpc/http/getaccountinfo).
 
 ### Usage
 
 ```tsx
 "use client";
 
-import { useAccount } from "gill-react";
+import { useAccount } from "@gillsdk/react";
 
 export function AccountInfo() {
   const { account, isLoading, isError, error } = useAccount({
@@ -39,7 +41,7 @@ Decode account data into a typed object:
 ```tsx
 "use client";
 
-import { useAccount } from "gill-react";
+import { useAccount } from "@gillsdk/react";
 import { getMintDecoder } from "gill/programs/token";
 
 export function MintInfo() {
@@ -75,7 +77,8 @@ interface UseAccountOptions {
 
 ## useBalance
 
-Get an account's balance in lamports using [`getBalance`](https://solana.com/docs/rpc/http/getbalance).
+Get an account's balance in lamports using
+[`getBalance`](https://solana.com/docs/rpc/http/getbalance).
 
 ### Usage
 
@@ -83,7 +86,7 @@ Get an account's balance in lamports using [`getBalance`](https://solana.com/doc
 "use client";
 
 import { lamportsToSol } from "gill";
-import { useBalance } from "gill-react";
+import { useBalance } from "@gillsdk/react";
 
 export function WalletBalance() {
   const { balance, isLoading, isError, error } = useBalance({
@@ -125,14 +128,15 @@ interface UseBalanceOptions {
 
 ## useLatestBlockhash
 
-Get the latest blockhash using [`getLatestBlockhash`](https://solana.com/docs/rpc/http/getlatestblockhash).
+Get the latest blockhash using
+[`getLatestBlockhash`](https://solana.com/docs/rpc/http/getlatestblockhash).
 
 ### Usage
 
 ```tsx
 "use client";
 
-import { useLatestBlockhash } from "gill-react";
+import { useLatestBlockhash } from "@gillsdk/react";
 
 export function BlockhashDisplay() {
   const { latestBlockhash, isLoading } = useLatestBlockhash();
@@ -175,14 +179,15 @@ interface UseLatestBlockhashOptions {
 
 ## useSignatureStatuses
 
-Get the statuses of signatures using [`getSignatureStatuses`](https://solana.com/docs/rpc/http/getSignatureStatuses).
+Get the statuses of signatures using
+[`getSignatureStatuses`](https://solana.com/docs/rpc/http/getSignatureStatuses).
 
 ### Usage
 
 ```tsx
 "use client";
 
-import { useSignatureStatuses } from "gill-react";
+import { useSignatureStatuses } from "@gillsdk/react";
 
 export function TransactionStatus({ signature }) {
   const { statuses, isLoading } = useSignatureStatuses({
@@ -228,14 +233,15 @@ interface UseSignatureStatusesOptions {
 
 ## useSignaturesForAddress
 
-Get signatures for confirmed transactions using [`getSignaturesForAddress`](https://solana.com/docs/rpc/http/getsignaturesforaddress).
+Get signatures for confirmed transactions using
+[`getSignaturesForAddress`](https://solana.com/docs/rpc/http/getsignaturesforaddress).
 
 ### Usage
 
 ```tsx
 "use client";
 
-import { useSignaturesForAddress } from "gill-react";
+import { useSignaturesForAddress } from "@gillsdk/react";
 
 export function TransactionHistory({ address }) {
   const { signatures, isLoading } = useSignaturesForAddress({
@@ -292,14 +298,15 @@ interface UseSignaturesForAddressOptions {
 
 ## useProgramAccounts
 
-Get all accounts owned by a program using [`getProgramAccounts`](https://solana.com/docs/rpc/http/getProgramAccounts).
+Get all accounts owned by a program using
+[`getProgramAccounts`](https://solana.com/docs/rpc/http/getProgramAccounts).
 
 ### Usage
 
 ```tsx
 "use client";
 
-import { useProgramAccounts } from "gill-react";
+import { useProgramAccounts } from "@gillsdk/react";
 
 export function ProgramAccounts() {
   const { accounts, isLoading } = useProgramAccounts({
@@ -368,7 +375,7 @@ Get a decoded [Mint account](https://solana.com/docs/tokens#mint-account) for a 
 ```tsx
 "use client";
 
-import { useTokenMint } from "gill-react";
+import { useTokenMint } from "@gillsdk/react";
 
 export function TokenInfo() {
   const { account, isLoading } = useTokenMint({
@@ -409,7 +416,7 @@ Get the token account for a given mint and owner.
 ```tsx
 "use client";
 
-import { useTokenAccount } from "gill-react";
+import { useTokenAccount } from "@gillsdk/react";
 
 export function TokenBalance() {
   const { account, isLoading } = useTokenAccount({
@@ -444,10 +451,10 @@ interface UseTokenAccountOptions {
   // Option 1: Provide mint and owner
   mint?: Address | string;
   owner?: Address | string;
-  
+
   // Option 2: Provide ATA address directly
   ata?: Address | string;
-  
+
   commitment?: Commitment;
   enabled?: boolean;
   // ... other TanStack Query options
@@ -484,7 +491,7 @@ function RefreshButton() {
   const queryClient = useQueryClient();
 
   const refreshAll = () => {
-    // Invalidate all gill-react queries
+    // Invalidate all @gillsdk/react queries
     queryClient.invalidateQueries({ queryKey: ["gill"] });
   };
 

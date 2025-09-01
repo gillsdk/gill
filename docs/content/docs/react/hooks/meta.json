@@ -1,10 +1,5 @@
 {
   "title": "Hooks",
-  "defaultOpen": true,
-  "pages": [
-    "index",
-    "client",
-    "data-fetching",
-    "transactions"
-  ]
+  "defaultOpen": false,
+  "pages": ["index", "client", "data-fetching", "transactions"]
 }

@@ -1,9 +1,10 @@
 ---
 title: Examples
-description: Real-world examples of using gill-react in your applications
+description: Real-world examples of using @gillsdk/react in your applications
 ---
 
-Learn how to use gill-react through practical examples that demonstrate common patterns and use cases.
+Learn how to use @gillsdk/react through practical examples that demonstrate common patterns and use
+cases.
 
 ## Basic Examples
 
@@ -15,7 +16,7 @@ A simple component to display a wallet's SOL balance:
 "use client";
 
 import { lamportsToSol } from "gill";
-import { useBalance } from "gill-react";
+import { useBalance } from "@gillsdk/react";
 
 export function WalletBalance({ address }: { address: string }) {
   const { balance, isLoading, isError, error } = useBalance({
@@ -42,15 +43,10 @@ Display a specific SPL token balance:
 ```tsx
 "use client";
 
-import { useTokenAccount, useTokenMint } from "gill-react";
+import { useTokenAccount, useTokenMint } from "@gillsdk/react";
+import { tokenAmountToUiAmount } from "gill/programs";
 
-export function TokenBalance({ 
-  mint, 
-  owner 
-}: { 
-  mint: string; 
-  owner: string;
-}) {
+export function TokenBalance({ mint, owner }: { mint: string; owner: string }) {
   const { account: tokenAccount, isLoading: loadingAccount } = useTokenAccount({
     mint,
     owner,
@@ -64,7 +60,7 @@ export function TokenBalance({
 
   const decimals = mintAccount?.data?.decimals || 0;
   const amount = tokenAccount?.data?.amount || 0n;
-  const displayAmount = Number(amount) / Math.pow(10, decimals);
+  const displayAmount = tokenAmountToUiAmount(amount, decimals);
 
   return (
     <div className="p-4 border rounded">
@@ -84,7 +80,7 @@ Display recent transactions for an address:
 ```tsx
 "use client";
 
-import { useSignaturesForAddress } from "gill-react";
+import { useSignaturesForAddress } from "@gillsdk/react";
 
 export function TransactionHistory({ address }: { address: string }) {
   const { signatures, isLoading, refetch } = useSignaturesForAddress({
@@ -100,31 +96,19 @@ export function TransactionHistory({ address }: { address: string }) {
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <h3 className="font-bold">Recent Transactions</h3>
-        <button 
-          onClick={() => refetch()}
-          className="px-3 py-1 bg-blue-500 text-white rounded"
-        >
+        <button onClick={() => refetch()} className="px-3 py-1 bg-blue-500 text-white rounded">
           Refresh
         </button>
       </div>
-      
+
       {signatures?.map((sig) => (
         <div key={sig.signature} className="p-3 border rounded">
-          <p className="font-mono text-sm truncate">
-            {sig.signature}
-          </p>
+          <p className="font-mono text-sm truncate">{sig.signature}</p>
           <div className="flex justify-between text-sm text-gray-600">
             <span>Slot: {sig.slot}</span>
-            <span>
-              {sig.blockTime && 
-                new Date(sig.blockTime * 1000).toLocaleString()}
-            </span>
+            <span>{sig.blockTime && new Date(sig.blockTime * 1000).toLocaleString()}</span>
           </div>
-          {sig.err && (
-            <p className="text-red-500 text-sm">
-              Error: {JSON.stringify(sig.err)}
-            </p>
-          )}
+          {sig.err && <p className="text-red-500 text-sm">Error: {JSON.stringify(sig.err)}</p>}
         </div>
       ))}
     </div>
@@ -139,8 +123,8 @@ Display NFTs owned by a wallet:
 ```tsx
 "use client";
 
-import { useProgramAccounts } from "gill-react";
-import { TOKEN_PROGRAM_ID } from "gill/programs/token";
+import { useProgramAccounts } from "@gillsdk/react";
+import { TOKEN_PROGRAM_ID } from "gill/programs";
 
 export function NFTGallery({ owner }: { owner: string }) {
   const { accounts, isLoading } = useProgramAccounts({
@@ -172,9 +156,7 @@ export function NFTGallery({ owner }: { owner: string }) {
       {nftAccounts?.map((nft, index) => (
         <div key={index} className="border rounded p-4">
           <div className="h-32 bg-gray-200 rounded mb-2" />
-          <p className="text-sm truncate">
-            {nft.pubkey.toString()}
-          </p>
+          <p className="text-sm truncate">{nft.pubkey.toString()}</p>
         </div>
       ))}
     </div>
@@ -192,7 +174,7 @@ Create a providers file:
 "use client";
 
 import { createSolanaClient } from "gill";
-import { SolanaProvider } from "gill-react";
+import { SolanaProvider } from "@gillsdk/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient({
@@ -211,9 +193,7 @@ const solanaClient = createSolanaClient({
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <SolanaProvider client={solanaClient}>
-        {children}
-      </SolanaProvider>
+      <SolanaProvider client={solanaClient}>{children}</SolanaProvider>
     </QueryClientProvider>
   );
 }
@@ -224,11 +204,7 @@ Use in layout:
 ```tsx filename="app/layout.tsx"
 import { Providers } from "./providers";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -241,18 +217,18 @@ export default function RootLayout({
 
 ### With Wallet Adapter
 
-Combine gill-react with Solana wallet adapter:
+Combine @gillsdk/react with Solana wallet adapter:
 
 ```tsx
 "use client";
 
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useBalance } from "gill-react";
+import { useBalance } from "@gillsdk/react";
 import { lamportsToSol } from "gill";
 
 export function ConnectedWalletInfo() {
   const { publicKey, connected } = useWallet();
-  
+
   const { balance, isLoading } = useBalance({
     address: publicKey?.toString() || "",
     enabled: !!publicKey, // Only fetch when wallet is connected
@@ -269,9 +245,7 @@ export function ConnectedWalletInfo() {
       {isLoading ? (
         <p>Loading balance...</p>
       ) : (
-        <p className="text-xl font-bold">
-          {lamportsToSol(balance)} SOL
-        </p>
+        <p className="text-xl font-bold">{lamportsToSol(balance)} SOL</p>
       )}
     </div>
   );
@@ -287,7 +261,7 @@ Fetch data conditionally based on other data:
 ```tsx
 "use client";
 
-import { useAccount, useTokenAccount } from "gill-react";
+import { useAccount, useTokenAccount } from "@gillsdk/react";
 
 export function ConditionalTokenBalance({ address }: { address: string }) {
   // First, check if the address exists
@@ -321,7 +295,7 @@ Update UI immediately while transaction confirms:
 ```tsx
 "use client";
 
-import { useBalance } from "gill-react";
+import { useBalance } from "@gillsdk/react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function OptimisticBalance({ address }: { address: string }) {
@@ -330,15 +304,12 @@ export function OptimisticBalance({ address }: { address: string }) {
 
   const handleTransfer = async (amount: bigint) => {
     // Optimistically update the balance
-    queryClient.setQueryData(
-      ["gill", "balance", address],
-      (old: bigint) => old - amount
-    );
+    queryClient.setQueryData(["gill", "balance", address], (old: bigint) => old - amount);
 
     try {
       // Send transaction...
       // await sendTransaction(...)
-      
+
       // Refetch to get real balance
       queryClient.invalidateQueries({
         queryKey: ["gill", "balance", address],
@@ -375,10 +346,7 @@ function ErrorFallback({ error, resetErrorBoundary }) {
     <div className="p-4 bg-red-50 border border-red-200 rounded">
       <h2 className="text-red-800 font-bold">Something went wrong</h2>
       <pre className="text-sm">{error.message}</pre>
-      <button
-        onClick={resetErrorBoundary}
-        className="mt-2 px-4 py-2 bg-red-600 text-white rounded"
-      >
+      <button onClick={resetErrorBoundary} className="mt-2 px-4 py-2 bg-red-600 text-white rounded">
         Try again
       </button>
     </div>
@@ -389,10 +357,7 @@ export function AppWithErrorBoundary({ children }) {
   const { reset } = useQueryErrorResetBoundary();
 
   return (
-    <ErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onReset={reset}
-    >
+    <ErrorBoundary FallbackComponent={ErrorFallback} onReset={reset}>
       {children}
     </ErrorBoundary>
   );
@@ -401,6 +366,7 @@ export function AppWithErrorBoundary({ children }) {
 
 ## Resources
 
-- [Full Example App](https://github.com/DecalLabs/gill/tree/main/examples/react-app) - Complete React application using gill-react
+- [Full Example App](https://github.com/DecalLabs/gill/tree/main/examples/react-app) - Complete
+  React application using @gillsdk/react
 - [gill Documentation](/docs) - Core gill library documentation
 - [TanStack Query Docs](https://tanstack.com/query) - Learn more about React Query

@@ -1,9 +1,11 @@
 ---
 title: React Hooks Reference
-description: Complete reference for all available hooks in gill-react
+description: Complete reference for all available hooks in @gillsdk/react
 ---
 
-gill-react provides a comprehensive set of React hooks for interacting with the Solana blockchain. All hooks are built on top of TanStack Query, providing automatic caching, background refetching, and error handling.
+@gillsdk/react provides a comprehensive set of React hooks for interacting with the Solana
+blockchain. All hooks are built on top of TanStack Query, providing automatic caching, background
+refetching, and error handling.
 
 ## Hook Categories
 
@@ -11,56 +13,61 @@ gill-react provides a comprehensive set of React hooks for interacting with the 
 
 Hooks for managing and accessing the Solana client connection:
 
-- **[`useSolanaClient`](/docs/react/hooks/client#usesolanaclient)** - Get the current Solana client
-- **[`useUpdateSolanaClient`](/docs/react/hooks/client#useupdatesolanaclient)** - Update the Solana client
+- [`useSolanaClient`](/docs/react/hooks/client#usesolanaclient) - Get the current Solana client
+- [`useUpdateSolanaClient`](/docs/react/hooks/client#useupdatesolanaclient) - Update the Solana
+  client
 
 ### Data Fetching
 
 Hooks for fetching data from the Solana blockchain:
 
-- **[`useAccount`](/docs/react/hooks/data-fetching#useaccount)** - Get account info and data
-- **[`useBalance`](/docs/react/hooks/data-fetching#usebalance)** - Get account balance
-- **[`useLatestBlockhash`](/docs/react/hooks/data-fetching#uselatestblockhash)** - Get the latest blockhash
-- **[`useSignatureStatuses`](/docs/react/hooks/data-fetching#usesignaturestatuses)** - Get signature statuses
-- **[`useSignaturesForAddress`](/docs/react/hooks/data-fetching#usesignaturesforaddress)** - Get signatures for address
-- **[`useProgramAccounts`](/docs/react/hooks/data-fetching#useprogramaccounts)** - Get program accounts
-- **[`useTokenMint`](/docs/react/hooks/data-fetching#usetokenmint)** - Get token mint account
-- **[`useTokenAccount`](/docs/react/hooks/data-fetching#usetokenaccount)** - Get token account
+- [`useAccount`](/docs/react/hooks/data-fetching#useaccount) - Get account info and data
+- [`useBalance`](/docs/react/hooks/data-fetching#usebalance) - Get account balance
+- [`useLatestBlockhash`](/docs/react/hooks/data-fetching#uselatestblockhash) - Get the latest
+  blockhash
+- [`useSignatureStatuses`](/docs/react/hooks/data-fetching#usesignaturestatuses) - Get signature
+  statuses
+- [`useSignaturesForAddress`](/docs/react/hooks/data-fetching#usesignaturesforaddress) - Get
+  signatures for address
+- [`useProgramAccounts`](/docs/react/hooks/data-fetching#useprogramaccounts) - Get program
+  accounts
+- [`useTokenMint`](/docs/react/hooks/data-fetching#usetokenmint) - Get token mint account
+- [`useTokenAccount`](/docs/react/hooks/data-fetching#usetokenaccount) - Get token account
 
 ### Transaction Handling
 
 Hooks for sending and managing transactions (coming soon):
 
-- **`useSendTransaction`** - Send transactions with automatic confirmation
-- **`useSimulateTransaction`** - Simulate transactions before sending
+- `useSendTransaction` - Send transactions with automatic confirmation
+- `useSimulateTransaction` - Simulate transactions before sending
 
 ## Common Hook Options
 
-All data fetching hooks in gill-react accept standard TanStack Query options:
+All data fetching hooks in @gillsdk/react accept standard TanStack Query options:
 
 ```typescript
 interface HookOptions {
   // Query key for caching
   queryKey?: QueryKey;
-  
+
   // How often to refetch in milliseconds
   refetchInterval?: number;
-  
+
   // Whether to refetch on window focus
   refetchOnWindowFocus?: boolean;
-  
+
   // Whether to refetch on reconnect
   refetchOnReconnect?: boolean;
-  
+
   // Time in milliseconds before data is considered stale
   staleTime?: number;
-  
+
   // Time in milliseconds to keep data in cache
   cacheTime?: number;
-  
+
   // Whether to enable the query
   enabled?: boolean;
-  
+
   // Retry configuration
   retry?: boolean | number | RetryConfig;
 }
@@ -72,25 +79,25 @@ All data fetching hooks return a consistent shape based on TanStack Query:
 
 ```typescript
 interface HookResult<T> {
-  // The fetched data
-  data: T | undefined;
-  
+  // The fetched data - hooks return specific field names like `account`, `balance`, etc. instead of generic `data`
+  account?: T; // or balance, signatures, etc. depending on the hook
+
   // Loading state
   isLoading: boolean;
   isFetching: boolean;
-  
+
   // Error state
   isError: boolean;
   error: Error | null;
-  
+
   // Success state
   isSuccess: boolean;
-  
+
   // Refetch function
   refetch: () => void;
-  
+
   // Query status
-  status: 'loading' | 'error' | 'success' | 'idle';
+  status: "loading" | "error" | "success" | "idle";
 }
 ```
 
@@ -142,11 +149,10 @@ All hooks are fully typed with TypeScript. Import types from gill for complete t
 
 ```typescript
 import type { Address, Lamports } from "gill";
-import { useBalance } from "gill-react";
+import { useBalance } from "@gillsdk/react";
 
 function Balance({ address }: { address: Address }) {
   const { balance } = useBalance({ address });
   // balance is typed as Lamports | undefined
 }
 ```
-

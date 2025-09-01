@@ -1,35 +1,42 @@
 ---
 title: React Hooks for Solana
-description: A React hooks library for easily interacting with the Solana blockchain, built on top of gill
+description:
+  A React hooks library for easily interacting with the Solana blockchain, built on top of gill
 ---
 
-Welcome to `gill-react`, a React hooks library for easily interacting with the [Solana](http://solana.com/) blockchain.
+Welcome to `@gillsdk/react`, a React hooks library for easily interacting with the
+[Solana](http://solana.com/) blockchain.
 
 <Callout type="info">
-  `gill-react` is in active development. All APIs are subject to change until reaching the first major version (v1.0.0).
+  `@gillsdk/react` is in active development. All APIs are subject to change until reaching the first
+  major version (v1.0.0).
 </Callout>
 
 This React hooks library is built on top of two core libraries:
 
-1. [`gill`](https://www.npmjs.com/package/gill) - modern JavaScript/TypeScript library for interacting with the Solana blockchain.
-2. [`@tanstack/react-query`](https://www.npmjs.com/package/@tanstack/react-query) - popular and powerful asynchronous state management for React.
+1. [`gill`](https://www.npmjs.com/package/gill) - modern JavaScript/TypeScript library for
+   interacting with the Solana blockchain.
+2. [`@tanstack/react-query`](https://www.npmjs.com/package/@tanstack/react-query) - popular and
+   powerful asynchronous state management for React.
 
 ## Installation
 
-Install `gill-react` with your package manager of choice:
+Install `@gillsdk/react` with your package manager of choice:
 
 ```package-install
-gill gill-react @tanstack/react-query
+gill @gillsdk/react @tanstack/react-query
 ```
 
 <Callout>
-  `gill` and `@tanstack/react-query` are peer dependencies of `gill-react` so you need to explicitly install them. This allows you have more control over managing dependencies yourself.
+  `gill` and `@tanstack/react-query` are peer dependencies of `@gillsdk/react` so you need to
+  explicitly install them. This allows you have more control over managing dependencies yourself.
 </Callout>
 
 ## Key Features
 
 - **Type-safe hooks** - Full TypeScript support with proper typing for all Solana data
-- **Built on TanStack Query** - Leverages the power of React Query for caching, background refetching, and optimistic updates
+- **Built on TanStack Query** - Leverages the power of React Query for caching, background
+  refetching, and optimistic updates
 - **Easy to use** - Simple, intuitive API that follows React best practices
 - **Server component ready** - Works with Next.js and other React Server Component frameworks
 - **Lightweight** - Minimal bundle size with tree-shaking support
@@ -37,24 +44,33 @@ gill gill-react @tanstack/react-query
 ## Available Hooks
 
 ### Client Management
+
 - [`useSolanaClient`](/docs/react/hooks/client#usesolanaclient) - Get the current Solana client
-- [`useUpdateSolanaClient`](/docs/react/hooks/client#useupdatesolanaclient) - Update the Solana client
+- [`useUpdateSolanaClient`](/docs/react/hooks/client#useupdatesolanaclient) - Update the Solana
+  client
 
 ### Data Fetching
+
 - [`useAccount`](/docs/react/hooks/data-fetching#useaccount) - Get account info and data
 - [`useBalance`](/docs/react/hooks/data-fetching#usebalance) - Get account balance in lamports
-- [`useLatestBlockhash`](/docs/react/hooks/data-fetching#uselatestblockhash) - Get the latest blockhash
-- [`useSignatureStatuses`](/docs/react/hooks/data-fetching#usesignaturestatuses) - Get signature statuses
-- [`useSignaturesForAddress`](/docs/react/hooks/data-fetching#usesignaturesforaddress) - Get signatures for an address
-- [`useProgramAccounts`](/docs/react/hooks/data-fetching#useprogramaccounts) - Get program accounts (GPA)
-- [`useTokenMint`](/docs/react/hooks/data-fetching#usetokenmint) - Get a decoded token's Mint account
-- [`useTokenAccount`](/docs/react/hooks/data-fetching#usetokenaccount) - Get token account for a mint and owner
+- [`useLatestBlockhash`](/docs/react/hooks/data-fetching#uselatestblockhash) - Get the latest
+  blockhash
+- [`useSignatureStatuses`](/docs/react/hooks/data-fetching#usesignaturestatuses) - Get signature
+  statuses
+- [`useSignaturesForAddress`](/docs/react/hooks/data-fetching#usesignaturesforaddress) - Get
+  signatures for an address
+- [`useProgramAccounts`](/docs/react/hooks/data-fetching#useprogramaccounts) - Get program accounts
+  (GPA)
+- [`useTokenMint`](/docs/react/hooks/data-fetching#usetokenmint) - Get a decoded token's Mint
+  account
+- [`useTokenAccount`](/docs/react/hooks/data-fetching#usetokenaccount) - Get token account for a
+  mint and owner
 
 ## Quick Example
 
 ```tsx
 import { lamportsToSol } from "gill";
-import { useBalance } from "gill-react";
+import { useBalance } from "@gillsdk/react";
 
 export function WalletBalance({ address }: { address: string }) {
   const { balance, isLoading, isError, error } = useBalance({ address });

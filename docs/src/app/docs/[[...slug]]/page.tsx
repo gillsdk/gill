@@ -49,7 +49,7 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
   const MDX = page.data.body;
   const hasCategory = page.file.name === "index" && page.slugs.length > 0;
   // Don't show cards for the React section index page
-  const isReactIndex = page.slugs.join('/') === 'react';
+  const isReactIndex = page.slugs.join("/") === "react";
   const showCards = !isReactIndex;
 
   return (

@@ -1,9 +1,11 @@
 ---
-title: Getting Started with gill-react
-description: Learn how to set up and configure gill-react in your React application
+title: Getting Started with @gillsdk/react
+description: Learn how to set up and configure @gillsdk/react in your React application
 ---
 
-This guide will walk you through setting up `gill-react` in your React application, including configuration for Next.js App Router, Remix, and other frameworks that support React Server Components.
+This guide will walk you through setting up `@gillsdk/react` in your React application, including
+configuration for Next.js App Router, Remix, and other frameworks that support React Server
+Components.
 
 ## Prerequisites
 
@@ -21,10 +23,10 @@ Before you begin, make sure you have:
 
 ### Install Dependencies
 
-First, install `gill-react` along with its peer dependencies:
+First, install `@gillsdk/react` along with its peer dependencies:
 
 ```package-install
-gill gill-react @tanstack/react-query
+gill @gillsdk/react @tanstack/react-query
 ```
 
 </Step>
@@ -44,7 +46,8 @@ const client = createSolanaClient({
 ```
 
 <Callout type="warning">
-  The public Solana RPC endpoints are subject to rate limits and should not be used in production. For production applications, use a dedicated RPC provider like Helius, QuickNode, or Alchemy.
+  The public Solana RPC endpoints are subject to rate limits and should not be used in production.
+  For production applications, use a dedicated RPC provider like Helius, QuickNode, or Alchemy.
 </Callout>
 
 </Step>
@@ -53,24 +56,21 @@ const client = createSolanaClient({
 
 ### Wrap Your App with SolanaProvider
 
-The `SolanaProvider` is a React context provider that makes the Solana client available to all gill-react hooks in your component tree.
+The `SolanaProvider` is a React context provider that makes the Solana client available to all
+@gillsdk/react hooks in your component tree.
 
 #### For Standard React Apps
 
 ```tsx
 import { createSolanaClient } from "gill";
-import { SolanaProvider } from "gill-react";
+import { SolanaProvider } from "@gillsdk/react";
 
 const client = createSolanaClient({
   urlOrMoniker: "devnet",
 });
 
 function App() {
-  return (
-    <SolanaProvider client={client}>
-      {/* Your app components */}
-    </SolanaProvider>
-  );
+  return <SolanaProvider client={client}>{/* Your app components */}</SolanaProvider>;
 }
 
 export default App;
@@ -78,18 +78,16 @@ export default App;
 
 #### For Next.js App Router and React Server Components
 
-For applications that use React Server Components (like Next.js App Router, Remix, or other RSC-enabled frameworks), you need to create a client-side wrapper component.
+For applications that use React Server Components (like Next.js App Router, Remix, or other
+RSC-enabled frameworks), you need to create a client-side wrapper component.
 
 <Callout type="info">
-  **What is the "use client" directive?**
-  
-  The `"use client"` directive tells the bundler that this component and its children should run on the client side (in the browser) rather than on the server. This is necessary because:
-  
-  - gill-react uses React hooks (useState, useEffect, etc.) which only work on the client
-  - Solana RPC calls and wallet interactions need to happen in the browser
-  - The provider creates React context, which is a client-side feature
-  
-  Without this directive, you'll get errors about using hooks in Server Components.
+  **What is the "use client" directive?** The `"use client"` directive tells the bundler that this
+  component and its children should run on the client side (in the browser) rather than on the
+  server. This is necessary because: - @gillsdk/react uses React hooks (useState, useEffect, etc.)
+  which only work on the client - Solana RPC calls and wallet interactions need to happen in the
+  browser - The provider creates React context, which is a client-side feature Without this
+  directive, you'll get errors about using hooks in Server Components.
 </Callout>
 
 Here's how to create a client-side provider wrapper:
@@ -98,22 +96,14 @@ Here's how to create a client-side provider wrapper:
 "use client"; // Required - marks this as a Client Component
 
 import { createSolanaClient } from "gill";
-import { SolanaProvider } from "gill-react";
+import { SolanaProvider } from "@gillsdk/react";
 
 const client = createSolanaClient({
   urlOrMoniker: "devnet",
 });
 
-export function SolanaProviderClient({ 
-  children 
-}: { 
-  children: React.ReactNode 
-}) {
-  return (
-    <SolanaProvider client={client}>
-      {children}
-    </SolanaProvider>
-  );
+export function SolanaProviderClient({ children }: { children: React.ReactNode }) {
+  return <SolanaProvider client={client}>{children}</SolanaProvider>;
 }
 ```
 
@@ -122,17 +112,11 @@ Then wrap your app in the root layout:
 ```tsx filename="app/layout.tsx"
 import { SolanaProviderClient } from "@/providers/solana-provider";
 
-export default function RootLayout({ 
-  children 
-}: { 
-  children: React.ReactNode 
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <SolanaProviderClient>
-          {children}
-        </SolanaProviderClient>
+        <SolanaProviderClient>{children}</SolanaProviderClient>
       </body>
     </html>
   );
@@ -143,15 +127,17 @@ export default function RootLayout({
 
 <Step>
 
-### Use gill-react Hooks
+### Use @gillsdk/react Hooks
 
-Now you can use any gill-react hook in your components. When using frameworks with React Server Components (like Next.js App Router), remember to add the `"use client"` directive to any component that uses gill-react hooks:
+Now you can use any @gillsdk/react hook in your components. When using frameworks with React Server
+Components (like Next.js App Router), remember to add the `"use client"` directive to any component
+that uses @gillsdk/react hooks:
 
 ```tsx filename="app/components/balance.tsx"
 "use client"; // Required when using React Server Components
 
 import { lamportsToSol } from "gill";
-import { useBalance } from "gill-react";
+import { useBalance } from "@gillsdk/react";
 
 export function WalletBalance() {
   const { balance, isLoading, isError, error } = useBalance({
@@ -201,7 +187,7 @@ You can manage multiple Solana clients using the `useUpdateSolanaClient` hook:
 "use client";
 
 import { createSolanaClient } from "gill";
-import { useUpdateSolanaClient } from "gill-react";
+import { useUpdateSolanaClient } from "@gillsdk/react";
 
 function NetworkSwitcher() {
   const updateClient = useUpdateSolanaClient();
@@ -213,17 +199,14 @@ function NetworkSwitcher() {
     updateClient(mainnetClient);
   };
 
-  return (
-    <button onClick={switchToMainnet}>
-      Switch to Mainnet
-    </button>
-  );
+  return <button onClick={switchToMainnet}>Switch to Mainnet</button>;
 }
 ```
 
 ## TypeScript Configuration
 
-gill-react is fully typed out of the box. No additional TypeScript configuration is required. However, ensure your `tsconfig.json` has:
+@gillsdk/react is fully typed out of the box. No additional TypeScript configuration is required.
+However, ensure your `tsconfig.json` has:
 
 ```json
 {
@@ -240,26 +223,32 @@ gill-react is fully typed out of the box. No additional TypeScript configuration
 
 ### "use client" Errors
 
-If you see errors like "You're importing a component that needs useEffect. It only works in a Client Component" or "useState only works in Client Components", this means you're trying to use gill-react in a Server Component.
+If you see errors like "You're importing a component that needs useEffect. It only works in a Client
+Component" or "useState only works in Client Components", this means you're trying to use
+@gillsdk/react in a Server Component.
 
 **Why this happens:**
+
 - React Server Components run on the server during build/request time
-- gill-react uses browser-specific features like React hooks and Web APIs
+- @gillsdk/react uses browser-specific features like React hooks and Web APIs
 - The Solana client needs to make RPC calls from the browser
 
 **To fix:**
-1. Add `"use client"` at the top of any file using gill-react hooks
+
+1. Add `"use client"` at the top of any file using @gillsdk/react hooks
 2. Ensure your SolanaProvider wrapper has `"use client"` at the top
 3. Make sure the provider is properly wrapped around your component tree
 
 **Common scenarios:**
+
 - Forgot to add `"use client"` to a component using `useBalance`, `useAccount`, etc.
-- Trying to use gill-react hooks directly in a page.tsx without the directive
+- Trying to use @gillsdk/react hooks directly in a page.tsx without the directive
 - Importing a Client Component into a Server Component without proper boundaries
 
 ### RPC Rate Limiting
 
 If you're hitting rate limits:
+
 1. Switch from public endpoints to a dedicated RPC provider
 2. Implement request batching and caching strategies
 3. Consider using the `staleTime` and `cacheTime` options in hooks
@@ -267,10 +256,12 @@ If you're hitting rate limits:
 ### Bundle Size
 
 To minimize bundle size:
+
 1. Import only the hooks you need
 2. Ensure tree-shaking is enabled in your bundler
 3. Use dynamic imports for heavy components
 
 ---
 
-Ready to start using gill-react? Check out the [available hooks](/docs/react/hooks) to begin fetching blockchain data in your React application.
+Ready to start using @gillsdk/react? Check out the [available hooks](/docs/react/hooks) to begin
+fetching blockchain data in your React application.

@@ -7,14 +7,15 @@ These hooks allow you to access and manage the Solana client configured in your 
 
 ## useSolanaClient
 
-Get the current Solana client configured in the `SolanaProvider`, including the `rpc` and `rpcSubscriptions` connections.
+Get the current Solana client configured in the `SolanaProvider`, including the `rpc` and
+`rpcSubscriptions` connections.
 
 ### Usage
 
 ```tsx
 "use client";
 
-import { useSolanaClient } from "gill-react";
+import { useSolanaClient } from "@gillsdk/react";
 
 export function MyComponent() {
   const { rpc, rpcSubscriptions } = useSolanaClient();
@@ -25,11 +26,7 @@ export function MyComponent() {
     console.log("Current slot:", slot);
   };
 
-  return (
-    <button onClick={getSlot}>
-      Get Current Slot
-    </button>
-  );
+  return <button onClick={getSlot}>Get Current Slot</button>;
 }
 ```
 
@@ -50,10 +47,11 @@ Using the client to make custom RPC calls:
 ```tsx
 "use client";
 
-import { useSolanaClient } from "gill-react";
+import { useSolanaClient } from "@gillsdk/react";
 import { address } from "gill";
+import type { Address } from "gill";
 
-export function AccountExplorer({ accountAddress }: { accountAddress: string }) {
+export function AccountExplorer({ accountAddress }: { accountAddress: Address }) {
   const { rpc } = useSolanaClient();
   const [accountInfo, setAccountInfo] = useState(null);
 
@@ -64,7 +62,7 @@ export function AccountExplorer({ accountAddress }: { accountAddress: string }) 
           encoding: "base64",
         })
         .send();
-      
+
       setAccountInfo(info);
     } catch (error) {
       console.error("Failed to fetch account info:", error);
@@ -73,12 +71,8 @@ export function AccountExplorer({ accountAddress }: { accountAddress: string }) 
 
   return (
     <div>
-      <button onClick={fetchAccountInfo}>
-        Fetch Account Info
-      </button>
-      {accountInfo && (
-        <pre>{JSON.stringify(accountInfo, null, 2)}</pre>
-      )}
+      <button onClick={fetchAccountInfo}>Fetch Account Info</button>
+      {accountInfo && <pre>{JSON.stringify(accountInfo, null, 2)}</pre>}
     </div>
   );
 }
@@ -86,7 +80,8 @@ export function AccountExplorer({ accountAddress }: { accountAddress: string }) 
 
 ## useUpdateSolanaClient
 
-Update the current Solana client in the `SolanaProvider`. This is useful for switching between different networks or RPC endpoints.
+Update the current Solana client in the `SolanaProvider`. This is useful for switching between
+different networks or RPC endpoints.
 
 ### Usage
 
@@ -94,12 +89,13 @@ Update the current Solana client in the `SolanaProvider`. This is useful for swi
 "use client";
 
 import { createSolanaClient } from "gill";
-import { useUpdateSolanaClient } from "gill-react";
+import type { SolanaClusterMoniker } from "gill";
+import { useUpdateSolanaClient } from "@gillsdk/react";
 
 export function NetworkSwitcher() {
   const updateClient = useUpdateSolanaClient();
 
-  const switchNetwork = (network: "mainnet" | "devnet" | "testnet") => {
+  const switchNetwork = (network: SolanaClusterMoniker) => {
     const newClient = createSolanaClient({
       urlOrMoniker: network,
     });
@@ -108,15 +104,9 @@ export function NetworkSwitcher() {
 
   return (
     <div>
-      <button onClick={() => switchNetwork("mainnet")}>
-        Mainnet
-      </button>
-      <button onClick={() => switchNetwork("devnet")}>
-        Devnet
-      </button>
-      <button onClick={() => switchNetwork("testnet")}>
-        Testnet
-      </button>
+      <button onClick={() => switchNetwork("mainnet")}>Mainnet</button>
+      <button onClick={() => switchNetwork("devnet")}>Devnet</button>
+      <button onClick={() => switchNetwork("testnet")}>Testnet</button>
     </div>
   );
 }
@@ -138,7 +128,8 @@ Switching to a custom RPC endpoint with error handling:
 "use client";
 
 import { createSolanaClient } from "gill";
-import { useUpdateSolanaClient, useSolanaClient } from "gill-react";
+import type { SolanaClientUrlOrMoniker } from "gill";
+import { useUpdateSolanaClient, useSolanaClient } from "@gillsdk/react";
 
 export function CustomRPCManager() {
   const currentClient = useSolanaClient();
@@ -157,7 +148,7 @@ export function CustomRPCManager() {
 
       // Test the connection
       await newClient.rpc.getSlot().send();
-      
+
       // If successful, update the client
       updateClient(newClient);
       alert("Successfully connected to custom RPC!");
@@ -176,10 +167,7 @@ export function CustomRPCManager() {
         onChange={(e) => setRpcUrl(e.target.value)}
         placeholder="Enter custom RPC URL"
       />
-      <button 
-        onClick={connectToCustomRPC}
-        disabled={isConnecting}
-      >
+      <button onClick={connectToCustomRPC} disabled={isConnecting}>
         {isConnecting ? "Connecting..." : "Connect"}
       </button>
     </div>
@@ -228,7 +216,7 @@ function NetworkManager() {
   const updateClient = useUpdateSolanaClient();
   const queryClient = useQueryClient();
 
-  const switchNetwork = async (network: string) => {
+  const switchNetwork = async (network: SolanaClientUrlOrMoniker) => {
     // Create new client
     const newClient = createSolanaClient({
       urlOrMoniker: network,
@@ -253,6 +241,7 @@ function NetworkManager() {
 ### Client Not Available
 
 If `useSolanaClient` returns undefined, ensure:
+
 1. Your component is wrapped in `SolanaProvider`
 2. The provider is properly initialized with a client
 3. You're not calling the hook during SSR (use `"use client"` directive)
@@ -262,7 +251,7 @@ If `useSolanaClient` returns undefined, ensure:
 When updating clients, handle connection failures gracefully:
 
 ```tsx
-const updateClientSafely = async (url: string) => {
+const updateClientSafely = async (url: SolanaClientUrlOrMoniker) => {
   try {
     const newClient = createSolanaClient({ urlOrMoniker: url });
     // Test connection

@@ -4,10 +4,11 @@ description: Hooks for sending and managing Solana transactions
 ---
 
 <Callout type="info">
-  Transaction hooks are coming soon to gill-react. This page documents the planned API.
+  Transaction hooks are coming soon to @gillsdk/react. This page documents the planned API.
 </Callout>
 
-These hooks will provide an easy way to send, confirm, and manage Solana transactions with automatic error handling and retry logic.
+These hooks will provide an easy way to send, confirm, and manage Solana transactions with automatic
+error handling and retry logic.
 
 ## Planned Hooks
 
@@ -44,7 +45,7 @@ const checkTransaction = async () => {
     transaction,
     signers: [keypair],
   });
-  
+
   if (simulation.err) {
     console.error("Transaction would fail:", simulation.err);
   }
@@ -70,7 +71,7 @@ Until transaction hooks are available, you can use the Solana client directly:
 ```tsx
 "use client";
 
-import { useSolanaClient } from "gill-react";
+import { useSolanaClient } from "@gillsdk/react";
 import { createTransaction } from "gill";
 
 export function SendTransaction() {
@@ -86,10 +87,7 @@ export function SendTransaction() {
       });
 
       // Send and confirm
-      const signature = await sendAndConfirmTransaction(
-        transaction,
-        { commitment: "confirmed" }
-      );
+      const signature = await sendAndConfirmTransaction(transaction, { commitment: "confirmed" });
 
       console.log("Transaction confirmed:", signature);
     } catch (error) {
@@ -109,11 +107,11 @@ export function SendTransaction() {
 
 ## With Wallet Adapter
 
-If you're using a wallet adapter, combine it with gill-react:
+If you're using a wallet adapter, combine it with @gillsdk/react:
 
 ```tsx
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useSolanaClient } from "gill-react";
+import { useSolanaClient } from "@gillsdk/react";
 
 export function WalletTransaction() {
   const { publicKey, signTransaction } = useWallet();
@@ -131,9 +129,7 @@ export function WalletTransaction() {
     const signedTx = await signTransaction(transaction);
 
     // Send via RPC
-    const signature = await rpc
-      .sendTransaction(signedTx, { skipPreflight: false })
-      .send();
+    const signature = await rpc.sendTransaction(signedTx, { skipPreflight: false }).send();
 
     console.log("Sent:", signature);
   };
@@ -144,4 +140,5 @@ export function WalletTransaction() {
 
 ## Contributing
 
-Transaction hooks are actively being developed. If you have suggestions or want to contribute, please check out the [gill-react repository](https://github.com/DecalLabs/gill) on GitHub.
+Transaction hooks are actively being developed. If you have suggestions or want to contribute,
+please check out the [@gillsdk/react repository](https://github.com/DecalLabs/gill) on GitHub.
