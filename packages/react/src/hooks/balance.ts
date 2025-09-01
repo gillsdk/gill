@@ -31,7 +31,7 @@ export function useBalance<TConfig extends RpcConfig = RpcConfig>({
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    enabled: !!address,
+    enabled: (options?.enabled ?? true) && !!address,
     queryKey: [GILL_HOOK_CLIENT_KEY, "getBalance", address],
     queryFn: async () => {
       const { value } = await rpc.getBalance(address as Address, config).send({ abortSignal });

@@ -60,7 +60,7 @@ export function useAccount<
       if (decoder) return decodeAccount(account, decoder as Decoder<TDecodedData>);
       return account;
     },
-    enabled: !!address,
+    enabled: (options?.enabled ?? true) && !!address,
   });
   return {
     ...rest,

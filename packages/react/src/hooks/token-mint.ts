@@ -49,7 +49,7 @@ export function useTokenMint<TConfig extends RpcConfig = RpcConfig, TAddress ext
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    enabled: !!mint,
+    enabled: (options?.enabled ?? true) && !!mint,
     queryKey: [GILL_HOOK_CLIENT_KEY, "getMintAccount", mint],
     queryFn: async () => {
       const account = await fetchEncodedAccount(rpc, mint as Address<TAddress>, config);
