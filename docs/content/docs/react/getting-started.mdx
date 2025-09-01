@@ -107,7 +107,7 @@ export function SolanaProviderClient({ children }: { children: React.ReactNode }
 }
 ```
 
-hen wrap your app in the root layout with this `SolanaProviderClient` component:
+Then wrap your app in the root layout with this `SolanaProviderClient` component:
 
 ```tsx filename="app/layout.tsx"
 import { SolanaProviderClient } from "@/providers/solana-provider";
@@ -225,7 +225,7 @@ However, ensure your `tsconfig.json` has:
 
 If you see errors like "You're importing a component that needs useEffect. It only works in a Client
 Component" or "useState only works in Client Components", this means you're trying to use
-`@gillsdk/react` in a Server Component.
+`@gillsdk/react` in a Server Component. (which NextJS App router does by default unless the `"use client"` directive is explicitly used).
 
 **Why this happens:**
 
