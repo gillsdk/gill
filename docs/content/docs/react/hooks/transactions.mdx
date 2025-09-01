@@ -110,8 +110,11 @@ export function SendTransaction() {
 If you're using a wallet adapter, combine it with `@gillsdk/react`:
 
 ```tsx
+"use client";
+
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSolanaClient } from "@gillsdk/react";
+import { createTransaction } from "gill";
 
 export function WalletTransaction() {
   const { publicKey, signTransaction } = useWallet();
