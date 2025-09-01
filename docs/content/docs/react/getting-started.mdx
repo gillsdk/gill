@@ -1,6 +1,6 @@
 ---
-title: Getting Started with @gillsdk/react
-description: Learn how to set up and configure @gillsdk/react in your React application
+title: Getting Started with `@gillsdk/react`
+description: Learn how to set up and configure `@gillsdk/react` in your React application
 ---
 
 This guide will walk you through setting up `@gillsdk/react` in your React application, including
@@ -57,7 +57,7 @@ const client = createSolanaClient({
 ### Wrap Your App with SolanaProvider
 
 The `SolanaProvider` is a React context provider that makes the Solana client available to all
-@gillsdk/react hooks in your component tree.
+`@gillsdk/react` hooks in your component tree.
 
 #### For Standard React Apps
 
@@ -84,9 +84,9 @@ RSC-enabled frameworks), you need to create a client-side wrapper component.
 <Callout type="info">
   **What is the "use client" directive?** The `"use client"` directive tells the bundler that this
   component and its children should run on the client side (in the browser) rather than on the
-  server. This is necessary because: - @gillsdk/react uses React hooks (useState, useEffect, etc.)
-  which only work on the client - Solana RPC calls and wallet interactions need to happen in the
-  browser - The provider creates React context, which is a client-side feature Without this
+  server. This is necessary because: - `@gillsdk/react` uses React hooks (useState, useEffect, etc.)
+  which only works on the client - Solana RPC calls and wallet interactions need to happen in the
+  browser - The provider creates a React context, which is a client-side feature, without this
   directive, you'll get errors about using hooks in Server Components.
 </Callout>
 
@@ -107,7 +107,7 @@ export function SolanaProviderClient({ children }: { children: React.ReactNode }
 }
 ```
 
-Then wrap your app in the root layout:
+hen wrap your app in the root layout with this `SolanaProviderClient` component:
 
 ```tsx filename="app/layout.tsx"
 import { SolanaProviderClient } from "@/providers/solana-provider";
@@ -127,11 +127,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 <Step>
 
-### Use @gillsdk/react Hooks
+### Use `@gillsdk/react` Hooks
 
-Now you can use any @gillsdk/react hook in your components. When using frameworks with React Server
+Now you can use any `@gillsdk/react` hook in your components. When using frameworks with React Server
 Components (like Next.js App Router), remember to add the `"use client"` directive to any component
-that uses @gillsdk/react hooks:
+that uses `@gillsdk/react` hooks:
 
 ```tsx filename="app/components/balance.tsx"
 "use client"; // Required when using React Server Components
@@ -205,7 +205,7 @@ function NetworkSwitcher() {
 
 ## TypeScript Configuration
 
-@gillsdk/react is fully typed out of the box. No additional TypeScript configuration is required.
+`@gillsdk/react` is fully typed out of the box. No additional TypeScript configuration is required.
 However, ensure your `tsconfig.json` has:
 
 ```json
@@ -225,24 +225,24 @@ However, ensure your `tsconfig.json` has:
 
 If you see errors like "You're importing a component that needs useEffect. It only works in a Client
 Component" or "useState only works in Client Components", this means you're trying to use
-@gillsdk/react in a Server Component.
+`@gillsdk/react` in a Server Component.
 
 **Why this happens:**
 
 - React Server Components run on the server during build/request time
-- @gillsdk/react uses browser-specific features like React hooks and Web APIs
+- `@gillsdk/react` uses browser-specific features like React hooks and Web APIs
 - The Solana client needs to make RPC calls from the browser
 
 **To fix:**
 
-1. Add `"use client"` at the top of any file using @gillsdk/react hooks
+1. Add `"use client"` at the top of any file using `@gillsdk/react` hooks
 2. Ensure your SolanaProvider wrapper has `"use client"` at the top
 3. Make sure the provider is properly wrapped around your component tree
 
 **Common scenarios:**
 
 - Forgot to add `"use client"` to a component using `useBalance`, `useAccount`, etc.
-- Trying to use @gillsdk/react hooks directly in a page.tsx without the directive
+- Trying to use `@gillsdk/react` hooks directly in a page.tsx without the directive
 - Importing a Client Component into a Server Component without proper boundaries
 
 ### RPC Rate Limiting
@@ -263,5 +263,5 @@ To minimize bundle size:
 
 ---
 
-Ready to start using @gillsdk/react? Check out the [available hooks](/docs/react/hooks) to begin
+Ready to start using `@gillsdk/react`? Check out the [available hooks](/docs/react/hooks) to begin
 fetching blockchain data in your React application.
