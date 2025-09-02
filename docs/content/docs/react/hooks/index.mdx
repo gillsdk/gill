@@ -1,6 +1,6 @@
 ---
 title: React Hooks Reference
-description: Complete reference for all available hooks in `@gillsdk/react`
+description: Complete reference for all available hooks in @gillsdk/react
 ---
 
 `@gillsdk/react` provides a comprehensive set of React hooks for interacting with the Solana
@@ -145,7 +145,7 @@ const queryClient = new QueryClient({
 
 ## TypeScript Support
 
-All hooks are fully typed with TypeScript. Import types from gill for complete type safety:
+All hooks are fully typed with TypeScript. Import types from `gill` for complete type safety:
 
 ```typescript
 import type { Address, Lamports } from "gill";
@@ -153,6 +153,6 @@ import { useBalance } from "@gillsdk/react";
 
 function Balance({ address }: { address: Address }) {
   const { balance } = useBalance({ address });
-  // balance is typed as Lamports | undefined
+  // balance is typed as `Lamports | undefined`
 }
 ```

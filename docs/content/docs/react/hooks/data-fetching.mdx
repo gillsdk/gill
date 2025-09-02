@@ -299,13 +299,15 @@ interface UseSignaturesForAddressOptions {
 Get all accounts owned by a program using the
 [`getProgramAccounts`](https://solana.com/docs/rpc/http/getProgramAccounts) RPC method.
 
-<Callout type="warning">
-  **Important getProgramAccounts (GPA) Limitations:**
-  - `getProgramAccounts` can return large amounts of data and is resource-intensive
-  - Many RPC providers return errors or have rate limits due to the system load
-  - Public RPC endpoints often have getProgramAccounts disabled entirely
-  - Consider using filters to reduce the data returned and always use a paid RPC provider for production
-  - For large programs, consider alternative approaches like indexers or specialized APIs
+<Callout type="warn" title="Important getProgramAccounts (GPA) Limitations">
+
+- `getProgramAccounts` can return large amounts of data and is resource-intensive
+- Many RPC providers return errors or have rate limits due to the system load
+- Public RPC endpoints often have `getProgramAccounts` disabled entirely
+- Consider using filters to reduce the data returned and always use a paid RPC provider for
+  production
+- For large programs, consider alternative approaches like indexers or specialized APIs
+
 </Callout>
 
 ### Usage
@@ -416,7 +418,8 @@ interface UseTokenMintOptions {
 
 ## useTokenAccount
 
-Get the decoded [Token Account](https://solana.com/docs/tokens#token-account) for a given mint and owner, automatically deriving the Associated Token Account (ATA) address:
+Get the decoded [Token Account](https://solana.com/docs/tokens#token-account) for a given mint and
+owner, automatically deriving the Associated Token Account (ATA) address:
 
 ### Usage
 
@@ -445,7 +448,8 @@ export function TokenBalance() {
 
 ### With ATA Address
 
-If you need to fetch and decode a specific Token Account's address (like for ancillary token accounts), you can manually derive the address and provide it to the hook:
+If you need to fetch and decode a specific Token Account's address (like for ancillary token
+accounts), you can manually derive the address and provide it to the hook:
 
 ```tsx
 const { account } = useTokenAccount({
@@ -500,7 +504,7 @@ function RefreshButton() {
   const queryClient = useQueryClient();
 
   const refreshAll = () => {
-    // Invalidate all @gillsdk/react queries
+    // Invalidate all `@gillsdk/react` queries
     queryClient.invalidateQueries({ queryKey: ["gill"] });
   };
 
