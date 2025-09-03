@@ -1,0 +1,320 @@
+---
+title: "Migration Guide"
+description: "A step-by-step guide to migrating from @solana/kit to gill."
+---
+
+## Why migrate?
+
+**gill** is a powerful toolkit built directly on top of
+[`@solana/kit`](https://www.npmjs.com/package/@solana/kit). It provides all the same tree-shakable,
+performant, and composable primitives that Kit offers, but adds a layer of carefully crafted
+abstractions designed to drastically improve the developer experience.
+
+By upgrading, you can eliminate significant amounts of boilerplate code for common tasks like
+setting up connections, loading keypairs, and building transactions. This allows you to write
+cleaner, more readable code and focus on your application's core logic, not the low-level logics.
+Since `gill` is a superset of `kit`, you can migrate incrementally, adopting `gill`'s helpers at
+your own pace.
+
+---
+
+## Connections
+
+The `createSolanaClient` function replaces the manual setup of RPC, subscriptions, and the
+transaction sending function.
+
+**@solana/kit**
+
+```ts
+import {
+  devnet,
+  createSolanaRpc,
+  createSolanaRpcSubscriptions,
+  sendAndConfirmTransactionFactory,
+} from "@solana/kit";
+
+const rpc = createSolanaRpc(devnet("https://api.devnet.solana.com"));
+const rpcSubscriptions = createSolanaRpcSubscriptions(devnet("wss://api.devnet.solana.com"));
+const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({
+  rpc,
+  rpcSubscriptions,
+});
+```
+
+**gill**
+
+```ts
+import { createSolanaClient } from "gill";
+const { rpc, rpcSubscriptions, sendAndConfirmTransaction } = createSolanaClient({
+  urlOrMoniker: "devnet",
+});
+```
+
+---
+
+## Loading a Keypair without the Fuss
+
+`@solana/kit` is unopinionated about how you manage keypairs, meaning you have to write your own
+logic for loading them from files or environment variables. For server-side applications, `gill`
+provides a set of convenient, Node.js-specific helpers to handle this common task.
+
+**@solana/kit**
+
+```ts
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { resolve } from "node:path";
+import { createKeyPairFromBytes } from "@solana/kit";
+
+const keypairPath = resolve(homedir(), ".config", "solana", "id.json");
+const secretKey = new Uint8Array(JSON.parse(readFileSync(keypairPath, "utf-8")));
+const signer = await createKeyPairFromBytes(secretKey);
+```
+
+**gill**
+
+```ts
+import { loadKeypairSignerFromFile } from "gill/node";
+// Defaults to the Solana CLI's default keypair path.
+const signer = await loadKeypairSignerFromFile();
+
+// Or specify a path.
+const signer = await loadKeypairSignerFromFile("/path/to/my/keypair.json");
+```
+
+---
+
+## Calculating Rent without a Network Call
+
+A common task is to find the minimum lamports needed for an account to be rent-exempt. With
+'@solana/kit', you have to make a network call. gill has a built-in helper that calculates this
+instantly without any network latency. This is faster and saves on RPC credits.
+
+**@solana/kit**
+
+```ts
+// This requires an RPC connection and a network call
+const { value: rent } = await rpc.getMinimumBalanceForRentExemption(50n).send();
+// rent will be 1238880n
+```
+
+**gill**
+
+```ts
+import { getMinimumBalanceForRentExemption } from "gill";
+
+// This is a synchronous, instant calculation. No `await`, no `rpc` needed.
+const rent = getMinimumBalanceForRentExemption(50);
+// rent will be 1238880n
+```
+
+---
+
+## Building Transactions
+
+### Where did all the factory functions and pipe() go?
+
+In `@solana/kit`, setting up a connection and building a transaction requires wiring together
+multiple factory functions and composing helpers with the `pipe()` utility. This provides maximum
+composability but can be verbose for everyday tasks.
+
+`gill` simplifies this by providing higher-level helper functions that handle the common-case setup
+for you, without sacrificing the ability to access the low-level primitives when you need them.
+
+Similarly, the `createTransaction` function replaces the `pipe()` flow with a single, descriptive
+configuration object.
+
+**@solana/kit**
+
+```ts
+import {
+  pipe,
+  createTransactionMessage,
+  setTransactionMessageFeePayerSigner,
+  setTransactionMessageLifetimeUsingBlockhash,
+  appendTransactionMessageInstructions,
+} from "@solana/kit";
+import { getTransferSolInstruction } from "@solana-program/system";
+
+// Assume `payer`, `destinationAddress`, and `latestBlockhash` are already defined
+
+// Create the instruction first
+const transferInstruction = getTransferSolInstruction({
+  source: payer.address,
+  destination: destinationAddress,
+  amount: 1_000_000_000, // 1 SOL
+});
+
+// use that variable in the pipe
+const transactionMessage = pipe(
+  createTransactionMessage({ version: 0 }),
+  (tx) => setTransactionMessageFeePayerSigner(payer, tx),
+  (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+  (tx) => appendTransactionMessageInstructions([transferInstruction], tx),
+);
+```
+
+**gill**
+
+```ts
+import { createTransaction } from "gill";
+import { getTransferSolInstruction } from "gill/programs";
+
+// Assume `payer`, `destinationAddress`, and `latestBlockhash` are already defined
+
+//  Create the instruction first
+const transferInstruction = getTransferSolInstruction({
+  source: payer.address,
+  destination: destinationAddress,
+  amount: 1_000_000_000, // 1 SOL
+});
+
+// Now, use that variable in the transaction object
+const transaction = createTransaction({
+  version: 0,
+  feePayer: payer,
+  instructions: [transferInstruction],
+  latestBlockhash,
+});
+```
+
+You can still access and use the low-level `pipe` and composer functions from `gill` if you need
+custom behavior, as `gill` re-exports everything from `@solana/kit`.
+
+## Even Simpler: Transaction Builders
+
+For very common multi-instruction tasks, like creating a token with metadata or transferring tokens,
+`gill` goes a step further by providing high-level **Transaction Builders**. These functions
+abstract away even more complexity, such as deriving associated token accounts and setting optimized
+compute unit limits. `@solana/kit` does not have an equivalent for this level of abstraction.
+
+For example, building a transaction to transfer SPL tokens.
+
+**@solana/kit**
+
+```ts
+import {
+  pipe,
+  createTransactionMessage,
+  setTransactionMessageFeePayerSigner,
+  setTransactionMessageLifetimeUsingBlockhash,
+  appendTransactionMessageInstructions,
+} from "@solana/kit";
+import {
+  getAssociatedTokenAccountAddress, // Correct function name
+  getCreateAssociatedTokenAccountInstruction, // Correct function name
+  getTransferInstruction,
+} from "@solana-program/token";
+
+// Assume we already have:
+// rpc: Rpc client
+// payer: Signer
+// mint: Address
+// destinationOwner: Address
+// amount: bigint
+// latestBlockhash: Blockhash
+
+const instructions = [];
+
+// 1. Derive source and destination addresses
+const sourceAta = await getAssociatedTokenAccountAddress(mint, payer.address);
+const destinationAta = await getAssociatedTokenAccountAddress(mint, destinationOwner);
+
+// 2. Check if the destination account exists
+const destinationAtaInfo = await rpc.getAccountInfo(destinationAta).send();
+
+// 3. Conditionally add the instruction to create the destination account
+if (destinationAtaInfo.value === null) {
+  instructions.push(
+    getCreateAssociatedTokenAccountInstruction({
+      payer,
+      associatedToken: destinationAta,
+      owner: destinationOwner,
+      mint,
+    }),
+  );
+}
+
+// 4. Add the transfer instruction
+instructions.push(
+  getTransferInstruction({
+    source: sourceAta,
+    destination: destinationAta,
+    owner: payer,
+    amount,
+  }),
+);
+
+// 5. Build the transaction
+const txMessage = pipe(
+  createTransactionMessage({ version: 0 }),
+  (tx) => setTransactionMessageFeePayerSigner(payer, tx),
+  (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+  (tx) => appendTransactionMessageInstructions(instructions, tx),
+);
+```
+
+**gill**
+
+```ts
+import { buildTransferTokensTransaction } from "gill/programs/token";
+
+const transferTx = await buildTransferTokensTransaction({
+  feePayer: signer,
+  latestBlockhash,
+  mint: mintAddress,
+  authority: signer,
+  amount: 1000,
+  destination: destinationWalletAddress,
+});
+```
+
+The transaction builder automatically handles the creation of the associated token account if it
+doesn't exist, bundles the necessary instructions, and sets a recommended compute limit.
+
+---
+
+## Simplified Explorer Links
+
+While you can always build explorer links yourself, gill provides a simple helper function that
+handles it for you, preventing typos and working across different clusters.
+
+**@solana/kit**
+
+```ts
+const signature = getSignatureFromTransaction(signedTransaction);
+const link = `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
+```
+
+**gill**
+
+```ts
+import { getExplorerLink } from "gill";
+
+const signature = getSignatureFromTransaction(signedTransaction);
+const link = getExplorerLink({ transaction: signature, cluster: "devnet" });
+```
+
+---
+
+## Easy Transaction Debugging
+
+'@solana/kit'has no built-in equivalent. You would have to write all this logging logic yourself,
+manually grabbing the signature and constructing the links or base64 strings every time.
+Troubleshooting failed transactions can be difficult. gill has a built-in debug mode that
+automatically logs helpful information.you can also use custom debugging in gill using
+isDebugEnabled() & debug()
+
+[refer this doc for more details](https://www.gillsdk.com/docs/debug-mode)
+
+---
+
+## Closing words
+
+Upgrading from `@solana/kit` to `gill` is a low-friction process designed to enhance your
+productivity. Since `gill` is a superset of `kit`, there is no complex compatibility layer needed.
+
+You can start by simply replacing all imports from `@solana/kit` with `gill`—your existing code will
+continue to work. From there, you can incrementally refactor your project to adopt `gill`'s
+convenient helpers and builders, cleaning up boilerplate and simplifying your codebase at your own
+pace.
