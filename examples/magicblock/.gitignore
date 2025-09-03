@@ -1,0 +1,55 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.cache
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# generated codama program client
+/clients/js/**
+*/clients/js/**
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+/dist
+/bin
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env
+!.env.example
+
+# vercel
+.vercel
+
+# contentlayer
+.contentlayer
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# sitemaps / robots
+public/sitemap*
+public/robot*
+
+test-ledger
+temp
+
+.cache
