@@ -1,5 +1,19 @@
 # @gillsdk/react
 
+## 0.6.0
+
+### Minor Changes
+
+- [#228](https://github.com/gillsdk/gill/pull/228)
+  [`83bba6a`](https://github.com/gillsdk/gill/commit/83bba6a3643c5eb719f5018917308fd8dad6e540) Thanks
+  [@JkrishnaD](https://github.com/JkrishnaD)! - update `useProgramAccounts` hook by removing the base58 encodings
+
+### Patch Changes
+
+- Updated dependencies [[`55e5628`](https://github.com/gillsdk/gill/commit/55e562846a0865c0c9773f638e5a48b35e89ed5b),
+  [`ee23f2a`](https://github.com/gillsdk/gill/commit/ee23f2a3fbabd31c3ca040e7def970aa552afdf9)]:
+  - gill@0.12.0
+
 ## 0.5.1
 
 ### Patch Changes
