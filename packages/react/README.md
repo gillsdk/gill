@@ -67,7 +67,21 @@ Fetch data from the Solana blockchain with the gill hooks:
 - [`useTokenAccount`](#get-token-account) - get the token account for a given mint and owner (or ATA)
 
 Send data to the Solana blockchain with the gill hooks:
-- [`useSendTransaction`](#send-transaction) - send a transaction to the Solana blockchain
+
+- [`useSendTransaction`](#send-transaction) - send a serialized solana transaction (Base64 encoded) to the Solana blockchain
+
+### Example Usage of useSendTransaction hook
+```tsx
+const { send, signature, isPending, isError } = useSendTransaction({
+  transaction: base64EncodedTransaction,
+  config: {
+    skipPreflight: true,
+    preflightCommitment: 'finalized'
+  }
+});
+// Send the transaction
+send();
+````
 
 ### Wrap your React app in a context provider
 
