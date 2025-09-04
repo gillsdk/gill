@@ -1,12 +1,12 @@
-import { useSendTransaction } from "../hooks/send-transaction";
+import { useSendTransaction } from "../hooks";
 import { Base64EncodedWireTransaction, SendTransactionApi} from "gill";
 
 // [DESCRIBE] useSendTransaction
 {
-  const signature = null as unknown as Base64EncodedWireTransaction | string;
+  const transaction = null as unknown as Base64EncodedWireTransaction | string;
   {
-    const transaction = useSendTransaction({ signature });
-    transaction.signature satisfies ReturnType<SendTransactionApi["sendTransaction"]>;
+    const signature = useSendTransaction({ transaction });
+    signature.transaction satisfies ReturnType<SendTransactionApi["sendTransaction"]>;
     // @ts-expect-error - Should not allow no argument
     useSendTransaction();
 
@@ -16,23 +16,23 @@ import { Base64EncodedWireTransaction, SendTransactionApi} from "gill";
 
   {
     // Should accept `config` input
-    const transaction = useSendTransaction({
+    const signature = useSendTransaction({
       config: {
         encoding: "base64",
         preflightCommitment: "confirmed",
         skipPreflight: false,
       },
-      signature,
+      transaction,
     });
-    transaction.signature satisfies ReturnType<SendTransactionApi["sendTransaction"]>;
+    signature.transaction satisfies ReturnType<SendTransactionApi["sendTransaction"]>;
   }
 
   {
     // Should require `signature` input
-    const transaction = useSendTransaction({
-      signature: "5Pj5fCupXLUePYn18JkY8SrRaWFiUctuDTRwvUy2ML9yvkENLb1QMYbcBGcBXRrSVDjp7RjUwk9a3rLC6gpvtYpZ",
+    const signature = useSendTransaction({
+      transaction: "5Pj5fCupXLUePYn18JkY8SrRaWFiUctuDTRwvUy2ML9yvkENLb1QMYbcBGcBXRrSVDjp7RjUwk9a3rLC6gpvtYpZ",
     });
 
-    transaction.signature satisfies ReturnType<SendTransactionApi["sendTransaction"]>;
+    signature.transaction satisfies ReturnType<SendTransactionApi["sendTransaction"]>;
   }
 }

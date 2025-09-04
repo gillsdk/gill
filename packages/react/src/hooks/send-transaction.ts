@@ -17,7 +17,7 @@ type UseSendTransactionInput<TConfig extends RpConfig = RpConfig> = GillUseRpcHo
   /**
    *  The signed transaction in wire format, as a base-64 encoded string.
    */
-  signature: Base64EncodedWireTransaction | string;
+  transaction: Base64EncodedWireTransaction | string;
 };
 
 /**
@@ -27,7 +27,7 @@ type UseSendTransactionInput<TConfig extends RpConfig = RpConfig> = GillUseRpcHo
  * @returns An object from useMutation, including `signature`(the transaction signature) in an object
  */
 export function useSendTransaction<TConfig extends RpConfig = RpConfig>({
-  signature,
+  transaction,
   config,
 }: UseSendTransactionInput<TConfig>) {
   const { rpc } = useSolanaClient();
@@ -36,7 +36,7 @@ export function useSendTransaction<TConfig extends RpConfig = RpConfig>({
     mutationFn: async () => {
       // The RPC method expects the base-64 encoded transaction as the first argument.
       const response = await rpc
-        .sendTransaction(signature as Base64EncodedWireTransaction, {
+        .sendTransaction(transaction as Base64EncodedWireTransaction, {
           encoding: "base64",
           preflightCommitment: "confirmed",
           skipPreflight: false,
@@ -52,6 +52,6 @@ export function useSendTransaction<TConfig extends RpConfig = RpConfig>({
 
   return {
     ...rest,
-    signature: data as UseSendTransactionResponse,
+    transaction: data as UseSendTransactionResponse,
   };
 }
