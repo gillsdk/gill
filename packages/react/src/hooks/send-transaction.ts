@@ -48,6 +48,8 @@ export function useSendTransaction<TConfig extends RpConfig = RpConfig>({
     },
     mutationKey: [GILL_HOOK_CLIENT_KEY, "sendTransaction"],
     networkMode: "offlineFirst",
+    retry: 3,
+    retryDelay: (index) => Math.min(1000 * 2 ** index, 3000),
   });
 
   return {
