@@ -4,7 +4,6 @@ import {
   AccountInfoWithJsonData,
   Address,
   Base58EncodedBytes,
-  Base64EncodedBytes,
   SolanaRpcResponse,
 } from "gill";
 import { useProgramAccounts } from "../hooks/program-accounts";
@@ -16,7 +15,7 @@ import { useProgramAccounts } from "../hooks/program-accounts";
   // default encoded data as bytes
   {
     const { accounts: baseConfigAccounts } = useProgramAccounts({ program });
-    baseConfigAccounts[0].account.data satisfies Base64EncodedBytes;
+    baseConfigAccounts[0].account.data satisfies AccountInfoWithBase64EncodedData["data"];
 
     const { accounts: baseConfigAccounts2 } = useProgramAccounts({
       program,
@@ -24,7 +23,7 @@ import { useProgramAccounts } from "../hooks/program-accounts";
         commitment: "finalized",
       },
     });
-    baseConfigAccounts2[0].account.data satisfies Base64EncodedBytes;
+    baseConfigAccounts2[0].account.data satisfies AccountInfoWithBase64EncodedData["data"];
 
     const { accounts: baseConfigContextAccounts } = useProgramAccounts({
       program,
@@ -35,7 +34,7 @@ import { useProgramAccounts } from "../hooks/program-accounts";
 
     // Should include context in response
     baseConfigContextAccounts satisfies SolanaRpcResponse<any>;
-    baseConfigContextAccounts.value[0].account.data satisfies Base64EncodedBytes;
+    baseConfigContextAccounts.value[0].account satisfies AccountInfoWithBase64EncodedData;
   }
 
   // base64 encoded `data`

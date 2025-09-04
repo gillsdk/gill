@@ -49,8 +49,8 @@ type UseProgramAccountsResponse<TConfig extends RpcConfig> = TConfig extends {
           : TConfig extends { encoding: "jsonParsed" }
             ? AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithJsonData>[]
             : TConfig extends { withContext: true }
-              ? SolanaRpcResponse<AccountInfoWithPubkey<AccountInfoBase>>[]
-              : AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithJsonData>[];
+              ? SolanaRpcResponse<AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithBase64EncodedData>[]>
+              : AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithBase64EncodedData>[];
 /**
  * Get all the accounts owned by a `program` using the Solana RPC method of
  * [`getProgramAccounts`](https://solana.com/docs/rpc/http/getprogramaccounts)
