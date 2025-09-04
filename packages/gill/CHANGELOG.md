@@ -1,5 +1,20 @@
 # gill
 
+## 0.12.0
+
+### Minor Changes
+
+- [#219](https://github.com/gillsdk/gill/pull/219)
+  [`55e5628`](https://github.com/gillsdk/gill/commit/55e562846a0865c0c9773f638e5a48b35e89ed5b) Thanks
+  [@nickfrosty](https://github.com/nickfrosty)! - add optional decimal places to `lamportsToSol` - from @GuiBibeau via
+  https://github.com/gillsdk/gill/pull/208
+
+### Patch Changes
+
+- [#213](https://github.com/gillsdk/gill/pull/213)
+  [`ee23f2a`](https://github.com/gillsdk/gill/commit/ee23f2a3fbabd31c3ca040e7def970aa552afdf9) Thanks
+  [@Kym0211](https://github.com/Kym0211)! - update kit imports to not use deprecated "I" symbols
+
 ## 0.11.0
 
 ### Minor Changes
