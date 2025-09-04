@@ -1,0 +1,191 @@
+---
+title: Send Transactions Between Client and Server
+description:
+  Learn how to construct, relay, sign and finalize Solana transactions between a client and a
+  backend server using the gill library.
+---
+
+In some applications, you may want to let a **server-side signer** (holding a private key) sign or
+co-sign transactions initiated by a client. This pattern is common for:
+
+- Adding extra authorization or verification logic on the server
+- Managing privileged operations
+- Securing sensitive keypairs
+
+This can be achieved in few steps:
+
+1. [Construct Transaction](#construct-transaction)
+2. [Encode to Base64](#encode-to-base64)
+3. [Send to Server for Signing](#send-to-server-for-signing)
+4. [Decode and reconstruct signed transaction](#decode-and-reconstruct-signed-transaction)
+5. [Submit to blockchain.](#submit-to-blockchain)
+
+<Steps>
+
+<Step>
+### Construct Transaction
+
+On the client, you will create a transaction with instructions (in this case, a simple memo
+instruction).
+
+```ts
+import { createSolanaClient, createTransaction } from "gill";
+import { loadKeypairSignerFromFile } from "gill/node";
+import { getAddMemoInstruction } from "gill/programs";
+
+const signer = await loadKeypairSignerFromFile();
+const { rpc } = createSolanaClient({ urlOrMoniker: "devnet" });
+
+const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+const tx = createTransaction({
+  version: "legacy",
+  feePayer: signer,
+  instructions: [getAddMemoInstruction({ memo: "GM Solana!" })],
+  latestBlockhash,
+});
+```
+
+</Step>
+
+<Step>
+### Encode to Base64
+
+The `transactionToBase64` function encodes the transaction into a Base64 string. This allows the
+transaction to be safely sent to the backend, since a raw transaction object cannot be transmitted
+directly.
+
+```ts
+import { transactionToBase64 } from "gill";
+
+const base64Tx = transactionToBase64(tx);
+```
+
+</Step>
+
+<Step>
+### Send to Server for Signing
+
+#### Server Setup
+
+Set up an Express server to handle POST requests.
+
+```ts
+import express from "express";
+
+const app = express();
+app.use(express.json());
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server listening at http://localhost:${PORT}`);
+});
+```
+
+</Step>
+
+#### Send transaction to the server
+
+On the client, send the encoded transaction to the server for signing:
+
+```ts
+const { tx: encodedSignedTx } = await fetch("http://localhost:3000/tx", {
+  method: "POST",
+  body: JSON.stringify({ base64Tx }),
+  headers: {
+    "Content-Type": "application/json",
+  },
+}).then((r) => r.json());
+```
+
+<i>
+  using [fetch](https://nodejs.org/en/learn/getting-started/fetch) in this example — you could also
+  use [Axios](https://axios-http.com/docs/intro) or any other HTTP client.
+</i>
+
+#### Transaction Signing
+
+The server exposes a `/tx` endpoint that accepts a Base64-encoded transaction from the client. It
+decodes the transaction, signs it using the server’s keypair, and then re-encodes it into Base64
+before sending the signed result back to the client.
+
+```ts
+import { signTransaction, transactionFromBase64, transactionToBase64 } from "gill";
+import { loadKeypairFromFile } from "gill/node";
+
+app.post("/tx", async (req, res) => {
+  if (!base64Tx || typeof base64Tx !== "string") {
+    return res.status(400).json({ error: "Missing 'base64Tx' string" });
+  }
+
+  const serverSigner = await loadKeypairFromFile();
+
+  // 1) Decode Base64 string
+  const decodedTx = transactionFromBase64(base64Tx);
+
+  // 2) Sign with the server signer
+  const signedTx = await signTransaction([serverSigner], decoded);
+
+  // 3) Re-encode back to Base64 for the client to submit
+  const encodedSignedTx = transactionToBase64(signed);
+
+  return res.json({ tx: encodedSignedTx });
+});
+```
+
+<Step>
+### Decode and Reconstruct Signed Transaction
+
+Convert the signed base64 econded transaction string into a regular transaction format.
+
+```ts
+let decodedSignedTx = transactionFromBase64(encodedSignedTx);
+```
+
+#### Reconstruct Transaction
+
+When the transaction is passed between client and server as a Base64 string, some internal type
+markers and the blockhash originally attached to the transaction are stripped away, the resulting
+transaction object is no longer directly compatible with `sendAndConfirmTransaction` .
+
+Specifically, a valid lifetime constraint(in this case, a Blockhash) must be present for the
+transaction to be considered sendable.
+
+<i>
+  See
+  [SendableTransaction](https://github.com/solana-foundation/gill/blob/master/packages/gill/src/core/send-and-confirm-transaction-with-signers.ts#L46)
+  Type
+</i>
+
+To resolve this, we attach the latest blockhash and explicitly recast the object as a
+`FullySignedTransaction` & `TransactionWithBlockhashLifetime`.
+
+```ts
+import { FullySignedTransaction, TransactionWithBlockhashLifetime } from "gill";
+
+const finalTx = {
+  ...decodedSignedTx,
+  lifetimeConstraint: latestBlockhash,
+} as FullySignedTransaction & TransactionWithBlockhashLifetime;
+```
+
+</Step>
+
+<Step>
+### Submit to Blockchain
+
+The reconstructed transaction is now ready to be sent on-chain for execution. Using
+`sendAndConfirmTransaction`, it is both submitted and confirmed.
+
+```ts
+import { sendAndConfirmTransaction } from "gill";
+
+const signature = await sendAndConfirmTransaction(finalTx);
+```
+
+</Step>
+</Steps>
+
+With these steps, you’ve seen how to send transactions between a client and server using the gill
+library. This flow provides a foundation for building secure, server-assisted signing patterns in
+your applications.
