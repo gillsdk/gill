@@ -35,7 +35,7 @@ export function useTransaction<TConfig extends RpcConfig = RpcConfig>({
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    enabled: !!signature,
+    enabled: (options?.enabled ?? true) && !!signature,
     queryKey: [GILL_HOOK_CLIENT_KEY, "getTransaction", signature],
     queryFn: async () => {
       const response = await rpc
