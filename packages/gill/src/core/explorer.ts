@@ -107,9 +107,8 @@ export function getExplorerLinkSolanafm(props: GetExplorerLinkArgs = {}): string
 
   if (props.cluster !== "mainnet-beta") {
     if (props.cluster === "localnet" || props.cluster === "localhost") {
-      // localnet technically isn't a cluster, so requires special handling
-      url.searchParams.set("cluster", "custom");
-      url.searchParams.set("customUrl", "http://localhost:8899");
+      // SolanaFM uses "localnet-solana" instead of custom cluster
+      url.searchParams.set("cluster", "localnet-solana");
     } else if (props.cluster === "devnet") {
       // SolanaFM uses "devnet-solana" instead of "devnet"
       url.searchParams.set("cluster", "devnet-solana");

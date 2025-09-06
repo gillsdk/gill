@@ -279,15 +279,20 @@ describe("getExplorerLink", () => {
     assert.equal(link, "https://orb.helius.dev/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
   });
 
-  test("getExplorerLinkSolanafm works with localhost cluster on solanafm", () => {
+  test("getExplorerLinkSolanafm works with localhost cluster using localnet-solana", () => {
     const link = getExplorerLinkSolanafm({
       cluster: "localhost",
       address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
     });
-    assert.equal(
-      link,
-      "https://solana.fm/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899",
-    );
+    assert.equal(link, "https://solana.fm/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8?cluster=localnet-solana");
+  });
+
+  test("getExplorerLinkSolanafm works with localnet cluster using localnet-solana", () => {
+    const link = getExplorerLinkSolanafm({
+      cluster: "localnet",
+      address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
+    });
+    assert.equal(link, "https://solana.fm/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8?cluster=localnet-solana");
   });
 
   test("getExplorerLinkSolanafm works with devnet cluster using devnet-solana", () => {
