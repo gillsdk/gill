@@ -140,4 +140,167 @@ describe("getExplorerLink", () => {
       "https://explorer.solana.com/tx/2QC8BkDVZgaPHUXG9HuPw7aE5d6kN5DTRXLe2inT1NzurkYTCFhraSEo883CPNe18BZ2peJC1x1nojZ5Jmhs94pL?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899",
     );
   });
+
+  test("getExplorerLink returns the base explorer url with default explorer chosen", () => {
+    const link = getExplorerLink({
+      explorer: "default",
+    });
+    assert.equal(link, "https://explorer.solana.com/");
+  });
+
+  test("getExplorerLink returns orb explorer url", () => {
+    const link = getExplorerLink({
+      explorer: "orb",
+    });
+    assert.equal(link, "https://orb.helius.dev/");
+  });
+
+  test("getExplorerLink returns solscan explorer url", () => {
+    const link = getExplorerLink({
+      explorer: "solscan",
+    });
+    assert.equal(link, "https://solscan.io/");
+  });
+
+  test("getExplorerLink returns solanafm explorer url", () => {
+    const link = getExplorerLink({
+      explorer: "solanafm",
+    });
+    assert.equal(link, "https://solana.fm/");
+  });
+
+  test("getExplorerLink works for an address on solscan", () => {
+    const link = getExplorerLink({
+      explorer: "solscan",
+      address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
+    });
+    assert.equal(link, "https://solscan.io/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
+  });
+
+  test("getExplorerLink works for an address on orb", () => {
+    const link = getExplorerLink({
+      explorer: "orb",
+      address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
+    });
+    assert.equal(link, "https://orb.helius.dev/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
+  });
+
+  test("getExplorerLink works for an address on solanafm", () => {
+    const link = getExplorerLink({
+      explorer: "solanafm",
+      address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
+    });
+    assert.equal(link, "https://solana.fm/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
+  });
+
+  test("getExplorerLink works for a transaction on solscan", () => {
+    const link = getExplorerLink({
+      explorer: "solscan",
+      transaction: "2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
+    });
+    assert.equal(
+      link,
+      "https://solscan.io/tx/2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
+    );
+  });
+
+  test("getExplorerLink works for a transaction on orb", () => {
+    const link = getExplorerLink({
+      explorer: "orb",
+      transaction: "2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
+    });
+    assert.equal(
+      link,
+      "https://orb.helius.dev/tx/2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
+    );
+  });
+
+  test("getExplorerLink works for a transaction on solanafm", () => {
+    const link = getExplorerLink({
+      explorer: "solanafm",
+      transaction: "2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
+    });
+    assert.equal(
+      link,
+      "https://solana.fm/tx/2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
+    );
+  });
+
+  test("getExplorerLink works for a block on solscan", () => {
+    const link = getExplorerLink({
+      explorer: "solscan",
+      block: "242233124",
+    });
+    assert.equal(link, "https://solscan.io/block/242233124");
+  });
+
+  test("getExplorerLink works for a block on orb", () => {
+    const link = getExplorerLink({
+      explorer: "orb",
+      block: "242233124",
+    });
+    assert.equal(link, "https://orb.helius.dev/block/242233124");
+  });
+
+  test("getExplorerLink works for a block on solanafm", () => {
+    const link = getExplorerLink({
+      explorer: "solanafm",
+      block: "242233124",
+    });
+    assert.equal(link, "https://solana.fm/block/242233124");
+  });
+
+  test("getExplorerLink works with devnet cluster on solscan", () => {
+    const link = getExplorerLink({
+      explorer: "solscan",
+      cluster: "devnet",
+      address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
+    });
+    assert.equal(link, "https://solscan.io/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8?cluster=devnet");
+  });
+
+  test("getExplorerLink works with testnet cluster on orb", () => {
+    const link = getExplorerLink({
+      explorer: "orb",
+      cluster: "testnet",
+      transaction: "2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
+    });
+    assert.equal(
+      link,
+      "https://orb.helius.dev/tx/2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX?cluster=testnet",
+    );
+  });
+
+  test("getExplorerLink works with localnet on solscan", () => {
+    const link = getExplorerLink({
+      explorer: "solscan",
+      cluster: "localnet",
+      transaction: "2QC8BkDVZgaPHUXG9HuPw7aE5d6kN5DTRXLe2inT1NzurkYTCFhraSEo883CPNe18BZ2peJC1x1nojZ5Jmhs94pL",
+    });
+    assert.equal(
+      link,
+      "https://solscan.io/tx/2QC8BkDVZgaPHUXG9HuPw7aE5d6kN5DTRXLe2inT1NzurkYTCFhraSEo883CPNe18BZ2peJC1x1nojZ5Jmhs94pL?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899",
+    );
+  });
+
+  test("getExplorerLink works with localnet on orb", () => {
+    const link = getExplorerLink({
+      explorer: "orb",
+      cluster: "localnet",
+      block: "242233124",
+    });
+    assert.equal(link, "https://orb.helius.dev/block/242233124?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899");
+  });
+
+  test("getExplorerLink works with localhost cluster on solanafm", () => {
+    const link = getExplorerLink({
+      explorer: "solanafm",
+      cluster: "localhost",
+      address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
+    });
+    assert.equal(
+      link,
+      "https://solana.fm/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899",
+    );
+  });
 });
