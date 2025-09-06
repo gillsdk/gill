@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { type FullySignedTransaction, getSignatureFromTransaction } from "@solana/kit";
 
-import { getExplorerLink } from "../core";
+import { getExplorerLink, getExplorerLinkOrb, getExplorerLinkSolscan, getExplorerLinkSolanafm } from "../core";
 
 describe("getExplorerLink", () => {
   test("getExplorerLink returns the base explorer url", () => {
@@ -142,60 +142,48 @@ describe("getExplorerLink", () => {
   });
 
   test("getExplorerLink returns the base explorer url with default explorer chosen", () => {
-    const link = getExplorerLink({
-      explorer: "default",
-    });
+    const link = getExplorerLink();
     assert.equal(link, "https://explorer.solana.com/");
   });
 
-  test("getExplorerLink returns orb explorer url", () => {
-    const link = getExplorerLink({
-      explorer: "orb",
-    });
+  test("getExplorerLinkOrb returns orb explorer url", () => {
+    const link = getExplorerLinkOrb();
     assert.equal(link, "https://orb.helius.dev/");
   });
 
-  test("getExplorerLink returns solscan explorer url", () => {
-    const link = getExplorerLink({
-      explorer: "solscan",
-    });
+  test("getExplorerLinkSolscan returns solscan explorer url", () => {
+    const link = getExplorerLinkSolscan();
     assert.equal(link, "https://solscan.io/");
   });
 
-  test("getExplorerLink returns solanafm explorer url", () => {
-    const link = getExplorerLink({
-      explorer: "solanafm",
-    });
+  test("getExplorerLinkSolanafm returns solanafm explorer url", () => {
+    const link = getExplorerLinkSolanafm();
     assert.equal(link, "https://solana.fm/");
   });
 
-  test("getExplorerLink works for an address on solscan", () => {
-    const link = getExplorerLink({
-      explorer: "solscan",
+  test("getExplorerLinkSolscan works for an address on solscan", () => {
+    const link = getExplorerLinkSolscan({
       address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
     });
     assert.equal(link, "https://solscan.io/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
   });
 
-  test("getExplorerLink works for an address on orb", () => {
-    const link = getExplorerLink({
-      explorer: "orb",
+  test("getExplorerLinkOrb works for an address on orb", () => {
+    const link = getExplorerLinkOrb({
       address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
     });
     assert.equal(link, "https://orb.helius.dev/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
   });
 
-  test("getExplorerLink works for an address on solanafm", () => {
-    const link = getExplorerLink({
-      explorer: "solanafm",
+  test("getExplorerLinkSolanafm works for an address on solanafm", () => {
+    const link = getExplorerLinkSolanafm({
       address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
     });
     assert.equal(link, "https://solana.fm/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
   });
 
-  test("getExplorerLink works for a transaction on solscan", () => {
-    const link = getExplorerLink({
-      explorer: "solscan",
+  test("getExplorerLinkSolscan works for a transaction on solscan", () => {
+    const link = getExplorerLinkSolscan({
       transaction: "2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
     });
     assert.equal(
@@ -204,9 +192,8 @@ describe("getExplorerLink", () => {
     );
   });
 
-  test("getExplorerLink works for a transaction on orb", () => {
-    const link = getExplorerLink({
-      explorer: "orb",
+  test("getExplorerLinkOrb works for a transaction on orb", () => {
+    const link = getExplorerLinkOrb({
       transaction: "2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
     });
     assert.equal(
@@ -215,9 +202,8 @@ describe("getExplorerLink", () => {
     );
   });
 
-  test("getExplorerLink works for a transaction on solanafm", () => {
-    const link = getExplorerLink({
-      explorer: "solanafm",
+  test("getExplorerLinkSolanafm works for a transaction on solanafm", () => {
+    const link = getExplorerLinkSolanafm({
       transaction: "2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
     });
     assert.equal(
@@ -226,42 +212,37 @@ describe("getExplorerLink", () => {
     );
   });
 
-  test("getExplorerLink works for a block on solscan", () => {
-    const link = getExplorerLink({
-      explorer: "solscan",
+  test("getExplorerLinkSolscan works for a block on solscan", () => {
+    const link = getExplorerLinkSolscan({
       block: "242233124",
     });
     assert.equal(link, "https://solscan.io/block/242233124");
   });
 
-  test("getExplorerLink works for a block on orb", () => {
-    const link = getExplorerLink({
-      explorer: "orb",
+  test("getExplorerLinkOrb works for a block on orb", () => {
+    const link = getExplorerLinkOrb({
       block: "242233124",
     });
     assert.equal(link, "https://orb.helius.dev/block/242233124");
   });
 
-  test("getExplorerLink works for a block on solanafm", () => {
-    const link = getExplorerLink({
-      explorer: "solanafm",
+  test("getExplorerLinkSolanafm works for a block on solanafm", () => {
+    const link = getExplorerLinkSolanafm({
       block: "242233124",
     });
     assert.equal(link, "https://solana.fm/block/242233124");
   });
 
-  test("getExplorerLink works with devnet cluster on solscan", () => {
-    const link = getExplorerLink({
-      explorer: "solscan",
+  test("getExplorerLinkSolscan works with devnet cluster on solscan", () => {
+    const link = getExplorerLinkSolscan({
       cluster: "devnet",
       address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
     });
     assert.equal(link, "https://solscan.io/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8?cluster=devnet");
   });
 
-  test("getExplorerLink works with testnet cluster on orb", () => {
-    const link = getExplorerLink({
-      explorer: "orb",
+  test("getExplorerLinkOrb works with testnet cluster on orb", () => {
+    const link = getExplorerLinkOrb({
       cluster: "testnet",
       transaction: "2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX",
     });
@@ -271,9 +252,8 @@ describe("getExplorerLink", () => {
     );
   });
 
-  test("getExplorerLink works with localnet on solscan", () => {
-    const link = getExplorerLink({
-      explorer: "solscan",
+  test("getExplorerLinkSolscan works with localnet on solscan", () => {
+    const link = getExplorerLinkSolscan({
       cluster: "localnet",
       transaction: "2QC8BkDVZgaPHUXG9HuPw7aE5d6kN5DTRXLe2inT1NzurkYTCFhraSEo883CPNe18BZ2peJC1x1nojZ5Jmhs94pL",
     });
@@ -283,18 +263,24 @@ describe("getExplorerLink", () => {
     );
   });
 
-  test("getExplorerLink works with localnet on orb", () => {
-    const link = getExplorerLink({
-      explorer: "orb",
+  test("getExplorerLinkOrb ignores localnet cluster (not supported)", () => {
+    const link = getExplorerLinkOrb({
       cluster: "localnet",
       block: "242233124",
     });
-    assert.equal(link, "https://orb.helius.dev/block/242233124?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899");
+    assert.equal(link, "https://orb.helius.dev/block/242233124");
   });
 
-  test("getExplorerLink works with localhost cluster on solanafm", () => {
-    const link = getExplorerLink({
-      explorer: "solanafm",
+  test("getExplorerLinkOrb ignores localhost cluster (not supported)", () => {
+    const link = getExplorerLinkOrb({
+      cluster: "localhost",
+      address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
+    });
+    assert.equal(link, "https://orb.helius.dev/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
+  });
+
+  test("getExplorerLinkSolanafm works with localhost cluster on solanafm", () => {
+    const link = getExplorerLinkSolanafm({
       cluster: "localhost",
       address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
     });
@@ -302,5 +288,21 @@ describe("getExplorerLink", () => {
       link,
       "https://solana.fm/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899",
     );
+  });
+
+  test("getExplorerLinkSolanafm works with devnet cluster using devnet-solana", () => {
+    const link = getExplorerLinkSolanafm({
+      cluster: "devnet",
+      address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
+    });
+    assert.equal(link, "https://solana.fm/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8?cluster=devnet-solana");
+  });
+
+  test("getExplorerLinkSolanafm works with testnet cluster using testnet-solana", () => {
+    const link = getExplorerLinkSolanafm({
+      cluster: "testnet",
+      address: "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
+    });
+    assert.equal(link, "https://solana.fm/address/dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8?cluster=testnet-solana");
   });
 });
