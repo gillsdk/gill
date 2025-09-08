@@ -14,15 +14,16 @@
  * Learn more about the counter program here:
  * https://docs.magicblock.gg/pages/get-started/how-integrate-your-program/anchor
  */
-import { 
-    delegateBufferPdaFromDelegatedAccountAndOwnerProgram, 
+import {
     DELEGATION_PROGRAM_ID, 
-    delegationMetadataPdaFromDelegatedAccount, 
-    delegationRecordPdaFromDelegatedAccount, 
     MAGIC_CONTEXT_ID, 
     MAGIC_PROGRAM_ID
 } from "@magicblock-labs/ephemeral-rollups-sdk";
-import { PublicKey } from "@solana/web3.js";
+import { 
+    delegationMetadataPdaFromDelegatedAccountAddr, 
+    delegateBufferPdaFromDelegatedAccountAndOwnerProgramAddr, 
+    delegationRecordPdaFromDelegatedAccountAddr 
+} from "./helpers/pda";
 import { 
     address,
     createSolanaClient, 
@@ -159,18 +160,15 @@ console.log("Initial Count:",info[0].count);
  * Next we delegate the counter pda to MagicBlock ephemeral rollup
  * 
  * Magicblock's sdk and magic-router-sdk do not support @solana/kit yet so
- * we have to go through the trouble of trying to bridge things here
+ * we have to go through the trouble of rewriting the delegation pda helpers before 
+ * putting them to use here. You can view the code in @link'./helpers/pda.ts'
  */
 
-// Convert and get relevant addresses for instruction
-const counterPdaPubkey = new PublicKey(counterPda.toString());
-const programIdPubkey = new PublicKey(programClient.ANCHOR_COUNTER_PROGRAM_ADDRESS.toString());
+// Get relevant addresses for instruction
 const delegationProgram = address(DELEGATION_PROGRAM_ID.toBase58());
-const delegationMetadataPda = address(delegationMetadataPdaFromDelegatedAccount(counterPdaPubkey).toBase58());
-const delegationRecordPda = address(delegationRecordPdaFromDelegatedAccount(counterPdaPubkey).toBase58());
-const delegationBufferPda = address(
-    delegateBufferPdaFromDelegatedAccountAndOwnerProgram(counterPdaPubkey, programIdPubkey).toBase58()
-);
+const delegationMetadataPda = await delegationMetadataPdaFromDelegatedAccountAddr(counterPda);
+const delegationRecordPda = await delegationRecordPdaFromDelegatedAccountAddr(counterPda);
+const delegationBufferPda = await delegateBufferPdaFromDelegatedAccountAndOwnerProgramAddr(counterPda, programClient.ANCHOR_COUNTER_PROGRAM_ADDRESS);
 
 // Create delegate ix
 const delegateIx = programClient.getDelegateInstruction({

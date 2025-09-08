@@ -15,7 +15,6 @@
     "@codama/renderers-js": "^1.3.5",
     "@codama/renderers-rust": "^1.2.3",
     "@magicblock-labs/ephemeral-rollups-sdk": "^0.2.9",
-    "@solana/web3.js": "^1.98.4",
     "codama": "^1.3.4",
     "gill": "workspace:*"
   },

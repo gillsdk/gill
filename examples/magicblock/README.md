@@ -40,6 +40,7 @@ If you are thinking about creating a project using Codama + Gill, here's what yo
 1. Install Codama using anyone of the following commands
 ```shell
 npm install codama
+# or
 pnpm install codama
 ```
 2. Add your idl to the project e.g. in `idl/anchor_counter.idl`
@@ -54,5 +55,6 @@ Once setup locally, you will be able to run the scripts included within this rep
 
 ```bash
 npx tsx ./src/<script>
+# or
 pnpx tsx ./src/<script>
 ```
