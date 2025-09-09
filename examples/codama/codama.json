@@ -1,0 +1,20 @@
+{
+  "idl": "idl/escrow_p.json",
+  "before": [],
+  "scripts": {
+    "js": {
+      "from": "@codama/renderers-js",
+      "args": ["idl/generated/js/"]
+    },
+    "rust": {
+      "from": "@codama/renderers-rust",
+      "args": [
+        "idl/generated/rust/src/generated",
+        {
+          "crateFolder": "idl/generated/rust",
+          "formatCode": true
+        }
+      ]
+    }
+  }
+}
