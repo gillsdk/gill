@@ -1,0 +1,18 @@
+[package]
+name = "escrow_p"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+pinocchio = "0.9.0"
+pinocchio-pubkey = "0.3.0"
+pinocchio-associated-token-account = "0.2.0"
+pinocchio-system = "0.3.0"
+pinocchio-token = "0.4.0"
+bytemuck = {version="1.23.1", features=["derive","const_zeroed"]}
+shank = "0.4.5"
+
+[lib]
+crate-type = ["lib","cdylib"]
+
+
