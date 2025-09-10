@@ -20,9 +20,9 @@ import {
  * @example
  * ```typescript
  * const isValid = await verifySignatureForAddress(
- *   "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM" as Address,
- *   "signature_string_here",
- *   "Hello, world!"
+ *   "GC5AFcYqshWUnNK23MbWTXPix3FUagZt4fjUAt88FT59" as Address,
+ *   "jrZaHRqiRojydQMxHqqe7FEkfeyw64KfPdF2ww1mm3hpVtGyxBvEU5NmHdZFoawYnYu62ujgqw3gcL2XHYbxd9K",
+ *   "Hello, Solana!!"
  * );
  * console.log(isValid); // true or false
  * ```
