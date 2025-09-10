@@ -115,7 +115,9 @@
     "@solana/assertions": "^2.1.1",
     "@solana/codecs": "^2.1.1",
     "@solana/kit": "^2.3.0",
-    "@solana/transaction-confirmation": "^2.1.1"
+    "@solana/transaction-confirmation": "^2.1.1",
+    "@types/qrcode": "^1.5.5",
+    "qrcode": "^1.5.4"
   },
   "peerDependencies": {
     "typescript": ">=5"
