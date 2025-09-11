@@ -27,7 +27,9 @@
     "test:treeshakability:native": "agadoo dist/index.native.mjs",
     "test:treeshakability:node": "agadoo dist/index.node.mjs && agadoo dist/node/index.node.mjs",
     "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
-    "style:fix": "pnpm style:check --write"
+    "style:fix": "pnpm style:check --write",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src"
   },
   "exports": {
     ".": {
