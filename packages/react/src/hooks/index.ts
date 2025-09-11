@@ -8,5 +8,6 @@ export * from "./signature-statuses";
 export * from "./signatures-for-address";
 export * from "./slot";
 export * from "./token-account";
+export * from "./token-accounts-by-owner";
 export * from "./token-mint";
 export * from "./transaction";
