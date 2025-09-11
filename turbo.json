@@ -13,7 +13,7 @@
       "outputs": ["dist/**"]
     },
     "test": {
-      "dependsOn": ["build", "test:typecheck", "test:unit:browser", "test:unit:node"],
+      "dependsOn": ["build", "test:typecheck", "test:unit:browser", "test:unit:node", "test:unit:react"],
       "outputs": ["dist/**"]
     },
     "coverage": {
@@ -68,6 +68,11 @@
       "outputs": []
     },
     "test:unit:node": {
+      "dependsOn": ["^compile:js"],
+      "inputs": ["$TURBO_DEFAULT$", "src/**"],
+      "outputs": []
+    },
+    "test:unit:react": {
       "dependsOn": ["^compile:js"],
       "inputs": ["$TURBO_DEFAULT$", "src/**"],
       "outputs": []

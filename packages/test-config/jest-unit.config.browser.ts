@@ -24,7 +24,7 @@ const config: Partial<Config.InitialProjectOptions> = {
   ],
   testEnvironment: path.resolve(__dirname, "browser-environment.ts"),
   testEnvironmentOptions: {},
-  testPathIgnorePatterns: [...(commonConfig.testPathIgnorePatterns ?? []), "-test.node.ts$"],
+  testPathIgnorePatterns: [...(commonConfig.testPathIgnorePatterns ?? []), ".node.ts$", ".react.tsx$"],
 };
 
 export default config;

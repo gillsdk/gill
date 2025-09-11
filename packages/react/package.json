@@ -16,6 +16,7 @@
     "test:typecheck": "tsc --noEmit",
     "test:unit:node": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.node.ts --rootDir . --silent",
     "test:unit:browser": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.browser.ts --rootDir . --silent",
+    "test:unit:react": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.react.ts --rootDir . --silent",
     "test:treeshakability:browser": "agadoo dist/index.browser.mjs",
     "test:treeshakability:native": "agadoo dist/index.native.mjs",
     "test:treeshakability:node": "agadoo dist/index.node.mjs",
@@ -63,11 +64,6 @@
     "supports bigint and not dead",
     "maintained node versions"
   ],
-  "devDependencies": {
-    "@types/react": "^18",
-    "@types/react-test-renderer": "^18",
-    "react": "^18"
-  },
   "dependencies": {
     "@solana/react": "^3.0.3",
     "@solana/wallet-standard-chains": "^1.1.1",
@@ -82,6 +78,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "react": "^18",
+    "react-dom": "^18",
     "typescript": ">=5"
   },
   "engines": {
