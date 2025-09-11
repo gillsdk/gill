@@ -1,6 +1,6 @@
 /**
  * This script demonstrates how to use Gill to interact with a smart contract
- * deployed on a MagicBlock Ephemeral Rollup.
+ * using the Magicblock SDK.
  *
  * In this example, we’ll connect to the MagicBlock counter program:
  * - Initialize a new counter pda
