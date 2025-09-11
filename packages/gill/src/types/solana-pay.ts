@@ -5,7 +5,7 @@ import type { Address } from "@solana/kit";
  */
 export interface TransferRequestParams {
   recipient: Address;
-  amount?: number; // Decimal amount (e.g., 0.001 for 0.001 SOL)
+  amount?: number; // Decimal amount (0.001 = 0.001 SOL)
   splToken?: Address;
   reference?: Address[];
   label?: string;

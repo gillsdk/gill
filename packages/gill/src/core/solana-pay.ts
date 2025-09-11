@@ -3,78 +3,64 @@ import { isAddress } from "@solana/kit";
 import type { TransferRequestParams, TransactionRequestParams, SolanaPayData, URLOptions } from "../types/solana-pay";
 import { SolanaPayError } from "../types/solana-pay";
 
-const SCHEME = "solana:";
-
-function isValidAddress(address: string): boolean {
-  try {
-    return isAddress(address);
-  } catch {
-    return false;
-  }
-}
-
-function isHttpsUrl(url: string): boolean {
-  try {
-    return new URL(url).protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Create a Solana Pay transfer request URL
- */
 export function createTransferRequestURL(params: TransferRequestParams, options: URLOptions = {}): string {
   const { encode = true } = options;
-  
-  if (!isValidAddress(params.recipient)) {
-    throw new SolanaPayError("Invalid recipient address", "INVALID_RECIPIENT");
+
+  try {
+    isAddress(params.recipient);
+  } catch {
+    throw new SolanaPayError("Invalid recipient", "INVALID_RECIPIENT");
   }
   
-  let url = SCHEME + params.recipient;
-  const searchParams = new URLSearchParams();
+  let url = "solana:" + params.recipient;
+  const query = new URLSearchParams();
   
   if (params.amount !== undefined) {
-    searchParams.set("amount", params.amount.toString());
+    query.set("amount", params.amount.toString());
   }
   
   if (params.splToken) {
-    if (!isValidAddress(params.splToken)) {
-      throw new SolanaPayError("Invalid SPL token address", "INVALID_SPL_TOKEN");
+    try {
+      isAddress(params.splToken);
+    } catch {
+      throw new SolanaPayError("Invalid token address", "INVALID_SPL_TOKEN");
     }
-    searchParams.set("spl-token", params.splToken);
+    query.set("spl-token", params.splToken);
   }
   
   if (params.reference?.length) {
-    for (const ref of params.reference) {
-      if (!isValidAddress(ref)) {
-        throw new SolanaPayError("Invalid reference address", "INVALID_REFERENCE");
+    params.reference.forEach(ref => {
+      try {
+        isAddress(ref);
+      } catch {
+        throw new SolanaPayError("Invalid reference", "INVALID_REFERENCE");
       }
-      searchParams.append("reference", ref);
-    }
+      query.append("reference", ref);
+    });
   }
   
-  if (params.label) searchParams.set("label", params.label);
-  if (params.message) searchParams.set("message", params.message);
-  if (params.memo) searchParams.set("memo", params.memo);
+  if (params.label) query.set("label", params.label);
+  if (params.message) query.set("message", params.message);
+  if (params.memo) query.set("memo", params.memo);
   
-  const query = searchParams.toString();
-  if (query) url += "?" + query;
+  const queryString = query.toString();
+  if (queryString) url += "?" + queryString;
   
   return encode ? url : decodeURIComponent(url).replace(/\+/g, ' ');
 }
 
-/**
- * Create a Solana Pay transaction request URL
- */
 export function createTransactionRequestURL(params: TransactionRequestParams, options: URLOptions = {}): string {
   const { encode = true } = options;
   
-  if (!isHttpsUrl(params.link)) {
-    throw new SolanaPayError("Transaction request link must use HTTPS", "INVALID_LINK");
+  try {
+    if (new URL(params.link).protocol !== "https:") {
+      throw new Error();
+    }
+  } catch {
+    throw new SolanaPayError("HTTPS required", "INVALID_LINK");
   }
   
-  const url = SCHEME + params.link;
+  const url = "solana:" + params.link;
   return encode ? url : decodeURIComponent(url).replace(/\+/g, ' ');
 }
 
@@ -82,64 +68,70 @@ export function createTransactionRequestURL(params: TransactionRequestParams, op
  * Parse a Solana Pay URL into structured data
  */
 export function parseSolanaPayURL(url: string): SolanaPayData {
-  if (!url.startsWith(SCHEME)) {
-    throw new SolanaPayError("URL must start with 'solana:' scheme", "INVALID_SCHEME");
+  if (!url.startsWith("solana:")) {
+    throw new SolanaPayError("Invalid scheme", "INVALID_SCHEME");
   }
   
-  const withoutScheme = url.slice(SCHEME.length);
+  const content = url.slice(7); // Remove "solana:"
   
-  if (withoutScheme.startsWith("https://")) {
+  if (content.startsWith("https://")) {
     return {
       type: "transaction",
-      params: { link: withoutScheme },
+      params: { link: content },
     };
   }
   
-  const [addressPart, queryPart] = withoutScheme.split("?", 2);
+  const [address, queryString] = content.split("?", 2);
   
-  if (!isValidAddress(addressPart)) {
-    throw new SolanaPayError("Invalid recipient address in URL", "INVALID_RECIPIENT");
+  try {
+    isAddress(address);
+  } catch {
+    throw new SolanaPayError("Invalid recipient", "INVALID_RECIPIENT");
   }
   
-  const params: TransferRequestParams = { recipient: addressPart as Address };
+  const params: TransferRequestParams = { recipient: address as Address };
   
-  if (queryPart) {
-    const searchParams = new URLSearchParams(queryPart);
+  if (queryString) {
+    const query = new URLSearchParams(queryString);
     
-    const amountStr = searchParams.get("amount");
-    if (amountStr) {
-      const amount = parseFloat(amountStr);
-      if (isNaN(amount) || amount < 0) {
-        throw new SolanaPayError("Invalid amount parameter", "INVALID_AMOUNT");
+    const amount = query.get("amount");
+    if (amount) {
+      const numAmount = parseFloat(amount);
+      if (isNaN(numAmount) || numAmount < 0) {
+        throw new SolanaPayError("Invalid amount", "INVALID_AMOUNT");
       }
-      params.amount = amount;
+      params.amount = numAmount;
     }
     
-    const splToken = searchParams.get("spl-token");
-    if (splToken) {
-      if (!isValidAddress(splToken)) {
-        throw new SolanaPayError("Invalid SPL token address", "INVALID_SPL_TOKEN");
+    const token = query.get("spl-token");
+    if (token) {
+      try {
+        isAddress(token);
+      } catch {
+        throw new SolanaPayError("Invalid token", "INVALID_SPL_TOKEN");
       }
-      params.splToken = splToken as Address;
+      params.splToken = token as Address;
     }
     
-    const references = searchParams.getAll("reference");
-    if (references.length) {
-      for (const ref of references) {
-        if (!isValidAddress(ref)) {
-          throw new SolanaPayError("Invalid reference address", "INVALID_REFERENCE");
+    const refs = query.getAll("reference");
+    if (refs.length) {
+      refs.forEach(ref => {
+        try {
+          isAddress(ref);
+        } catch {
+          throw new SolanaPayError("Invalid reference", "INVALID_REFERENCE");
         }
-      }
-      params.reference = references as Address[];
+      });
+      params.reference = refs as Address[];
     }
     
-    const label = searchParams.get("label");
+    const label = query.get("label");
     if (label) params.label = decodeURIComponent(label);
     
-    const message = searchParams.get("message");
+    const message = query.get("message");
     if (message) params.message = decodeURIComponent(message);
     
-    const memo = searchParams.get("memo");
+    const memo = query.get("memo");
     if (memo) params.memo = decodeURIComponent(memo);
   }
   
@@ -171,7 +163,7 @@ export function extractReferenceKeys(url: string): Address[] {
  */
 export function toQRCodeURL(url: string): string {
   if (!validateSolanaPayURL(url)) {
-    throw new SolanaPayError("Invalid Solana Pay URL", "INVALID_URL");
+    throw new SolanaPayError("Invalid URL", "INVALID_URL");
   }
   return encodeURI(url);
 } 
