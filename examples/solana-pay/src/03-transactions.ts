@@ -2,13 +2,10 @@ import { type Address } from "gill";
 import qrcode from "qrcode-terminal";
 
 async function main() {
-  console.log("🚀 Transaction Request Examples\n");
-
   try {
     const {
       createTransactionRequestURL,
       parseSolanaPayURL,
-      validateSolanaPayURL,
       toQRCodeURL,
     } = await import("gill/node");
 
@@ -17,52 +14,35 @@ async function main() {
       link: "https://merchant.example.com/api/pay"
     });
 
-    console.log("Basic Transaction URL:", basicURL);
-    console.log("Valid:", validateSolanaPayURL(basicURL));
-    
-    console.log("\n📱 Basic Transaction QR Code:");
+    console.log("Transaction URL:", basicURL);
     qrcode.generate(toQRCodeURL(basicURL), { small: true });
 
-    // Transaction request with parameters
+    // Transaction with parameters
     const paramURL = createTransactionRequestURL({
       link: "https://merchant.example.com/api/pay?session=abc123&order=456"
     });
 
     console.log("\nParameterized URL:", paramURL);
-    console.log("Valid:", validateSolanaPayURL(paramURL));
-    
-    console.log("\n📱 Parameterized Transaction QR Code:");
     qrcode.generate(toQRCodeURL(paramURL), { small: true });
 
-    // Parse URLs
+    // Parse transactions
     const basicParsed = parseSolanaPayURL(basicURL);
     if (basicParsed.type === "transaction") {
-      console.log("\nBasic Transaction:");
-      console.log(`- Type: ${basicParsed.type}`);
-      console.log(`- Link: ${basicParsed.params.link}`);
+      console.log("\nTransaction details:");
+      console.log(`Endpoint: ${basicParsed.params.link}`);
     }
 
-    const paramParsed = parseSolanaPayURL(paramURL);
-    if (paramParsed.type === "transaction") {
-      console.log("\nParameterized Transaction:");
-      console.log(`- Type: ${paramParsed.type}`);
-      console.log(`- Link: ${paramParsed.params.link}`);
-    }
-
-    // Error handling
+    // Error handling demo
     try {
       createTransactionRequestURL({
         link: "http://insecure.example.com/api/pay"
       });
     } catch (error) {
-      console.log("\nError handling works:");
-      console.log(`- ${error instanceof Error ? error.message : String(error)}`);
+      console.log("\nHTTPS required:", error instanceof Error ? error.message : String(error));
     }
 
-    console.log("\n✅ Transaction examples completed!");
-
   } catch (error) {
-    console.error("❌ Error:", error);
+    console.error("Error:", error);
   }
 }
 
