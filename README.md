@@ -94,6 +94,8 @@ You can find [transaction builders](#transaction-builders) for common tasks, inc
 - [Minting tokens to a destination wallet](#mint-tokens-to-a-destination-wallet)
 - [Transfer tokens to a destination wallet](#transfer-tokens-to-a-destination-wallet)
 
+For [Solana Pay](#solana-pay) integration and QR code generation.
+
 For troubleshooting and debugging your Solana transactions, see [Debug mode](#debug-mode) below and the gill docs for
 [Debug Mode](https://gillsdk.com/docs/debug-mode).
 
@@ -675,6 +677,39 @@ const transferTokensTx = await buildTransferTokensTransaction({
   // computeUnitPrice?: number, // no default set
 });
 ```
+
+## Solana Pay
+
+Gill includes support for [Solana Pay](https://docs.solanapay.com/) payment requests and QR code generation.
+
+```typescript
+import {
+  createTransferRequestURL,
+  createTransactionRequestURL,
+  parseSolanaPayURL,
+  validateSolanaPayURL,
+} from "gill/node";
+
+// Create a payment request
+const paymentURL = createTransferRequestURL({
+  recipient: "11111111111111111111111111111112" as Address,
+  amount: 0.001, // 0.001 SOL
+  label: "Coffee Shop",
+  message: "Payment for coffee",
+});
+
+// Create a transaction request
+const transactionURL = createTransactionRequestURL({
+  link: "https://merchant.com/api/solana-pay",
+});
+
+// Parse and validate URLs
+const isValid = validateSolanaPayURL(paymentURL);
+const parsed = parseSolanaPayURL(paymentURL);
+```
+
+> Find complete examples with QR code generation in the
+> [`/examples/solana-pay` directory](https://github.com/gillsdk/gill/tree/master/examples/solana-pay).
 
 ## Debug mode
 

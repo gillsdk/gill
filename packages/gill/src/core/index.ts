@@ -16,5 +16,6 @@ export * from "./rent";
 export * from "./rpc";
 export * from "./send-and-confirm-transaction-with-signers";
 export * from "./simulate-transaction";
+export * from "./solana-pay";
 export * from "./utils";
 export * from "./verify-signature";
