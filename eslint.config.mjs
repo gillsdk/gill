@@ -26,4 +26,12 @@ export default [
             ],
         },
     },
+    {
+        files: ['packages/react/src/**/*.ts', 'packages/react/src/**/*.tsx'],
+        languageOptions: {
+            parserOptions: {
+                project: ['packages/react/tsconfig.lint.json'],
+            },
+        },
+    },
 ];
