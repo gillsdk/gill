@@ -20,7 +20,7 @@ import {
 } from '../instructions';
 
 export const ESCROW_ANCHOR_PROGRAM_ADDRESS =
-  'HgPZjRY7jDXLFsdngP13ruvYutb46WQ3ZwMCUxZfT9Rp' as Address<'HgPZjRY7jDXLFsdngP13ruvYutb46WQ3ZwMCUxZfT9Rp'>;
+  'GzzMbV5dxsPsjYRibf4xw9mTQQkYrDwqhM5MJFtYrrWM' as Address<'GzzMbV5dxsPsjYRibf4xw9mTQQkYrDwqhM5MJFtYrrWM'>;
 
 export enum EscrowAnchorAccount {
   Escrow,
@@ -95,7 +95,7 @@ export function identifyEscrowAnchorInstruction(
 }
 
 export type ParsedEscrowAnchorInstruction<
-  TProgram extends string = 'HgPZjRY7jDXLFsdngP13ruvYutb46WQ3ZwMCUxZfT9Rp',
+  TProgram extends string = 'GzzMbV5dxsPsjYRibf4xw9mTQQkYrDwqhM5MJFtYrrWM',
 > =
   | ({
       instructionType: EscrowAnchorInstruction.Make;
