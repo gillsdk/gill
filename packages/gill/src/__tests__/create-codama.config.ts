@@ -36,7 +36,6 @@ describe("createCodamaConfig", () => {
           ],
           from: "@codama/renderers-js",
         },
-        rust: undefined,
       },
     });
   });
