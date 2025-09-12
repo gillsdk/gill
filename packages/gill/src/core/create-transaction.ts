@@ -1,6 +1,3 @@
-import type { Simplify } from "../types";
-
-import { getSetComputeUnitLimitInstruction, getSetComputeUnitPriceInstruction } from "@solana-program/compute-budget";
 import type {
   Address,
   TransactionMessageWithBlockhashLifetime,
@@ -19,7 +16,9 @@ import {
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
 } from "@solana/kit";
+import { getSetComputeUnitLimitInstruction, getSetComputeUnitPriceInstruction } from "@solana-program/compute-budget";
 
+import type { Simplify } from "../types";
 import type { CreateTransactionInput, FullTransaction } from "../types/transactions";
 
 /**
@@ -64,7 +63,33 @@ export function createTransaction<TVersion extends TransactionVersion, TFeePayer
   TransactionMessageWithFeePayer | TransactionMessageWithFeePayerSigner
 > {
   return pipe(
-    createTransactionMessage({ version: version ?? ("legacy" as TVersion) }),
+    // Auto-select version: if any provided instruction appears to use an Address Lookup Table (ALT),
+    // choose `v0`. Otherwise default to `legacy`. If the caller explicitly provides `version`, use it.
+    (() => {
+      const hasAlt = (() => {
+        if (!instructions || !Array.isArray(instructions)) return false;
+        return instructions.some((ix) => {
+          if (!ix || typeof ix !== "object") return false;
+          if (
+            "addressTableLookup" in ix ||
+            "addressTableLookups" in ix ||
+            "addressLookupTable" in ix ||
+            "lookupTable" in ix
+          ) {
+            return true;
+          }
+          try {
+            const s = JSON.stringify(ix);
+            return /address\s*lookup|addressTable/i.test(s) || s.includes("addressTable");
+          } catch {
+            return false;
+          }
+        });
+      })();
+
+      const selectedVersion = version ?? (hasAlt ? ("v0" as TVersion) : ("legacy" as TVersion));
+      return createTransactionMessage({ version: selectedVersion });
+    })(),
     (tx) => {
       const withLifetime = latestBlockhash ? setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx) : tx;
       if (typeof feePayer !== "string" && "address" in feePayer && isTransactionSigner(feePayer)) {
