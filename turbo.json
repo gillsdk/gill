@@ -58,11 +58,13 @@
       "outputs": ["*"]
     },
     "lint": {
-      "inputs": ["$TURBO_DEFAULT$", "src/**", "eslint.config.*", ".eslintrc.*"],
+      "dependsOn": ["^lint"],
+      "inputs": ["$TURBO_DEFAULT$", "src/**/*", "eslint.config.*"],
       "outputs": []
     },
     "lint:fix": {
-      "inputs": ["$TURBO_DEFAULT$", "src/**", "eslint.config.*", ".eslintrc.*"],
+      "dependsOn": ["^lint:fix"],
+      "inputs": ["$TURBO_DEFAULT$", "src/**/*", "eslint.config.*"],
       "outputs": []
     },
     "test:typecheck": {
