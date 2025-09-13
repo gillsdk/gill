@@ -2,5 +2,6 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "gill",
   "extends": "../tsconfig/base.json",
-  "include": ["src", "src/programs/token/index.ts", "src/programs/index.ts", "src/programs", "src/node", "src/types"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/.eslintrc.js", "**/eslint.config.js"]
 }

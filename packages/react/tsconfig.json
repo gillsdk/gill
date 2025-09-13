@@ -2,7 +2,8 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "@gillsdk/react",
   "extends": "../tsconfig/base.json",
-  "include": ["src", "src/hooks", "src/types"],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/.eslintrc.js", "**/eslint.config.js"],
   "compilerOptions": {
     "jsx": "react",
     "lib": ["DOM", "ES2015", "ESNext.Promise"]
