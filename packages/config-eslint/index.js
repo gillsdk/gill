@@ -4,7 +4,7 @@ const project = resolve(process.cwd(), "tsconfig.json");
 
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
-  root:true,
+  root: true,
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 2020,
@@ -17,16 +17,13 @@ module.exports = {
     es6: true,
     jest: true,
   },
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-  ],
+  extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   settings: {
     "import/resolver": {
       typescript: {
-       project
-      }
-    }
+        project,
+      },
+    },
   },
   rules: {
     "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
@@ -36,20 +33,23 @@ module.exports = {
       [
         {
           transform: "kebab",
-        }
+        },
       ],
       {
         ignore: ["index"],
-      }
+      },
     ],
   },
-  ignorePatterns: [
-    "node_modules/",
-    "dist/",
-  ],
+  ignorePatterns: ["node_modules/", "dist/"],
   overrides: [
     {
       files: ["*.ts", "*.tsx", "*.js", "*.jsx"],
+    },
+    {
+      files: ["*.tsx"],
+      rules: {
+        "@typescript-eslint/await-thenable": "off",
+      },
     },
   ],
 };
