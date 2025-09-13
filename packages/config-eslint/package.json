@@ -1,19 +1,16 @@
 {
   "name": "@gillsdk/config-eslint",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
   "devDependencies": {
     "@solana/eslint-config-solana": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.15.0",
     "eslint-plugin-jest": "^28.9.0"
+  },
+  "engines": {
+    "node": ">=20.18.0"
   }
 }
