@@ -77,12 +77,9 @@ export function createSolanaClient<TCluster extends ModifiedClusterUrl>({
     rpc,
     rpcSubscriptions,
     sendAndConfirmTransaction: sendAndConfirmTransactionWithSignersFactory({
-      // @ts-ignore - TODO(FIXME:nick)
-      rpc,
-      // @ts-ignore - TODO(FIXME:nick)
-      rpcSubscriptions,
+      rpc: rpc as any,
+      rpcSubscriptions: rpcSubscriptions as any,
     }),
-    // @ts-ignore
-    simulateTransaction: simulateTransactionFactory({ rpc }),
+    simulateTransaction: simulateTransactionFactory({ rpc: rpc as any }),
   };
 }

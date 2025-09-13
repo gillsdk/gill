@@ -87,8 +87,10 @@ export function sendAndConfirmTransactionWithSignersFactory<
   rpc,
   rpcSubscriptions,
 }: SendAndConfirmTransactionWithSignersFactoryConfig<TCluster>): SendAndConfirmTransactionWithSignersFunction {
-  // @ts-ignore - TODO(FIXME)
-  const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+  const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({
+    rpc: rpc as Rpc<GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi>,
+    rpcSubscriptions: rpcSubscriptions as RpcSubscriptions<SignatureNotificationsApi & SlotNotificationsApi>,
+  });
   return async function sendAndConfirmTransactionWithSigners(transaction, config = { commitment: "confirmed" }) {
     if ("messageBytes" in transaction == false) {
       if ("lifetimeConstraint" in transaction === false) {
