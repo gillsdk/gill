@@ -57,6 +57,14 @@
       "inputs": ["$TURBO_DEFAULT$", "*"],
       "outputs": ["*"]
     },
+    "lint": {
+      "inputs": ["$TURBO_DEFAULT$", "src/**", "eslint.config.*", ".eslintrc.*"],
+      "outputs": []
+    },
+    "lint:fix": {
+      "inputs": ["$TURBO_DEFAULT$", "src/**", "eslint.config.*", ".eslintrc.*"],
+      "outputs": []
+    },
     "test:typecheck": {
       "dependsOn": ["^compile:typedefs"],
       "inputs": ["$TURBO_DEFAULT$", "tsconfig.*", "src/**"],
