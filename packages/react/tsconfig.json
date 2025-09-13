@@ -3,7 +3,6 @@
   "display": "@gillsdk/react",
   "extends": "../tsconfig/base.json",
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/.eslintrc.js", "**/eslint.config.js"],
   "compilerOptions": {
     "jsx": "react",
     "lib": ["DOM", "ES2015", "ESNext.Promise"]
