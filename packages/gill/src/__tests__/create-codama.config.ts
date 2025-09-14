@@ -38,6 +38,7 @@ describe("createCodamaConfig", () => {
         },
       },
     });
+    expect(config.scripts).not.toHaveProperty("rust");
   });
 
   it("should return accept rust client", () => {
