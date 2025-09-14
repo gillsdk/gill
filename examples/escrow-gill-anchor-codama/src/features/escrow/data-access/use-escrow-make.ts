@@ -1,11 +1,24 @@
-import { useMutation } from '@tanstack/react-query'
-import { createTransaction, getBase58Decoder, signAndSendTransactionMessageWithSigners } from 'gill'
-import { getMakeInstructionAsync } from '@/generated/instructions'
-import type { Address } from 'gill'
-import { toast } from 'sonner'
 import { useSolana } from '@/components/solana/use-solana'
 import { useWalletUiSigner } from '@/components/solana/use-wallet-ui-signer'
 import { toastTx } from '@/components/toast-tx'
+import { ESCROW_ANCHOR_PROGRAM_ADDRESS, fetchAllEscrow, getEscrowDiscriminatorBytes } from '@/generated'
+import { getMakeInstructionAsync } from '@/generated/instructions'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import type { Address, Base58EncodedBytes } from 'gill'
+import {
+  createTransaction,
+  getAddressEncoder,
+  getBase58Decoder,
+  getProgramDerivedAddress,
+  signAndSendTransactionMessageWithSigners,
+} from 'gill'
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
+  getAssociatedTokenAccountAddress,
+  SYSTEM_PROGRAM_ADDRESS,
+  TOKEN_PROGRAM_ADDRESS,
+} from 'gill/programs'
+import { toast } from 'sonner'
 
 interface MakeEscrowInput {
   mintA: Address
@@ -17,10 +30,11 @@ interface MakeEscrowInput {
 
 export function useEscrowMake() {
   const { client, cluster } = useSolana()
+  const addressEncoder = getAddressEncoder()
   const signer = useWalletUiSigner()
 
   return useMutation({
-    mutationKey: ['escrow', 'make'],
+    mutationKey: ['escrow', 'make', { cluster, signer }],
     mutationFn: async (input: MakeEscrowInput) => {
       try {
         console.log('=== ESCROW TRANSACTION DEBUG ===')
@@ -33,7 +47,6 @@ export function useEscrowMake() {
 
         // Check if the escrow program exists
         try {
-          const { ESCROW_ANCHOR_PROGRAM_ADDRESS } = await import('@/generated/programs')
           const programInfo = await client.rpc.getAccountInfo(ESCROW_ANCHOR_PROGRAM_ADDRESS).send()
           if (!programInfo.value) {
             throw new Error(
@@ -49,23 +62,44 @@ export function useEscrowMake() {
           // Continue anyway - the error might be network related
         }
 
+        console.log(input.seed, 'seed from maker')
+        const seedBytes = new Uint8Array(new BigUint64Array([BigInt(input.seed)]).buffer)
+
+        const [escrowPDA] = await getProgramDerivedAddress({
+          programAddress: ESCROW_ANCHOR_PROGRAM_ADDRESS,
+          seeds: ['escrow', addressEncoder.encode(signer.address), seedBytes],
+        })
+
+        const makerAtaA = await getAssociatedTokenAccountAddress(input.mintA, signer, TOKEN_PROGRAM_ADDRESS)
+        const vault = await getAssociatedTokenAccountAddress(input.mintA, escrowPDA, TOKEN_PROGRAM_ADDRESS)
+        console.log(escrowPDA, makerAtaA, vault, 'derived')
+
         console.log('Creating instruction with signer:', signer.address)
+
         const instruction = await getMakeInstructionAsync({
           maker: signer,
           mintA: input.mintA,
           mintB: input.mintB,
-          seed: input.seed,
-          depositAmt: input.depositAmt,
-          receiveAmt: input.receiveAmt,
+          seed: BigInt(input.seed),
+          vault,
+          makerAtaA,
+          depositAmt: BigInt(input.depositAmt),
+          receiveAmt: BigInt(input.receiveAmt),
+          escrow: escrowPDA,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
+          tokenProgram: TOKEN_PROGRAM_ADDRESS,
+          systemProgram: SYSTEM_PROGRAM_ADDRESS,
         })
+
         console.log('Instruction created successfully')
 
-        const transaction = createTransaction({
+        const transaction = await createTransaction({
           feePayer: signer,
-          version: 0,
+          version: 'legacy',
           latestBlockhash,
           instructions: [instruction],
         })
+
         console.log('Transaction created, signing and sending...')
         const signatureBytes = await signAndSendTransactionMessageWithSigners(transaction)
         const signature = getBase58Decoder().decode(signatureBytes)
@@ -117,7 +151,9 @@ export function useEscrowMake() {
       toastTx(signature)
     },
     onError: (error) => {
+      console.log(error, 'error creating escrow')
       toast.error(`Failed to create escrow: ${error}`)
     },
   })
 }
+

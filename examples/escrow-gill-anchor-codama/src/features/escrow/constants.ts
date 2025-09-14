@@ -3,9 +3,9 @@ import type { Address } from 'gill'
 // Common devnet test tokens
 export const DEVNET_TOKENS = {
   // USDC Devnet
-  USDC: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU' as Address,
+  USDC: 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr' as Address,
   // USDT Devnet
-  USDT: 'EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS' as Address,
+  USDT: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU' as Address,
   // SOL (wrapped)
   WSOL: 'So11111111111111111111111111111111111111112' as Address,
 } as const

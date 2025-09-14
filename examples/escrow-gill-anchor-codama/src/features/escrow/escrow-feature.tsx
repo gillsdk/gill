@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,7 +9,7 @@ import { AppHero } from '@/components/app-hero'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useSolana } from '@/components/solana/use-solana'
 import { useEscrowMake } from './data-access/use-escrow-make'
-import { useEscrowTake } from './data-access/use-escrow-take'
+import { useEscrowTake, useGetEscrows } from './data-access/use-escrow-take'
 import { useEscrowRefund } from './data-access/use-escrow-refund'
 import { useValidateEscrow } from './data-access/use-validate-escrow'
 import { AppErrorBoundary } from '@/components/error-boundary'
@@ -17,6 +17,7 @@ import { DEVNET_TOKENS, EXAMPLE_ESCROW } from './constants'
 import { toast } from 'sonner'
 import type { Address } from 'gill'
 import { ESCROW_ANCHOR_PROGRAM_ADDRESS } from '@/generated/programs'
+import { ellipsify } from '@/lib/utils'
 function EscrowFeatureContent() {
   const [mounted, setMounted] = useState(false)
   const [programDeployed, setProgramDeployed] = useState<boolean | null>(null)
@@ -56,7 +57,7 @@ function EscrowFeatureContent() {
     receiveAmount: EXAMPLE_ESCROW.receiveAmount.toString(),
   })
   const [takeForm, setTakeForm] = useState({
-    escrowAccount: '',
+    // escrowAccount: '',
     maker: '',
     mintA: '',
     mintB: '',
@@ -70,6 +71,7 @@ function EscrowFeatureContent() {
   const takeMutation = useEscrowTake()
   const refundMutation = useEscrowRefund()
   const validateMutation = useValidateEscrow()
+  const getEscrowsQuery = useGetEscrows()
 
   const fillExampleTokens = () => {
     setMakeForm({
@@ -123,7 +125,7 @@ function EscrowFeatureContent() {
     const depositAmt = parseInt(makeForm.depositAmount)
     const receiveAmt = parseInt(makeForm.receiveAmount)
 
-    if (isNaN(seed) || isNaN(depositAmt) || isNaN(receiveAmt)) {
+    if (isNaN(depositAmt) || isNaN(receiveAmt)) {
       toast.error('Please enter valid numbers for seed and amounts!')
       return
     }
@@ -155,16 +157,15 @@ function EscrowFeatureContent() {
 
   const handleTakeEscrow = async () => {
     if (!connected || !takeMutation) return
-
+    const seed = parseInt(makeForm.seed)
     try {
       await takeMutation.mutateAsync({
         maker: takeForm.maker as Address,
         mintA: takeForm.mintA as Address,
         mintB: takeForm.mintB as Address,
-        escrow: takeForm.escrowAccount as Address,
+        seed,
       })
       setTakeForm({
-        escrowAccount: '',
         maker: '',
         mintA: '',
         mintB: '',
@@ -176,11 +177,12 @@ function EscrowFeatureContent() {
 
   const handleRefundEscrow = async () => {
     if (!connected || !refundMutation) return
-
+    const seed = parseInt(makeForm.seed)
     try {
       await refundMutation.mutateAsync({
         mintA: refundForm.mintA as Address,
         escrow: refundForm.escrowAccount as Address,
+        seed,
       })
       setRefundForm({
         escrowAccount: '',
@@ -457,7 +459,7 @@ function EscrowFeatureContent() {
                       makeMutation.isPending ||
                       !makeForm.mintA ||
                       !makeForm.mintB ||
-                      !makeForm.seed ||
+                      // !makeForm.seed ||
                       !makeForm.depositAmount ||
                       !makeForm.receiveAmount
                     }
@@ -478,58 +480,44 @@ function EscrowFeatureContent() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="escrowAccount">Escrow Account Address</Label>
-                    <Input
-                      id="escrowAccount"
-                      placeholder="Escrow account address"
-                      value={takeForm.escrowAccount}
-                      onChange={(e) => setTakeForm({ ...takeForm, escrowAccount: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="maker">Maker Address</Label>
-                    <Input
-                      id="maker"
-                      placeholder="Original escrow maker address"
-                      value={takeForm.maker}
-                      onChange={(e) => setTakeForm({ ...takeForm, maker: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="mintA">Token A Mint Address</Label>
-                    <Input
-                      id="mintA"
-                      placeholder="Token A mint address"
-                      value={takeForm.mintA}
-                      onChange={(e) => setTakeForm({ ...takeForm, mintA: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="mintB">Token B Mint Address</Label>
-                    <Input
-                      id="mintB"
-                      placeholder="Token B mint address"
-                      value={takeForm.mintB}
-                      onChange={(e) => setTakeForm({ ...takeForm, mintB: e.target.value })}
-                    />
-                  </div>
+                <div className="grid grid-cols-3 gap-2 py-4">
+                  {getEscrowsQuery.data && getEscrowsQuery?.data?.length > 0 ? (
+                    getEscrowsQuery.data?.map((d, i) => (
+                      <Card key={i}>
+                        <CardHeader>{ellipsify(d?.address)}</CardHeader>
+                        <CardContent>
+                          <CardDescription>
+                            <div>Mint A: {ellipsify(d?.data.mintA)}</div>
+                            <div>Mint B: {ellipsify(d?.data.mintB)}</div>
+                            <div>Reciveing Amount: {Number(d?.data.receiveAmt).toFixed(2)}</div>
+                          </CardDescription>
+                          <Button
+                            onClick={async () => {
+                              if (!connected || !takeMutation) return
+                              const seed = d.data.seed
+                              try {
+                                await takeMutation.mutateAsync({
+                                  maker: d.data.maker as Address,
+                                  mintA: d.data.mintA as Address,
+                                  mintB: d.data.mintB as Address,
+                                  seed,
+                                })
+                              } catch (error) {
+                                console.error('Take escrow failed:', error)
+                              }
+                            }}
+                            disabled={takeMutation.isPending}
+                            className="my-4"
+                          >
+                            {takeMutation.isPending ? 'Taking...' : 'Take'}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <span className="text-xs">no escrow found onchain</span>
+                  )}
                 </div>
-                <Button
-                  onClick={handleTakeEscrow}
-                  disabled={
-                    !takeMutation ||
-                    takeMutation.isPending ||
-                    !takeForm.escrowAccount ||
-                    !takeForm.maker ||
-                    !takeForm.mintA ||
-                    !takeForm.mintB
-                  }
-                  className="w-full"
-                >
-                  {takeMutation?.isPending ? 'Taking Escrow...' : 'Take Escrow'}
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>
