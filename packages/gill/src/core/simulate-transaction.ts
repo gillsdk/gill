@@ -7,27 +7,11 @@ export type SimulateTransactionFunction = (
   config?: Simplify<Omit<Parameters<SimulateTransactionApi["simulateTransaction"]>[1], "encoding" | "sigVerify">>,
 ) => Promise<ReturnType<SimulateTransactionApi["simulateTransaction"]>>;
 
-type SimulateTransactionFactoryConfig<TCluster> = {
-  rpc: Rpc<SimulateTransactionApi> & {
-    "~cluster"?: TCluster;
-  };
+type SimulateTransactionFactoryConfig = {
+  rpc: Rpc<SimulateTransactionApi>;
 };
 
-export function simulateTransactionFactory({
-  rpc,
-}: SimulateTransactionFactoryConfig<"devnet">): SimulateTransactionFunction;
-export function simulateTransactionFactory({
-  rpc,
-}: SimulateTransactionFactoryConfig<"testnet">): SimulateTransactionFunction;
-export function simulateTransactionFactory({
-  rpc,
-}: SimulateTransactionFactoryConfig<"mainnet">): SimulateTransactionFunction;
-export function simulateTransactionFactory({
-  rpc,
-}: SimulateTransactionFactoryConfig<"localnet">): SimulateTransactionFunction;
-export function simulateTransactionFactory<
-  TCluster extends "devnet" | "mainnet" | "testnet" | "localnet" | void = void,
->({ rpc }: SimulateTransactionFactoryConfig<TCluster>): SimulateTransactionFunction {
+export function simulateTransactionFactory({ rpc }: SimulateTransactionFactoryConfig): SimulateTransactionFunction {
   return async function simulateTransaction(transaction, config) {
     if ("messageBytes" in transaction == false) {
       transaction = await partiallySignTransactionMessageWithSigners(transaction);

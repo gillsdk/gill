@@ -56,40 +56,18 @@ export type SendAndConfirmTransactionWithSignersFunction = (
   >,
 ) => Promise<Signature>;
 
-type SendAndConfirmTransactionWithSignersFactoryConfig<TCluster> = {
-  rpc: Rpc<GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi> & {
-    "~cluster"?: TCluster;
-  };
-  rpcSubscriptions: RpcSubscriptions<SignatureNotificationsApi & SlotNotificationsApi> & {
-    "~cluster"?: TCluster;
-  };
+type SendAndConfirmTransactionWithSignersFactoryConfig = {
+  rpc: Rpc<GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi>;
+  rpcSubscriptions: RpcSubscriptions<SignatureNotificationsApi & SlotNotificationsApi>;
 };
 
 export function sendAndConfirmTransactionWithSignersFactory({
   rpc,
   rpcSubscriptions,
-}: SendAndConfirmTransactionWithSignersFactoryConfig<"devnet">): SendAndConfirmTransactionWithSignersFunction;
-export function sendAndConfirmTransactionWithSignersFactory({
-  rpc,
-  rpcSubscriptions,
-}: SendAndConfirmTransactionWithSignersFactoryConfig<"testnet">): SendAndConfirmTransactionWithSignersFunction;
-export function sendAndConfirmTransactionWithSignersFactory({
-  rpc,
-  rpcSubscriptions,
-}: SendAndConfirmTransactionWithSignersFactoryConfig<"mainnet">): SendAndConfirmTransactionWithSignersFunction;
-export function sendAndConfirmTransactionWithSignersFactory({
-  rpc,
-  rpcSubscriptions,
-}: SendAndConfirmTransactionWithSignersFactoryConfig<"localnet">): SendAndConfirmTransactionWithSignersFunction;
-export function sendAndConfirmTransactionWithSignersFactory<
-  TCluster extends "devnet" | "mainnet" | "testnet" | "localnet" | undefined = undefined,
->({
-  rpc,
-  rpcSubscriptions,
-}: SendAndConfirmTransactionWithSignersFactoryConfig<TCluster>): SendAndConfirmTransactionWithSignersFunction {
+}: SendAndConfirmTransactionWithSignersFactoryConfig): SendAndConfirmTransactionWithSignersFunction {
   const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({
-    rpc: rpc as Rpc<GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi>,
-    rpcSubscriptions: rpcSubscriptions as RpcSubscriptions<SignatureNotificationsApi & SlotNotificationsApi>,
+    rpc,
+    rpcSubscriptions,
   });
   return async function sendAndConfirmTransactionWithSigners(transaction, config = { commitment: "confirmed" }) {
     if ("messageBytes" in transaction == false) {

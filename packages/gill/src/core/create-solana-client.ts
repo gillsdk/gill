@@ -77,9 +77,9 @@ export function createSolanaClient<TCluster extends ModifiedClusterUrl>({
     rpc,
     rpcSubscriptions,
     sendAndConfirmTransaction: sendAndConfirmTransactionWithSignersFactory({
-      rpc: rpc as any,
-      rpcSubscriptions: rpcSubscriptions as any,
+      rpc,
+      rpcSubscriptions,
     }),
-    simulateTransaction: simulateTransactionFactory({ rpc: rpc as any }),
+    simulateTransaction: simulateTransactionFactory({ rpc }),
   };
 }
