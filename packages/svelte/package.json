@@ -16,7 +16,9 @@
     "test:treeshakability:browser": "agadoo dist/index.browser.mjs",
     "test:treeshakability:node": "agadoo dist/index.node.mjs",
     "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
-    "style:fix": "pnpm style:check --write"
+    "style:fix": "pnpm style:check --write",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src"
   },
   "exports": {
     "types": "./dist/index.d.ts",
@@ -67,7 +69,9 @@
     "supports bigint and not dead",
     "maintained node versions"
   ],
-  "devDependencies": {},
+  "devDependencies": {
+    "@gillsdk/config-eslint": "workspace:*"
+  },
   "peerDependencies": {
     "gill": "workspace:*",
     "typescript": ">=5"
