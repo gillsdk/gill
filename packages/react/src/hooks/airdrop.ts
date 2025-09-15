@@ -31,6 +31,14 @@ type UseAirdropResponse = {
 };
 
 /**
+ * Convert a number or bigint to Lamports type
+ */
+function toLamports(value: bigint | number): Lamports {
+  const lamportAmount = typeof value === "number" ? BigInt(value) : value;
+  return lamportAmount as Lamports;
+}
+
+/**
  * Request an airdrop of SOL to an address on devnet/testnet networks.
  *
  * **Important**: This hook will throw an error if used on mainnet.
@@ -66,33 +74,31 @@ export function useAirdrop({ config, abortSignal }: UseAirdropInput = {}) {
       address,
       lamports,
     }: {
-      address: Address | string;
+      address: Address;
       lamports: bigint | number;
     }): Promise<UseAirdropResponse> => {
-      // Convert lamports to bigint if it's a number
-      const lamportAmount = typeof lamports === "number" ? BigInt(lamports) : lamports;
+      try {
+        const signature = await rpc
+          .requestAirdrop(address, toLamports(lamports), {
+            commitment: config?.commitment ?? "confirmed",
+          })
+          .send({ abortSignal });
 
-      const signature = await rpc
-        .requestAirdrop(address as Address, lamportAmount as Lamports, {
-          commitment: config?.commitment ?? "confirmed",
-        })
-        .send({ abortSignal });
-
-      return { signature };
-    },
-    onError: (error) => {
-      // Provide helpful error messages for common issues
-      if (error instanceof Error) {
-        if (error.message.includes("airdrop request failed")) {
-          throw new Error(
-            "Airdrop failed. This could be due to: 1) Using mainnet (airdrops only work on devnet/testnet), 2) Rate limiting (try again later), or 3) Network issues.",
-          );
+        return { signature };
+      } catch (error) {
+        // giving helpful error messages for common issues
+        if (error instanceof Error) {
+          if (error.message.includes("airdrop request failed")) {
+            throw new Error(
+              "Airdrop failed. This could be due to: 1) Using mainnet (airdrops only work on devnet/testnet), 2) Rate limiting (try again later), or 3) Network issues.",
+            );
+          }
+          if (error.message.includes("mainnet")) {
+            throw new Error("Airdrops are not available on mainnet. Switch to devnet or testnet to request SOL.");
+          }
         }
-        if (error.message.includes("mainnet")) {
-          throw new Error("Airdrops are not available on mainnet. Switch to devnet or testnet to request SOL.");
-        }
+        throw error;
       }
-      throw error;
     },
   });
 }
