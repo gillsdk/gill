@@ -62,7 +62,6 @@ export function useEscrowMake() {
           // Continue anyway - the error might be network related
         }
 
-        console.log(input.seed, 'seed from maker')
         const seedBytes = new Uint8Array(new BigUint64Array([BigInt(input.seed)]).buffer)
 
         const [escrowPDA] = await getProgramDerivedAddress({

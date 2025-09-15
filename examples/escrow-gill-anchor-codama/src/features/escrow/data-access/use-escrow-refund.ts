@@ -36,7 +36,6 @@ export function useEscrowRefund() {
     mutationKey: ['escrow', 'refund'],
     mutationFn: async (input: RefundEscrowInput) => {
       try {
-              console.log(input.seed, 'seed from refund')
         const seedBytes = new Uint8Array(new BigUint64Array([BigInt(input.seed)]).buffer)
 
 

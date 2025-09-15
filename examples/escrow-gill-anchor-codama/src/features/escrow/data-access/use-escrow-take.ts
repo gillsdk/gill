@@ -37,7 +37,7 @@ export function useEscrowTake() {
     mutationKey: ['escrow', 'take'],
     mutationFn: async (input: TakeEscrowInput) => {
       try {
-        console.log(input.seed, 'seed from taker')
+
         const seedBytes = new Uint8Array(new BigUint64Array([BigInt(input.seed)]).buffer)
 
         const [escrowPDA] = await getProgramDerivedAddress({
