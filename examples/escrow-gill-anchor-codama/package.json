@@ -1,7 +1,6 @@
 {
   "name": "escrow-gill-anchor-codama",
   "scripts": {
-    "build": "next build",
     "ci": "npm run build && npm run lint && npm run format:check",
     "dev": "next dev --turbopack",
     "format": "prettier --write .",
