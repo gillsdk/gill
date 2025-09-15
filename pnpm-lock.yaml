@@ -282,6 +282,10 @@ importers:
       typescript:
         specifier: '>=5'
         version: 5.6.3
+    devDependencies:
+      '@gillsdk/config-eslint':
+        specifier: workspace:*
+        version: link:../config-eslint
 
   packages/test-config:
     dependencies:
@@ -309,6 +313,10 @@ importers:
       typescript:
         specifier: '>=5'
         version: 5.6.3
+    devDependencies:
+      '@gillsdk/config-eslint':
+        specifier: workspace:*
+        version: link:../config-eslint
 
 packages:
 
