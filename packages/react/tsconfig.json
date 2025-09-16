@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "@gillsdk/react",
   "extends": "../tsconfig/base.json",
-  "include": ["src/**/*"],
+  "include": ["src"],
   "compilerOptions": {
     "jsx": "react",
     "lib": ["DOM", "ES2015", "ESNext.Promise"]
