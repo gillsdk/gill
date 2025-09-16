@@ -11,14 +11,11 @@ import { loadKeypairSignerFromFile } from "gill/node";
 import {
   getCreateAccountInstruction,
   getCreateMetadataAccountV3Instruction,
-  getTokenMetadataAddress,
-} from "gill/programs";
-import {
-  getCreateTokenInstructions,
   getInitializeMintInstruction,
   getMintSize,
+  getTokenMetadataAddress,
   TOKEN_PROGRAM_ADDRESS,
-} from "gill/programs/token";
+} from "gill/programs";
 
 const { rpc, sendAndConfirmTransaction } = createSolanaClient({
   urlOrMoniker: "devnet",

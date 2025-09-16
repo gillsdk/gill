@@ -7,7 +7,7 @@ import type { GillUseRpcHook } from "./types";
 
 import type { Account, Address, FetchAccountConfig, Simplify } from "gill";
 import { assertAccountExists, fetchEncodedAccount } from "gill";
-import { decodeMint, type Mint } from "gill/programs/token";
+import { decodeMint, type Mint } from "gill/programs";
 
 type RpcConfig = Simplify<Omit<FetchAccountConfig, "abortSignal">>;
 

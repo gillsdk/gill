@@ -13,7 +13,7 @@ import {
   fetchMint,
   getAssociatedTokenAccountAddress,
   type Token,
-} from "gill/programs/token";
+} from "gill/programs";
 
 type RpcConfig = Simplify<Omit<FetchAccountConfig, "abortSignal">>;
 
