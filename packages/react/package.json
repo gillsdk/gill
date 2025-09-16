@@ -2,6 +2,7 @@
   "name": "@gillsdk/react",
   "license": "MIT",
   "version": "0.5.1",
+  "type": "module",
   "description": "a Solana hooks library for React, built on top of gill - the modern JavaScript/TypeScript library for Solana",
   "scripts": {
     "clean": "rimraf coverage dist build node_modules .turbo",
@@ -35,7 +36,6 @@
   "module": "./dist/index.node.mjs",
   "react-native": "./dist/index.native.mjs",
   "types": "./dist/index.d.ts",
-  "type": "commonjs",
   "files": [
     "./dist/"
   ],
@@ -70,6 +70,9 @@
   },
   "dependencies": {
     "@solana/react": "^3.0.3",
+    "@solana/wallet-standard-features": "^1.3.0",
+    "@wallet-standard/core": "^1.1.1",
+    "@wallet-standard/react": "^1.0.1",
     "gill": "workspace:*"
   },
   "peerDependencies": {
