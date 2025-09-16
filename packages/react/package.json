@@ -69,6 +69,7 @@
     "react": "^18"
   },
   "dependencies": {
+    "@solana/react": "^3.0.3",
     "gill": "workspace:*"
   },
   "peerDependencies": {
