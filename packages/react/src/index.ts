@@ -1,5 +1,4 @@
-// @ts-expect-error - Patch BigInt to allow calling `JSON.stringify` on objects that use
-// eslint-disable-next-line no-unused-vars
+// @ts-ignore - Patch BigInt to allow calling `JSON.stringify` on objects that use
 interface BigInt {
   /** Convert a BigInt to string form when calling `JSON.stringify()` */
   toJSON: () => string;
