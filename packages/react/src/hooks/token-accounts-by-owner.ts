@@ -1,14 +1,22 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import type { Account, Address, FetchAccountConfig, Simplify } from "gill";
 import type { Token } from "gill/programs/token";
 import { decodeToken, TOKEN_PROGRAM_ADDRESS } from "gill/programs/token";
-import { useQuery } from "@tanstack/react-query";
 import { GILL_HOOK_CLIENT_KEY } from "../const";
 import { useSolanaClient } from "./client";
 import type { GillUseRpcHook } from "./types";
 
 type RpcConfig = Simplify<Omit<FetchAccountConfig, "abortSignal">>;
+
+/**
+ * Utility type for accounts that exist on-chain
+ */
+type ExistingAccount<TData extends object | Uint8Array, TAddress extends Address = Address> = Account<
+  TData,
+  TAddress
+> & { exists: true };
 
 /**
  * Token account with its associated token account address
@@ -17,7 +25,7 @@ type TokenAccountWithAddress<TAddress extends Address = Address> = {
   /**
    * The token account data
    */
-  account: Account<Token, TAddress> & { exists: true };
+  account: ExistingAccount<Token, TAddress>;
   /**
    * The address of the token account
    */
@@ -92,54 +100,45 @@ export function useTokenAccountsByOwner<TConfig extends RpcConfig = RpcConfig, T
   const { data, ...rest } = useQuery({
     ...options,
     enabled: !!owner,
-    queryFn: async (): Promise<TokenAccountsQueryResult<TAddress>> => {
-      const allAccounts: TokenAccountWithAddress<TAddress>[] = [];
+    queryFn: async (): Promise<TokenAccountsQueryResult<Address>> => {
+      const allAccounts: TokenAccountWithAddress<Address>[] = [];
 
-      try {
-        let filter;
-        if (tokenMint) {
-          filter = { mint: tokenMint };
-        } else {
-          filter = { programId: TOKEN_PROGRAM_ADDRESS };
+      const filter = tokenMint ? { mint: tokenMint } : { programId: TOKEN_PROGRAM_ADDRESS };
+
+      const response = await rpc.getTokenAccountsByOwner(owner, filter, { encoding: "base64", ...config }).send();
+
+      for (const accountInfo of response.value) {
+        const rawAccount: ExistingAccount<Uint8Array, Address> = {
+          address: accountInfo.pubkey,
+          data: new Uint8Array(Buffer.from(accountInfo.account.data[0], "base64")),
+          executable: accountInfo.account.executable,
+          exists: true,
+          lamports: accountInfo.account.lamports,
+          programAddress: accountInfo.account.owner,
+          space: accountInfo.account.space,
+        };
+
+        const decodedAccount = decodeToken(rawAccount);
+
+        if (!includeZeroBalance && decodedAccount.data.amount === 0n) {
+          continue;
         }
 
-        const response = await rpc.getTokenAccountsByOwner(owner, filter, { encoding: "base64", ...config }).send();
+        const tokenAccount: ExistingAccount<Token, Address> = {
+          ...decodedAccount,
+          exists: true,
+        };
 
-        for (const accountInfo of response.value) {
-          try {
-            const rawAccount: Account<Uint8Array, TAddress> & { exists: true } = {
-              address: accountInfo.pubkey as TAddress,
-              data: new Uint8Array(Buffer.from(accountInfo.account.data[0], "base64")),
-              executable: accountInfo.account.executable,
-              exists: true,
-              lamports: accountInfo.account.lamports,
-              programAddress: accountInfo.account.owner,
-              space: accountInfo.account.space,
-            };
-
-            const decodedAccount = decodeToken(rawAccount);
-
-            if (!includeZeroBalance && decodedAccount.data.amount === 0n) {
-              continue;
-            }
-
-            allAccounts.push({
-              account: decodedAccount as Account<Token, TAddress> & { exists: true },
-              address: accountInfo.pubkey as TAddress,
-            });
-          } catch (decodeError) {
-            console.warn(`Failed to decode token account ${accountInfo.pubkey}:`, decodeError);
-          }
-        }
-      } catch (queryError) {
-        console.warn(`Failed to query token accounts:`, queryError);
-        throw queryError;
+        allAccounts.push({
+          account: tokenAccount,
+          address: accountInfo.pubkey,
+        });
       }
 
       return {
         accounts: allAccounts,
         total: allAccounts.length,
-      } satisfies TokenAccountsQueryResult<TAddress>;
+      };
     },
     queryKey: [GILL_HOOK_CLIENT_KEY, "getTokenAccountsByOwner", owner, tokenMint, includeZeroBalance],
   });
@@ -147,6 +146,5 @@ export function useTokenAccountsByOwner<TConfig extends RpcConfig = RpcConfig, T
   return {
     ...rest,
     accounts: (data as TokenAccountsQueryResult<TAddress> | undefined)?.accounts || [],
-    total: (data as TokenAccountsQueryResult<TAddress> | undefined)?.total || 0,
   };
 }
