@@ -14,6 +14,7 @@
   "editor.formatOnType": false,
   "typescript.preferences.organizeImports": true,
   "javascript.preferences.organizeImports": true,
+  "typescript.preferences.importModuleSpecifierEnding": "js",
 
   // Set Prettier as the default formatter
   "editor.defaultFormatter": "esbenp.prettier-vscode",

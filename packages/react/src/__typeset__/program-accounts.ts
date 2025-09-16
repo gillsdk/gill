@@ -6,7 +6,7 @@ import {
   Base58EncodedBytes,
   SolanaRpcResponse,
 } from "gill";
-import { useProgramAccounts } from "../hooks/program-accounts";
+import { useProgramAccounts } from "../hooks/program-accounts.js";
 
 // [DESCRIBE] useProgramAccounts
 {

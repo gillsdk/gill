@@ -12,9 +12,9 @@ import type {
   Simplify,
   SolanaRpcResponse,
 } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import type { GillUseRpcHook } from "./types";
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
 
 type Encoding = "base64" | "jsonParsed" | "base64+zstd";
 

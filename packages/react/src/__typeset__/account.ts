@@ -1,6 +1,6 @@
 import { Account, Address } from "gill";
-import { useAccount } from "../hooks";
 import { getMetadataDecoder, Metadata } from "gill/programs";
+import { useAccount } from "../hooks/account.js";
 
 // [DESCRIBE] useAccount
 {
