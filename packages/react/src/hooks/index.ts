@@ -1,4 +1,5 @@
 export * from "./account";
+export * from "./airdrop";
 export * from "./balance";
 export * from "./client";
 export * from "./latest-blockhash";
