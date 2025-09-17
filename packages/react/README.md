@@ -63,7 +63,7 @@ Fetch data from the Solana blockchain with the gill hooks:
 - [`useProgramAccounts`](#get-program-accounts-gpa) - get program accounts (GPA)
 - [`useTokenMint`](#get-token-mint-account) - get a decoded token's Mint account
 - [`useTokenAccount`](#get-token-account) - get the token account for a given mint and owner (or ATA)
-- [`useTokenAccountsByOwner`](#get-token-accounts-by-owner) - get all SPL Token accounts by token owner.
+- [`useTokenAccountsByOwner`](#get-token-accounts-by-owner) - get all SPL Token accounts by token owner
 
 ### Wrap your React app in a context provider
 
