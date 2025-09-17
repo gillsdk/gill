@@ -52,8 +52,7 @@ console.log("latestBlockhash:", latestBlockhash);
 /**
  * Create a transaction to be sent to the blockchain
  */
-let tx = createTransaction({
-  version: "legacy",
+const tx = createTransaction({
   feePayer: signer,
   instructions: [memoIx],
   latestBlockhash,
@@ -74,14 +73,14 @@ console.log(simulation);
 /**
  * Sign the transaction with the provided `signer` when it was created
  */
-let signedTransaction = await signTransactionMessageWithSigners(tx);
+const signedTransaction = await signTransactionMessageWithSigners(tx);
 console.log("signedTransaction:");
 console.log(signedTransaction);
 
 /**
  * Get the transaction signature after it has been signed by the `feePayer`
  */
-let signature = getSignatureFromTransaction(signedTransaction);
+const signature = getSignatureFromTransaction(signedTransaction);
 
 /**
  * Log the Solana Explorer link for the

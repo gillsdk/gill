@@ -49,7 +49,6 @@ const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
  */
 const tx = pipe(
   createTransaction({
-    version: "legacy",
     feePayer: signer,
     instructions: [
       getAddMemoInstruction({
