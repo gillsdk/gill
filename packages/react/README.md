@@ -438,7 +438,7 @@ import { useTokenAccountsByOwner } from "gill-react";
 export function PageClient() {
   const { tokenAccounts, isLoading, isError, error } = useTokenAccountsByOwner({
     owner: "nicktrLHhYzLmoVbuZQzHUTicd2sfP571orwo9jfc8c",
-    filter: { programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" }, // or { mint: "<TokenMintAddress>" }
+    filter: { programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" }, // or { mint: "<TokenMintAddress>" } - either mint OR programId required, not both
     config: { 
       commitment: "finalized",
       encoding: "jsonParsed", // encoding: "base58" | "base64" | "base64+zstd" | "jsonParsed"
