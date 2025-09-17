@@ -66,7 +66,7 @@ export function useTokenAccountsByOwner<TConfig extends RpcConfig = RpcConfig>({
   const { data, ...rest } = useQuery({
     ...options,
     enabled: !!owner && !!filter,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getTokenAccountsByOwner", owner, filter],
+    queryKey: [GILL_HOOK_CLIENT_KEY, "getTokenAccountsByOwner", owner, filter, config],
     queryFn: async () => {
       const tokenAccounts = await rpc.getTokenAccountsByOwner(
         owner as Address, 
