@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { GetSignatureStatusesApi, Signature, Simplify } from "gill";
+
 import { GILL_HOOK_CLIENT_KEY } from "../const.js";
 import { useSolanaClient } from "./client.js";
 import type { GillUseRpcHook } from "./types.js";
@@ -28,15 +29,15 @@ export function useSignatureStatuses<TConfig extends RpcConfig = RpcConfig>({
   abortSignal,
   signatures,
 }: UseSignatureStatusesInput<TConfig>) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
   const { data, ...rest } = useQuery({
     ...options,
     enabled: signatures && signatures.length > 0,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getSignatureStatuses", signatures],
     queryFn: async () => {
       const { value } = await rpc.getSignatureStatuses(signatures as Signature[], config).send({ abortSignal });
       return value;
     },
+    queryKey: [GILL_HOOK_CLIENT_KEY, urlOrMoniker, "getSignatureStatuses", signatures],
   });
   return {
     ...rest,

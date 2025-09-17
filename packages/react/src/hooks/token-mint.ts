@@ -1,13 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { GILL_HOOK_CLIENT_KEY } from "../const.js";
-import { useSolanaClient } from "./client.js";
-import type { GillUseRpcHook } from "./types.js";
-
 import type { Account, Address, FetchAccountConfig, Simplify } from "gill";
 import { assertAccountExists, fetchEncodedAccount } from "gill";
 import { decodeMint, type Mint } from "gill/programs";
+
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
 
 type RpcConfig = Simplify<Omit<FetchAccountConfig, "abortSignal">>;
 
@@ -24,7 +24,7 @@ type UseTokenMintInput<
   /**
    * Address of the Mint account to get and decode
    */
-  mint: TAddress | Address<TAddress>;
+  mint: Address<TAddress> | TAddress;
 };
 
 /**
@@ -36,7 +36,7 @@ export function useTokenMint<TConfig extends RpcConfig = RpcConfig, TAddress ext
   abortSignal,
   mint,
 }: UseTokenMintInput<TConfig, TAddress>) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
 
   if (abortSignal) {
     // @ts-expect-error we stripped the `abortSignal` from the type but are now adding it back in
@@ -50,12 +50,12 @@ export function useTokenMint<TConfig extends RpcConfig = RpcConfig, TAddress ext
     networkMode: "offlineFirst",
     ...options,
     enabled: !!mint,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getMintAccount", mint],
     queryFn: async () => {
       const account = await fetchEncodedAccount(rpc, mint as Address<TAddress>, config);
       assertAccountExists(account);
       return decodeMint(account);
     },
+    queryKey: [GILL_HOOK_CLIENT_KEY, urlOrMoniker, "getMintAccount", mint],
   });
   return {
     ...rest,
