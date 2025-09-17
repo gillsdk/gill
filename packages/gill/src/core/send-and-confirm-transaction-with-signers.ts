@@ -56,39 +56,19 @@ export type SendAndConfirmTransactionWithSignersFunction = (
   >,
 ) => Promise<Signature>;
 
-type SendAndConfirmTransactionWithSignersFactoryConfig<TCluster> = {
-  rpc: Rpc<GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi> & {
-    "~cluster"?: TCluster;
-  };
-  rpcSubscriptions: RpcSubscriptions<SignatureNotificationsApi & SlotNotificationsApi> & {
-    "~cluster"?: TCluster;
-  };
+type SendAndConfirmTransactionWithSignersFactoryConfig = {
+  rpc: Rpc<GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi>;
+  rpcSubscriptions: RpcSubscriptions<SignatureNotificationsApi & SlotNotificationsApi>;
 };
 
 export function sendAndConfirmTransactionWithSignersFactory({
   rpc,
   rpcSubscriptions,
-}: SendAndConfirmTransactionWithSignersFactoryConfig<"devnet">): SendAndConfirmTransactionWithSignersFunction;
-export function sendAndConfirmTransactionWithSignersFactory({
-  rpc,
-  rpcSubscriptions,
-}: SendAndConfirmTransactionWithSignersFactoryConfig<"testnet">): SendAndConfirmTransactionWithSignersFunction;
-export function sendAndConfirmTransactionWithSignersFactory({
-  rpc,
-  rpcSubscriptions,
-}: SendAndConfirmTransactionWithSignersFactoryConfig<"mainnet">): SendAndConfirmTransactionWithSignersFunction;
-export function sendAndConfirmTransactionWithSignersFactory({
-  rpc,
-  rpcSubscriptions,
-}: SendAndConfirmTransactionWithSignersFactoryConfig<"localnet">): SendAndConfirmTransactionWithSignersFunction;
-export function sendAndConfirmTransactionWithSignersFactory<
-  TCluster extends "devnet" | "mainnet" | "testnet" | "localnet" | undefined = undefined,
->({
-  rpc,
-  rpcSubscriptions,
-}: SendAndConfirmTransactionWithSignersFactoryConfig<TCluster>): SendAndConfirmTransactionWithSignersFunction {
-  // @ts-ignore - TODO(FIXME)
-  const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+}: SendAndConfirmTransactionWithSignersFactoryConfig): SendAndConfirmTransactionWithSignersFunction {
+  const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({
+    rpc,
+    rpcSubscriptions,
+  });
   return async function sendAndConfirmTransactionWithSigners(transaction, config = { commitment: "confirmed" }) {
     if ("messageBytes" in transaction == false) {
       if ("lifetimeConstraint" in transaction === false) {
