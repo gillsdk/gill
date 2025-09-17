@@ -1,7 +1,7 @@
 {
   "name": "gill",
   "license": "MIT",
-  "version": "0.10.2",
+  "version": "0.11.0",
   "description": "a modern javascript/typescript client library for interacting with the Solana blockchain",
   "scripts": {
     "clean": "rimraf coverage dist build node_modules .turbo .docs",
@@ -25,7 +25,9 @@
     "test:unit:browser": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.browser.ts --rootDir . --silent",
     "test:treeshakability:browser": "agadoo dist/index.browser.mjs",
     "test:treeshakability:native": "agadoo dist/index.native.mjs",
-    "test:treeshakability:node": "agadoo dist/index.node.mjs && agadoo dist/node/index.node.mjs"
+    "test:treeshakability:node": "agadoo dist/index.node.mjs && agadoo dist/node/index.node.mjs",
+    "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
+    "style:fix": "pnpm style:check --write"
   },
   "exports": {
     ".": {
@@ -93,10 +95,10 @@
     "@solana-developers/helpers",
     "treeshake"
   ],
-  "author": "Solana Foundation DevRel <devrel@solana.org>",
-  "homepage": "https://github.com/DecalLabs/gill#readme",
+  "author": "Nick Frostbutter <maintainers@gillsdk.com>",
+  "homepage": "https://gillsdk.com",
   "bugs": {
-    "url": "https://github.com/DecalLabs/gill/issues"
+    "url": "https://github.com/gillsdk/gill/issues"
   },
   "browserslist": [
     "supports bigint and not dead",
@@ -109,10 +111,10 @@
     "@solana-program/address-lookup-table": "^0.7.0",
     "@solana-program/compute-budget": "^0.8.0",
     "@solana-program/system": "^0.7.0",
-    "@solana-program/token-2022": "^0.4.1",
+    "@solana-program/token-2022": "^0.4.2",
     "@solana/assertions": "^2.1.1",
     "@solana/codecs": "^2.1.1",
-    "@solana/kit": "^2.1.1",
+    "@solana/kit": "^2.3.0",
     "@solana/transaction-confirmation": "^2.1.1"
   },
   "peerDependencies": {

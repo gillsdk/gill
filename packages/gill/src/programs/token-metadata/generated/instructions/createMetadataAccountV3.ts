@@ -26,11 +26,11 @@ import {
 } from "@solana/codecs";
 import type {
   Address,
-  IAccountMeta,
-  IAccountSignerMeta,
-  IInstruction,
-  IInstructionWithAccounts,
-  IInstructionWithData,
+  AccountMeta,
+  AccountSignerMeta,
+  Instruction,
+  InstructionWithAccounts,
+  InstructionWithData,
   ReadonlyAccount,
   ReadonlySignerAccount,
   TransactionSigner,
@@ -59,25 +59,25 @@ export function getCreateMetadataAccountV3DiscriminatorBytes(): ReadonlyUint8Arr
 
 export type CreateMetadataAccountV3Instruction<
   TProgram extends string = typeof TOKEN_METADATA_PROGRAM_ADDRESS,
-  TAccountMetadata extends string | IAccountMeta<string> = string,
-  TAccountMint extends string | IAccountMeta<string> = string,
-  TAccountMintAuthority extends string | IAccountMeta<string> = string,
-  TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountUpdateAuthority extends string | IAccountMeta<string> = string,
-  TAccountSystemProgram extends string | IAccountMeta<string> = "11111111111111111111111111111111",
-  TAccountRent extends string | IAccountMeta<string> | undefined = undefined,
-  TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
-> = IInstruction<TProgram> &
-  IInstructionWithData<Uint8Array> &
-  IInstructionWithAccounts<
+  TAccountMetadata extends string | AccountMeta<string> = string,
+  TAccountMint extends string | AccountMeta<string> = string,
+  TAccountMintAuthority extends string | AccountMeta<string> = string,
+  TAccountPayer extends string | AccountMeta<string> = string,
+  TAccountUpdateAuthority extends string | AccountMeta<string> = string,
+  TAccountSystemProgram extends string | AccountMeta<string> = "11111111111111111111111111111111",
+  TAccountRent extends string | AccountMeta<string> | undefined = undefined,
+  TRemainingAccounts extends readonly AccountMeta<string>[] = [],
+> = Instruction<TProgram> &
+  InstructionWithData<Uint8Array> &
+  InstructionWithAccounts<
     [
       TAccountMetadata extends string ? WritableAccount<TAccountMetadata> : TAccountMetadata,
       TAccountMint extends string ? ReadonlyAccount<TAccountMint> : TAccountMint,
       TAccountMintAuthority extends string
-        ? ReadonlySignerAccount<TAccountMintAuthority> & IAccountSignerMeta<TAccountMintAuthority>
+        ? ReadonlySignerAccount<TAccountMintAuthority> & AccountSignerMeta<TAccountMintAuthority>
         : TAccountMintAuthority,
       TAccountPayer extends string
-        ? WritableSignerAccount<TAccountPayer> & IAccountSignerMeta<TAccountPayer>
+        ? WritableSignerAccount<TAccountPayer> & AccountSignerMeta<TAccountPayer>
         : TAccountPayer,
       TAccountUpdateAuthority extends string ? ReadonlyAccount<TAccountUpdateAuthority> : TAccountUpdateAuthority,
       TAccountSystemProgram extends string ? ReadonlyAccount<TAccountSystemProgram> : TAccountSystemProgram,
@@ -190,7 +190,7 @@ export function getCreateMetadataAccountV3Instruction<
   TAccountMintAuthority,
   TAccountPayer,
   (typeof input)["updateAuthority"] extends TransactionSigner<TAccountUpdateAuthority>
-    ? ReadonlySignerAccount<TAccountUpdateAuthority> & IAccountSignerMeta<TAccountUpdateAuthority>
+    ? ReadonlySignerAccount<TAccountUpdateAuthority> & AccountSignerMeta<TAccountUpdateAuthority>
     : TAccountUpdateAuthority,
   TAccountSystemProgram,
   TAccountRent
@@ -241,7 +241,7 @@ export function getCreateMetadataAccountV3Instruction<
     TAccountMintAuthority,
     TAccountPayer,
     (typeof input)["updateAuthority"] extends TransactionSigner<TAccountUpdateAuthority>
-      ? ReadonlySignerAccount<TAccountUpdateAuthority> & IAccountSignerMeta<TAccountUpdateAuthority>
+      ? ReadonlySignerAccount<TAccountUpdateAuthority> & AccountSignerMeta<TAccountUpdateAuthority>
       : TAccountUpdateAuthority,
     TAccountSystemProgram,
     TAccountRent
@@ -252,7 +252,7 @@ export function getCreateMetadataAccountV3Instruction<
 
 export type ParsedCreateMetadataAccountV3Instruction<
   TProgram extends string = typeof TOKEN_METADATA_PROGRAM_ADDRESS,
-  TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[] = readonly AccountMeta[],
 > = {
   programAddress: Address<TProgram>;
   accounts: {
@@ -276,9 +276,9 @@ export type ParsedCreateMetadataAccountV3Instruction<
 
 export function parseCreateMetadataAccountV3Instruction<
   TProgram extends string,
-  TAccountMetas extends readonly IAccountMeta[],
+  TAccountMetas extends readonly AccountMeta[],
 >(
-  instruction: IInstruction<TProgram> & IInstructionWithAccounts<TAccountMetas> & IInstructionWithData<Uint8Array>,
+  instruction: Instruction<TProgram> & InstructionWithAccounts<TAccountMetas> & InstructionWithData<Uint8Array>,
 ): ParsedCreateMetadataAccountV3Instruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 6) {
     // TODO: Coded error.

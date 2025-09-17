@@ -2,11 +2,11 @@
 import type {
   Address,
   BaseTransactionMessage,
-  IInstruction,
-  ITransactionMessageWithFeePayer,
-  ITransactionMessageWithFeePayerSigner,
+  Instruction,
   KeyPairSigner,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithFeePayer,
+  TransactionMessageWithFeePayerSigner,
 } from "@solana/kit";
 import { signTransactionMessageWithSigners } from "@solana/kit";
 
@@ -18,23 +18,31 @@ import { createTransaction } from "../core";
   const signer = null as unknown as KeyPairSigner;
   const latestBlockhash = null as unknown as TransactionMessageWithBlockhashLifetime["lifetimeConstraint"];
 
-  const ix = null as unknown as IInstruction;
+  const ix = null as unknown as Instruction;
 
   // Legacy transactions
   {
+    createTransaction({
+      // version: "legacy", // no `version` set should result in a legacy transaction
+      feePayer: feePayer,
+      instructions: [ix],
+      computeUnitLimit: 0,
+      computeUnitPrice: 0,
+    }) satisfies BaseTransactionMessage<"legacy"> & TransactionMessageWithFeePayer;
+
     createTransaction({
       version: "legacy",
       feePayer: feePayer,
       instructions: [ix],
       computeUnitLimit: 0,
       computeUnitPrice: 0,
-    }) satisfies BaseTransactionMessage<"legacy"> & ITransactionMessageWithFeePayer;
+    }) satisfies BaseTransactionMessage<"legacy"> & TransactionMessageWithFeePayer;
 
     createTransaction({
       version: "legacy",
       feePayer: signer,
       instructions: [ix],
-    }) satisfies BaseTransactionMessage<"legacy"> & ITransactionMessageWithFeePayerSigner;
+    }) satisfies BaseTransactionMessage<"legacy"> & TransactionMessageWithFeePayerSigner;
 
     createTransaction({
       version: "legacy",
@@ -61,7 +69,16 @@ import { createTransaction } from "../core";
       latestBlockhash,
     }) satisfies BaseTransactionMessage<"legacy"> &
       TransactionMessageWithBlockhashLifetime &
-      ITransactionMessageWithFeePayerSigner;
+      TransactionMessageWithFeePayerSigner;
+
+    createTransaction({
+      // version: "legacy", // no `version` set should result in a legacy transaction
+      feePayer: signer,
+      instructions: [ix],
+      latestBlockhash,
+    }) satisfies BaseTransactionMessage<"legacy"> &
+      TransactionMessageWithBlockhashLifetime &
+      TransactionMessageWithFeePayerSigner;
 
     // Should be legacy with a Lifetime and address (aka non Signer)
     const txSignable = createTransaction({
@@ -71,7 +88,7 @@ import { createTransaction } from "../core";
       latestBlockhash,
     }) satisfies BaseTransactionMessage<"legacy"> &
       TransactionMessageWithBlockhashLifetime &
-      ITransactionMessageWithFeePayer;
+      TransactionMessageWithFeePayer;
 
     createTransaction({
       version: "legacy",
@@ -79,7 +96,7 @@ import { createTransaction } from "../core";
       instructions: [ix],
       latestBlockhash,
       // @ts-expect-error Should not be a "fee payer signer"
-    }) satisfies ITransactionMessageWithFeePayerSigner;
+    }) satisfies TransactionMessageWithFeePayerSigner;
 
     // Should be a signable transaction
     signTransactionMessageWithSigners(txSignable);
@@ -93,13 +110,13 @@ import { createTransaction } from "../core";
       instructions: [ix],
       computeUnitLimit: 0,
       computeUnitPrice: 0,
-    }) satisfies BaseTransactionMessage<0> & ITransactionMessageWithFeePayer;
+    }) satisfies BaseTransactionMessage<0> & TransactionMessageWithFeePayer;
 
     createTransaction({
       version: 0,
       feePayer: signer,
       instructions: [ix],
-    }) satisfies BaseTransactionMessage<0> & ITransactionMessageWithFeePayerSigner;
+    }) satisfies BaseTransactionMessage<0> & TransactionMessageWithFeePayerSigner;
 
     const txNotSignable = createTransaction({
       version: 0,
@@ -126,7 +143,7 @@ import { createTransaction } from "../core";
       latestBlockhash,
     }) satisfies BaseTransactionMessage<0> &
       TransactionMessageWithBlockhashLifetime &
-      ITransactionMessageWithFeePayerSigner;
+      TransactionMessageWithFeePayerSigner;
 
     // Should be version 0 with a Lifetime and address (aka non Signer)
     const txSignable = createTransaction({
@@ -134,7 +151,7 @@ import { createTransaction } from "../core";
       feePayer: feePayer,
       instructions: [ix],
       latestBlockhash,
-    }) satisfies BaseTransactionMessage<0> & TransactionMessageWithBlockhashLifetime & ITransactionMessageWithFeePayer;
+    }) satisfies BaseTransactionMessage<0> & TransactionMessageWithBlockhashLifetime & TransactionMessageWithFeePayer;
 
     createTransaction({
       version: 0,
@@ -142,7 +159,7 @@ import { createTransaction } from "../core";
       instructions: [ix],
       latestBlockhash,
       // @ts-expect-error Should not be a "fee payer signer"
-    }) satisfies ITransactionMessageWithFeePayerSigner;
+    }) satisfies TransactionMessageWithFeePayerSigner;
 
     // Should be a signable transaction
     signTransactionMessageWithSigners(txSignable);

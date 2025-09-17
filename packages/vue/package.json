@@ -1,5 +1,5 @@
 {
-  "name": "gill-vue",
+  "name": "@gillsdk/vue",
   "license": "MIT",
   "version": "0.0.1",
   "description": "",
@@ -14,7 +14,9 @@
     "test:unit:node": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.node.ts --rootDir . --silent",
     "test:unit:browser": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.browser.ts --rootDir . --silent",
     "test:treeshakability:browser": "agadoo dist/index.browser.mjs",
-    "test:treeshakability:node": "agadoo dist/index.node.mjs"
+    "test:treeshakability:node": "agadoo dist/index.node.mjs",
+    "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
+    "style:fix": "pnpm style:check --write"
   },
   "exports": {
     "types": "./dist/index.d.ts",
@@ -56,10 +58,10 @@
     "solana",
     "web3"
   ],
-  "author": "Solana Foundation DevRel <devrel@solana.org>",
-  "homepage": "https://github.com/DecalLabs/gill#readme",
+  "author": "Nick Frostbutter <maintainers@gillsdk.com>",
+  "homepage": "https://gillsdk.com",
   "bugs": {
-    "url": "https://github.com/DecalLabs/gill/issues"
+    "url": "https://github.com/gillsdk/gill/issues"
   },
   "browserslist": [
     "supports bigint and not dead",

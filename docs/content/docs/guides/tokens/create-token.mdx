@@ -75,7 +75,7 @@ console.log("signer:", signer.address);
 To use the legacy Token Program:
 
 ```ts twoslash
-import { TOKEN_PROGRAM_ADDRESS } from "gill/programs/token";
+import { TOKEN_PROGRAM_ADDRESS } from "gill/programs";
 
 const tokenProgram = TOKEN_PROGRAM_ADDRESS;
 ```
@@ -83,7 +83,7 @@ const tokenProgram = TOKEN_PROGRAM_ADDRESS;
 To use the Token Extensions Program (aka Token22):
 
 ```ts twoslash
-import { TOKEN_2022_PROGRAM_ADDRESS } from "gill/programs/token";
+import { TOKEN_2022_PROGRAM_ADDRESS } from "gill/programs";
 
 const tokenProgram = TOKEN_2022_PROGRAM_ADDRESS;
 ```
@@ -122,7 +122,7 @@ const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
 ```ts
 import { createTransaction } from "gill";
-import { getMintSize } from "gill/programs/token";
+import { getMintSize } from "gill/programs";
 
 const space = getMintSize();
 

@@ -42,7 +42,9 @@ export type SolanaClient<TClusterUrl extends ModifiedClusterUrl | string = strin
   /** Used to make RPC websocket calls to your RPC provider */
   rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi> & TClusterUrl;
   /**
-   * Send and confirm a transaction to the network (including signing with available Signers)
+   * Send and confirm a transaction to the network (including signing with available Signers).
+   *
+   * If the `transaction` does not already have a latest blockhash (and is not already signed), it will be automatically retrieved and applied.
    *
    * Default commitment level: `confirmed`
    */

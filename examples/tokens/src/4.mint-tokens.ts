@@ -12,7 +12,7 @@ import {
   getCreateAssociatedTokenIdempotentInstruction,
   getMintToInstruction,
   TOKEN_PROGRAM_ADDRESS,
-} from "gill/programs/token";
+} from "gill/programs";
 
 const { rpc, sendAndConfirmTransaction } = createSolanaClient({
   urlOrMoniker: "devnet",

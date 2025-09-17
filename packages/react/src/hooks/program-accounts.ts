@@ -3,8 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type {
   AccountInfoBase,
-  AccountInfoWithBase58Bytes,
-  AccountInfoWithBase58EncodedData,
   AccountInfoWithBase64EncodedData,
   AccountInfoWithBase64EncodedZStdCompressedData,
   AccountInfoWithJsonData,
@@ -14,11 +12,11 @@ import type {
   Simplify,
   SolanaRpcResponse,
 } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import type { GillUseRpcHook } from "./types";
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
 
-type Encoding = "base64" | "jsonParsed" | "base64+zstd" | "base58";
+type Encoding = "base64" | "jsonParsed" | "base64+zstd";
 
 type RpcConfig = Simplify<
   Parameters<GetProgramAccountsApi["getProgramAccounts"]>[1] &
@@ -50,14 +48,9 @@ type UseProgramAccountsResponse<TConfig extends RpcConfig> = TConfig extends {
           ? SolanaRpcResponse<AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithJsonData>[]>
           : TConfig extends { encoding: "jsonParsed" }
             ? AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithJsonData>[]
-            : TConfig extends { encoding: "base58"; withContext: true }
-              ? SolanaRpcResponse<AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithBase58EncodedData>[]>
-              : TConfig extends { encoding: "base58" }
-                ? AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithBase58EncodedData>[]
-                : TConfig extends { withContext: true }
-                  ? SolanaRpcResponse<AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithBase58Bytes>[]>
-                  : AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithBase58Bytes>[];
-
+            : TConfig extends { withContext: true }
+              ? SolanaRpcResponse<AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithBase64EncodedData>[]>
+              : AccountInfoWithPubkey<AccountInfoBase & AccountInfoWithBase64EncodedData>[];
 /**
  * Get all the accounts owned by a `program` using the Solana RPC method of
  * [`getProgramAccounts`](https://solana.com/docs/rpc/http/getprogramaccounts)
