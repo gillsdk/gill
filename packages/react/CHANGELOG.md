@@ -1,5 +1,30 @@
 # @gillsdk/react
 
+## 0.6.0
+
+### Minor Changes
+
+- [#228](https://github.com/gillsdk/gill/pull/228)
+  [`83bba6a`](https://github.com/gillsdk/gill/commit/83bba6a3643c5eb719f5018917308fd8dad6e540) Thanks
+  [@JkrishnaD](https://github.com/JkrishnaD)! - update `useProgramAccounts` hook by removing the base58 encodings
+
+- [#271](https://github.com/gillsdk/gill/pull/271)
+  [`4f69014`](https://github.com/gillsdk/gill/commit/4f69014f182c7ea0a2d21d9b73e95acf704da8f1) Thanks
+  [@nickfrosty](https://github.com/nickfrosty)! - update to esm over commonJS, including updating relative imports
+
+### Patch Changes
+
+- [#264](https://github.com/gillsdk/gill/pull/264)
+  [`9c22897`](https://github.com/gillsdk/gill/commit/9c228971124c7e711cbbad15b7298fca5dec4c62) Thanks
+  [@nickfrosty](https://github.com/nickfrosty)! - updated token program imports from "gill/programs/token" to
+  "gill/programs"
+
+- Updated dependencies [[`55e5628`](https://github.com/gillsdk/gill/commit/55e562846a0865c0c9773f638e5a48b35e89ed5b),
+  [`9c22897`](https://github.com/gillsdk/gill/commit/9c228971124c7e711cbbad15b7298fca5dec4c62),
+  [`ee23f2a`](https://github.com/gillsdk/gill/commit/ee23f2a3fbabd31c3ca040e7def970aa552afdf9),
+  [`8a50e71`](https://github.com/gillsdk/gill/commit/8a50e7151da1b1f270850b25127ac0a671fe6aa5)]:
+  - gill@0.12.0
+
 ## 0.5.1
 
 ### Patch Changes
