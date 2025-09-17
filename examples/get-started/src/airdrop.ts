@@ -1,8 +1,8 @@
 import {
   address,
-  lamports,
   airdropFactory,
   createSolanaClient,
+  lamports,
   SolanaClusterMoniker,
 } from "gill";
 
