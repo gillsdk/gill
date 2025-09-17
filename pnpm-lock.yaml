@@ -253,6 +253,15 @@ importers:
         specifier: ^18
         version: 18.3.1
 
+  packages/solana-pay:
+    dependencies:
+      gill:
+        specifier: workspace:*
+        version: link:../gill
+      typescript:
+        specifier: '>=5'
+        version: 5.8.3
+
   packages/svelte:
     dependencies:
       gill:
