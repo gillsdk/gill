@@ -13,3 +13,4 @@ export * from "./token-account-balance.js";
 export * from "./token-account.js";
 export * from "./token-mint.js";
 export * from "./transaction.js";
+export * from "./wallet.js";
