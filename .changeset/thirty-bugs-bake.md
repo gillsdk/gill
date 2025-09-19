@@ -2,4 +2,4 @@
 "gill-react": minor
 ---
 
-add's useSimulateTransaction hook
+adds useSimulateTransaction hook
