@@ -9,5 +9,5 @@ export * from "./signatures-for-address";
 export * from "./slot";
 export * from "./token-account";
 export * from "./token-mint";
-export * from "./simulate-transaction";
 export * from "./transaction";
+export * from "./simulate-transaction";
