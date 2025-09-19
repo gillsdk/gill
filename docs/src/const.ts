@@ -1,15 +1,15 @@
 export const siteConfig: SiteConfig = {
   name: "gill",
-  domain: "gill.site",
+  domain: "gillsdk.com",
   description:
     "gill is a modern javascript/typescript client library for interacting with the Solana blockchain.",
-  url: "https://gill.site",
-  ogImage: "https://gill.site/og.png",
+  url: "https://gillsdk.com",
+  ogImage: "https://gillsdk.com/og.png",
   links: {
-    github: "https://github.com/solana-foundation/gill",
-    // twitter: "https://x.com/nickfrosty",
+    github: "https://github.com/gillsdk/gill",
+    twitter: "https://x.com/gillsdk",
     // docs: "",
   },
-  // twitterHandle: "nickfrosty",
+  twitterHandle: "gillsdk",
   // twitterId: "0",
 };

@@ -5,15 +5,15 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "solana-foundation/gill"
+      "repo": "gillsdk/gill"
     }
   ],
   "commit": false,
   "ignore": [
-    "gill-vue", "gill-svelte", 
-    "@gill/tsconfig", "@gill/build-scripts", "@gill/test-config"
+    "@gillsdk/vue", "@gillsdk/svelte", 
+    "@gillsdk/tsconfig", "@gillsdk/build-scripts", "@gillsdk/test-config"
   ],
-  "fixed": [["gill-!({build-scripts,test-*,tsconfig})"]],
+  "fixed": [["@gillsdk/!({build-scripts,test-*,tsconfig})"]],
   "linked": [],
   "updateInternalDependencies": "patch"
 }

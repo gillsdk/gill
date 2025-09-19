@@ -1,12 +1,15 @@
 {
-  "name": "gill-examples-basic",
+  "name": "@gillsdk/examples-basics",
   "license": "MIT",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
+    "style:fix": "pnpm style:check --write"
+  },
   "keywords": [],
   "author": "",
   "dependencies": {

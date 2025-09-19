@@ -1,14 +1,14 @@
 {
-  "name": "gill-monorepo",
+  "name": "gillsdk",
   "license": "MIT",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "repository": {
-    "name": "solana-foundation/gill",
+    "name": "gillsdk/gill",
     "type": "git",
-    "url": "https://github.com/solana-foundation/gill"
+    "url": "https://github.com/gillsdk/gill"
   },
   "scripts": {
     "clean": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} clean && pnpm clean:root",
@@ -22,7 +22,8 @@
     "test:treeshakability:native": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:treeshakability:native",
     "test:treeshakability:browser": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:treeshakability:browser",
     "test:treeshakability:node": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:treeshakability:node",
-    "style:fix": "prettier --write '{*,**/*}.{ts,tsx,js,jsx,css,json,md}'"
+    "style:check": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} style:check",
+    "style:fix": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} style:fix"
   },
   "version": "0.0.1",
   "description": "",
@@ -73,10 +74,10 @@
     "typedoc-plugin-mdn-links": "^5.0.2"
   },
   "packageManager": "pnpm@9.1.0",
-  "author": "Solana Foundation DevRel <devrel@solana.org>",
-  "homepage": "https://github.com/solana-foundation/gill#readme",
+  "author": "Nick Frostbutter <maintainers@gillsdk.com>",
+  "homepage": "https://gillsdk.com",
   "bugs": {
-    "url": "https://github.com/solana-foundation/gill/issues"
+    "url": "https://github.com/gillsdk/gill/issues"
   },
   "contributors": [
     {

@@ -27,17 +27,20 @@ export const GILL_EXTERNAL_MODULE_MAP: Record<string, string> = {
  * export default createCodamaConfig({
  *  idl: "program/idl.json",
  *  clientJs: "clients/js/src/generated",
+ *  // clientRust: "clients/rust/src/generated",
  * });
  * ```
  */
 export function createCodamaConfig({
-  clientJs,
-  dependencyMap = GILL_EXTERNAL_MODULE_MAP,
   idl,
+  clientJs,
+  clientRust,
+  dependencyMap = GILL_EXTERNAL_MODULE_MAP,
 }: {
-  clientJs: string;
-  dependencyMap?: Record<string, string>;
   idl: string;
+  clientJs: string;
+  clientRust?: string;
+  dependencyMap?: Record<string, string>;
 }) {
   return {
     idl,
@@ -46,6 +49,18 @@ export function createCodamaConfig({
         args: [clientJs, { dependencyMap }],
         from: "@codama/renderers-js",
       },
+      rust: clientRust
+        ? {
+            from: "@codama/renderers-rust",
+            args: [
+              clientRust,
+              {
+                crateFolder: "clients/rust",
+                formatCode: true,
+              },
+            ],
+          }
+        : undefined,
     },
   };
 }

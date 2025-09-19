@@ -1,5 +1,5 @@
 {
-  "name": "gill-e2e",
+  "name": "@gillsdk/tests-e2e",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -8,7 +8,9 @@
     "test:unit:node": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} pnpm start:tsx && pnpm start:node",
     "start:tsx": "pnpm tsx ./src/imports.ts",
     "start:node": "node ./src/imports.js",
-    "start:tsc": "tsc ./src/imports.ts --outFile ./src/imports-tsc.js && node ./src/imports-tsc.js"
+    "start:tsc": "tsc ./src/imports.ts --outFile ./src/imports-tsc.js && node ./src/imports-tsc.js",
+    "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
+    "style:fix": "pnpm style:check --write"
   },
   "dependencies": {
     "gill": "workspace:*"

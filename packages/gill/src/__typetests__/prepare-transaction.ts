@@ -2,7 +2,7 @@
 
 import type {
   BaseTransactionMessage,
-  ITransactionMessageWithFeePayer,
+  TransactionMessageWithFeePayer,
   Rpc,
   SolanaRpcApi,
   TransactionMessageWithBlockhashLifetime,
@@ -15,10 +15,10 @@ async () => {
   const rpc = null as unknown as Rpc<SolanaRpcApi>;
 
   const transactionWithoutBlockhash = null as unknown as BaseTransactionMessage<"legacy"> &
-    ITransactionMessageWithFeePayer;
+    TransactionMessageWithFeePayer;
 
   const transactionWithBlockhash = null as unknown as BaseTransactionMessage<"legacy"> &
-    ITransactionMessageWithFeePayer &
+    TransactionMessageWithFeePayer &
     TransactionMessageWithBlockhashLifetime;
 
   // @ts-expect-error Base transaction should not be a signable

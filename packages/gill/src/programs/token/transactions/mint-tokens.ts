@@ -1,6 +1,6 @@
 import type {
   Address,
-  ITransactionMessageWithFeePayer,
+  TransactionMessageWithFeePayer,
   TransactionMessageWithBlockhashLifetime,
   TransactionSigner,
   TransactionVersion,
@@ -54,7 +54,7 @@ export async function buildMintTokensTransaction<
   TFeePayer extends TransactionSigner = TransactionSigner,
 >(
   args: TransactionBuilderInput<TVersion, TFeePayer> & GetCreateTokenTransactionInput,
-): Promise<FullTransaction<TVersion, ITransactionMessageWithFeePayer>>;
+): Promise<FullTransaction<TVersion, TransactionMessageWithFeePayer>>;
 export async function buildMintTokensTransaction<
   TVersion extends TransactionVersion = "legacy",
   TFeePayer extends TransactionSigner = TransactionSigner,
@@ -62,7 +62,7 @@ export async function buildMintTokensTransaction<
     TransactionMessageWithBlockhashLifetime["lifetimeConstraint"] = TransactionMessageWithBlockhashLifetime["lifetimeConstraint"],
 >(
   args: TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint> & GetCreateTokenTransactionInput,
-): Promise<FullTransaction<TVersion, ITransactionMessageWithFeePayer, TransactionMessageWithBlockhashLifetime>>;
+): Promise<FullTransaction<TVersion, TransactionMessageWithFeePayer, TransactionMessageWithBlockhashLifetime>>;
 export async function buildMintTokensTransaction<
   TVersion extends TransactionVersion,
   TFeePayer extends TransactionSigner,
