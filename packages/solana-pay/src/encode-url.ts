@@ -45,6 +45,10 @@ export function encodeSolanaPayURL(
 }
 
 function encodeTransactionRequestURL({ link, label, message }: SolanaPayTransactionRequestURLFields): URL {
+  if (link.protocol !== "https:") {
+    throw new Error("Link must use HTTPS protocol");
+  }
+
   // Remove trailing slashes
   const pathname = link.search
     ? encodeURIComponent(String(link).replace(/\/\?/, "?"))

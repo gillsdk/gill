@@ -119,5 +119,20 @@ describe("encodeSolanaPayURL", () => {
 
       assert.equal(String(url), `solana:${encodeURIComponent(link)}?label=${label}&message=${message}`);
     });
+
+    it("throws an error for HTTP", () => {
+      const link = "http://gillsdk.com?query=param";
+      expect(() => encodeSolanaPayURL({ link: new URL(link) })).toThrow("must use HTTPS protocol");
+    });
+
+    it("throws an error for FTP", () => {
+      const link = "ftp://gillsdk.com?query=param";
+      expect(() => encodeSolanaPayURL({ link: new URL(link) })).toThrow("must use HTTPS protocol");
+    });
+
+    it("throws an error for Solana Pay", () => {
+      const link = "solana://gillsdk.com";
+      expect(() => encodeSolanaPayURL({ link: new URL(link) })).toThrow("must use HTTPS protocol");
+    });
   });
 });
