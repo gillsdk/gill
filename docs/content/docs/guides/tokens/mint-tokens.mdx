@@ -1,0 +1,170 @@
+---
+title: Mint Tokens
+description: "Learn how to mint SPL tokens on Solana using the gill JavaScript library."
+---
+
+Minting tokens creates a new supply and adds them to a specified wallet. This guide shows how to
+mint tokens to any wallet using `gill`'s transaction builders.
+
+## Prerequisites
+
+Before minting tokens, you'll need:
+
+- A token that has already been created (Refer to
+  [Create Token guide](/docs/guides/tokens/create-token)).
+- The mint authority signer for the token.
+- The destination wallet's address.
+
+## Using the Mint Tokens Transaction Builder
+
+The `buildMintTokensTransaction` function creates an optimized transaction that mints tokens to a
+destination wallet, automatically creating the Associated Token Account (ATA) if needed.
+
+### Basic Example
+
+```typescript
+import {
+  address,
+  createSolanaClient,
+  getSignatureFromTransaction,
+  signTransactionMessageWithSigners,
+} from "gill";
+import { loadKeypairSignerFromFile } from "gill/node";
+import { buildMintTokensTransaction, TOKEN_PROGRAM_ADDRESS } from "gill/programs";
+
+// Create a Solana client.
+const { rpc, sendAndConfirmTransaction } = createSolanaClient({
+  urlOrMoniker: "devnet",
+});
+
+// Load the mint authority signer.
+const authority = await loadKeypairSignerFromFile();
+
+// Get the latest blockhash.
+const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+// The token mint address.
+const mint = address("YOUR_TOKEN_MINT_ADDRESS");
+
+// Destination wallet to receive the tokens.
+const destination = address("DESTINATION_WALLET_ADDRESS");
+
+// Build the mint transaction.
+const tx = await buildMintTokensTransaction({
+  feePayer: authority,
+  latestBlockhash,
+  mint,
+  authority, // Must have mint authority.
+  destination,
+  amount: 1_000_000_000, // 1 token with 9 decimals.
+  tokenProgram: TOKEN_PROGRAM_ADDRESS,
+});
+
+// Sign and send the transaction.
+const signedTx = await signTransactionMessageWithSigners(tx);
+await sendAndConfirmTransaction(signedTx);
+```
+
+## Important Considerations
+
+### Decimals
+
+The `amount` parameter is in the token's smallest unit. For a token with 9 decimals:
+
+- `1_000_000_000` = 1 token
+- `1_000_000` = 0.001 token
+- `1_000` = 0.000001 token
+
+Always check the mint's decimal configuration before specifying the amounts.
+
+### Token Program
+
+Use the correct token program for your mint:
+
+- `TOKEN_PROGRAM_ADDRESS` for standard SPL tokens.
+- `TOKEN_2022_PROGRAM_ADDRESS` for Token-2022 tokens.
+
+```typescript
+import { TOKEN_PROGRAM_ADDRESS, TOKEN_2022_PROGRAM_ADDRESS } from "gill/programs";
+```
+
+### Compute Units
+
+The transaction builder sets reasonable defaults:
+
+- Default compute unit limit: 21,000.
+- Automatically handles ATA creation if needed.
+
+You can override these defaults:
+
+```typescript
+const tx = await buildMintTokensTransaction({
+  // ... other params
+  computeUnitLimit: 30_000,
+  computeUnitPrice: 1_000, // microlamports per CU
+});
+```
+
+## Using Lower-Level Instructions
+
+For more control, you can use the `getMintTokensInstructions` function directly:
+
+```typescript
+import { getMintTokensInstructions } from "gill/programs";
+
+const instructions = getMintTokensInstructions({
+  feePayer: authority,
+  mint,
+  authority,
+  destination,
+  destinationAta, // must provide the ATA address
+  amount: 1_000_000_000,
+  tokenProgram: TOKEN_PROGRAM_ADDRESS,
+});
+
+// Add instructions to your transaction manually
+```
+
+## Minting to Multiple Recipients
+
+To mint tokens to multiple wallets efficiently:
+
+```typescript
+const recipients = [
+  { address: "wallet1...", amount: 1_000_000_000 },
+  { address: "wallet2...", amount: 2_000_000_000 },
+  { address: "wallet3...", amount: 500_000_000 },
+];
+
+for (const recipient of recipients) {
+  const tx = await buildMintTokensTransaction({
+    feePayer: authority,
+    latestBlockhash,
+    mint,
+    authority,
+    destination: address(recipient.address),
+    amount: recipient.amount,
+    tokenProgram: TOKEN_PROGRAM_ADDRESS,
+  });
+
+  const signedTx = await signTransactionMessageWithSigners(tx);
+  await sendAndConfirmTransaction(signedTx);
+}
+```
+
+## Error Handling
+
+Common errors when minting tokens:
+
+1. **Invalid mint authority**: Ensure the signer has mint authority for the token.
+2. **Mint supply exceeded**: Check if the token has a maximum supply cap.
+3. **Invalid destination**: Verify the destination address is valid.
+4. **Wrong token program**: Use the correct program for your token type.
+
+## Next Steps
+
+After minting tokens, you might want to:
+
+- [Transfer tokens](/docs/guides/tokens/transfer-tokens) to other wallets.
+- Query token balances using data fetching utilities.
+- Set up token metadata if not already configured.
