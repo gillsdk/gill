@@ -1,12 +1,12 @@
 import type {
   Address,
   BaseTransactionMessage,
-  Instruction,
+  IInstruction,
+  ITransactionMessageWithFeePayer,
+  ITransactionMessageWithFeePayerSigner,
   TransactionMessageWithBlockhashLifetime,
-  TransactionMessageWithFeePayer,
-  TransactionMessageWithFeePayerSigner,
   TransactionSigner,
-  TransactionVersion,
+  TransactionVersion
 } from "@solana/kit";
 import type { Simplify } from ".";
 
@@ -24,7 +24,7 @@ export type CreateTransactionInput<
    * */
   version?: TVersion;
   /** List of instructions for this transaction */
-  instructions: Instruction[];
+  instructions: IInstruction[];
   /** Address or Signer that will pay transaction fees */
   feePayer: TFeePayer;
   /**
@@ -40,10 +40,15 @@ export type CreateTransactionInput<
 
 export type FullTransaction<
   TVersion extends TransactionVersion,
-  TFeePayer extends TransactionMessageWithFeePayer | TransactionMessageWithFeePayerSigner,
+  TFeePayer extends ITransactionMessageWithFeePayer | ITransactionMessageWithFeePayerSigner,
   TBlockhashLifetime extends TransactionMessageWithBlockhashLifetime | undefined = undefined,
 > = Simplify<
   BaseTransactionMessage<TVersion> &
     TFeePayer &
     (TBlockhashLifetime extends TransactionMessageWithBlockhashLifetime ? TransactionMessageWithBlockhashLifetime : {})
 >;
+
+export type Plan<TArtifacts = {}> = {
+  ixs: IInstruction[];
+  artifacts: TArtifacts;
+};
