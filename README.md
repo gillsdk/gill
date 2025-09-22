@@ -583,7 +583,7 @@ Build a transaction that can create a token with metadata, either using the
 Related instruction builder: `getCreateTokenInstructions`
 
 ```typescript
-import { buildCreateTokenTransaction } from "gill/programs/token";
+import { buildCreateTokenTransaction } from "gill/programs";
 
 const createTokenTx = await buildCreateTokenTransaction({
   feePayer: signer,
@@ -618,7 +618,7 @@ Build a transaction that mints new tokens to the `destination` wallet address (r
 Related instruction builder: `getMintTokensInstructions`
 
 ```typescript
-import { buildMintTokensTransaction } from "gill/programs/token";
+import { buildMintTokensTransaction } from "gill/programs";
 
 const mintTokensTx = await buildMintTokensTransaction({
   feePayer: signer,
@@ -651,7 +651,7 @@ Build a transaction that transfers tokens to the `destination` wallet address fr
 Related instruction builder: `getTransferTokensInstructions`
 
 ```typescript
-import { buildTransferTokensTransaction } from "gill/programs/token";
+import { buildTransferTokensTransaction } from "gill/programs";
 
 const transferTokensTx = await buildTransferTokensTransaction({
   feePayer: signer,
@@ -755,11 +755,11 @@ To import any of these program clients:
 
 ```typescript
 import { ... } from "gill/programs";
-import { ... } from "gill/programs/token";
+import { ... } from "gill/programs";
 ```
 
 > Note: Some client re-exported client program clients have a naming collision. As a result, they may be re-exported
-> under a subpath of `gill/programs`. For example, `gill/programs/token`.
+> under a subpath of `gill/programs`. For example, `gill/programs`.
 
 The program clients included inside `gill` are:
 

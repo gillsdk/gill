@@ -1,5 +1,5 @@
 import { GetTransactionApi, Signature } from "gill";
-import { useTransaction } from "../hooks";
+import { useTransaction } from "../hooks/transaction.js";
 
 // [DESCRIBE] useTransaction
 {
