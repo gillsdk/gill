@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { SolanaClient } from "gill";
 import React from "react";
 import { GILL_HOOK_CLIENT_KEY } from "./const.js";
+import { WalletContextProvider } from "./hooks/wallet.js";
 
 /**
  * Provider to utilize gill hooks for Solana
@@ -18,5 +19,10 @@ export function SolanaProvider({
   queryClient?: QueryClient;
 }) {
   queryClient.setQueryData([GILL_HOOK_CLIENT_KEY], client);
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <WalletContextProvider>{children}</WalletContextProvider>
+    </QueryClientProvider>
+  );
 }
