@@ -65,6 +65,7 @@ Fetch data from the Solana blockchain with the gill hooks:
 - [`useProgramAccounts`](#get-program-accounts-gpa) - get program accounts (GPA)
 - [`useTokenMint`](#get-token-mint-account) - get a decoded token's Mint account
 - [`useTokenAccount`](#get-token-account) - get the token account for a given mint and owner (or ATA)
+- [`useTokenAccountsByOwner`](#get-token-accounts-by-owner) - get all SPL Token accounts by token owner
 
 ### Wrap your React app in a context provider
 
@@ -451,6 +452,36 @@ export function PageClient() {
   return (
     <div className="">
       <pre>signatures: {JSON.stringify(signatures, null, "\t")}</pre>
+    </div>
+  );
+}
+```
+
+### Get Token Accounts by Owner
+
+Get all SPL Token accounts by token owner using the Solana RPC method of [getTokenAccountsByOwner](https://solana.com/docs/rpc/http/gettokenaccountsbyowner).
+
+```tsx
+"use client";
+
+import { useTokenAccountsByOwner } from "gill-react";
+
+export function PageClient() {
+  const { tokenAccounts, isLoading, isError, error } = useTokenAccountsByOwner({
+    owner: "nicktrLHhYzLmoVbuZQzHUTicd2sfP571orwo9jfc8c",
+    filter: { programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" }, // or { mint: "<TokenMintAddress>" } - either mint OR programId required, not both
+    config: { 
+      commitment: "finalized",
+      encoding: "jsonParsed", // encoding: "base58" | "base64" | "base64+zstd" | "jsonParsed"
+    },
+  });
+
+  // if (isLoading) { return ... }
+  // if (isError) { return ... }
+
+  return (
+    <div className="">
+      <pre>tokenAccounts: {JSON.stringify(tokenAccounts, null, 2)}</pre>
     </div>
   );
 }
