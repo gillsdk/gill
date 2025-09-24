@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { GetSlotApi, Simplify } from "gill";
+
 import { GILL_HOOK_CLIENT_KEY } from "../const.js";
 import { useSolanaClient } from "./client.js";
 import type { GillUseRpcHook } from "./types.js";
@@ -23,15 +24,15 @@ export function useSlot<TConfig extends RpcConfig = RpcConfig>({
   config,
   abortSignal,
 }: UseSlotInput<TConfig> = {}) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
 
   const { data, ...rest } = useQuery({
     ...options,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getSlot"],
     queryFn: async () => {
       const slot = await rpc.getSlot(config).send({ abortSignal });
       return slot;
     },
+    queryKey: [GILL_HOOK_CLIENT_KEY, urlOrMoniker, "getSlot"],
   });
 
   return {

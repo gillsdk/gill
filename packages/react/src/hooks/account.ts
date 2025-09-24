@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Account, Address, Decoder, FetchAccountConfig, Simplify } from "gill";
 import { assertAccountExists, decodeAccount, fetchEncodedAccount } from "gill";
+
 import { GILL_HOOK_CLIENT_KEY } from "../const.js";
 import { useSolanaClient } from "./client.js";
 import type { GillUseRpcHook } from "./types.js";
@@ -24,7 +25,7 @@ type UseAccountInput<
   /**
    * Address of the account to get the balance of
    */
-  address: TAddress | Address;
+  address: Address | TAddress;
   /**
    * Account decoder that can decode the account's `data` byte array value
    */
@@ -40,7 +41,7 @@ export function useAccount<
   TAddress extends string = string,
   TDecodedData extends object = Uint8Array,
 >({ options, config, abortSignal, address, decoder }: UseAccountInput<TConfig, TAddress, TDecodedData>) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
 
   if (abortSignal) {
     // @ts-expect-error we stripped the `abortSignal` from the type but are now adding it back in
@@ -53,14 +54,14 @@ export function useAccount<
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getAccountInfo", address],
+    enabled: !!address,
     queryFn: async () => {
       const account = await fetchEncodedAccount(rpc, address as Address, config);
       assertAccountExists(account);
-      if (decoder) return decodeAccount(account, decoder as Decoder<TDecodedData>);
+      if (decoder) return decodeAccount(account, decoder);
       return account;
     },
-    enabled: !!address,
+    queryKey: [GILL_HOOK_CLIENT_KEY, urlOrMoniker, "getAccountInfo", address],
   });
   return {
     ...rest,
