@@ -1,5 +1,4 @@
-// @ts-expect-error - Patch BigInt to allow calling `JSON.stringify` on objects that use
-// eslint-disable-next-line no-unused-vars
+// @ts-ignore - Patch BigInt to allow calling `JSON.stringify` on objects that use
 interface BigInt {
   /** Convert a BigInt to string form when calling `JSON.stringify()` */
   toJSON: () => string;
@@ -16,3 +15,14 @@ if (BigInt.prototype.toJSON === undefined) {
 export * from "./const.js";
 export * from "./hooks/index.js";
 export * from "./providers.js";
+
+/**
+ * Reexporting the Solana Wallet Standard functionality allows gill to
+ * provide a cohesive developer experience
+ */
+export * from "@solana/react";
+export * from "@solana/wallet-standard-chains";
+export * from "@solana/wallet-standard-features";
+export * from "@wallet-standard/core";
+export * from "@wallet-standard/react";
+export * from "@wallet-standard/ui";

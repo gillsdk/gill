@@ -1,9 +1,8 @@
 {
-  "name": "@gillsdk/react",
+  "name": "@gillsdk/solana-pay",
   "license": "MIT",
-  "version": "0.5.1",
-  "type": "module",
-  "description": "a Solana hooks library for React, built on top of gill - the modern JavaScript/TypeScript library for Solana",
+  "version": "0.0.0",
+  "description": "modern Solana Pay protocol client library, built on top of gill",
   "scripts": {
     "clean": "rimraf coverage dist build node_modules .turbo",
     "compile:js": "tsup --config ./tsup.config.package.ts",
@@ -36,6 +35,7 @@
   "module": "./dist/index.node.mjs",
   "react-native": "./dist/index.native.mjs",
   "types": "./dist/index.d.ts",
+  "type": "module",
   "files": [
     "./dist/"
   ],
@@ -48,11 +48,14 @@
     "solana kit",
     "wallet",
     "dapps",
-    "hooks",
-    "react hooks",
-    "solana hooks",
-    "web3js hooks",
-    "wagmi"
+    "solana helpers",
+    "solana pay",
+    "payments",
+    "@solana/web3.js",
+    "@solana/kit",
+    "@solana/pay",
+    "@solana-developers/helpers",
+    "treeshake"
   ],
   "author": "Nick Frostbutter <maintainers@gillsdk.com>",
   "homepage": "https://gillsdk.com",
@@ -63,28 +66,13 @@
     "supports bigint and not dead",
     "maintained node versions"
   ],
-  "devDependencies": {
-    "@types/react": "^18",
-    "@types/react-test-renderer": "^18",
-    "react": "^18"
+  "engines": {
+    "node": ">=20.18.0"
   },
   "dependencies": {
-    "@solana/react": "^3.0.3",
-    "@solana/wallet-standard-chains": "^1.1.1",
-    "@solana/wallet-standard-features": "^1.3.0",
-    "@wallet-standard/core": "^1.1.1",
-    "@wallet-standard/react": "^1.0.1",
-    "@wallet-standard/ui": "^1.0.1",
     "gill": "workspace:*"
   },
   "peerDependencies": {
-    "@tanstack/react-query": "^5.61.4",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "react": "^18",
     "typescript": ">=5"
-  },
-  "engines": {
-    "node": ">=20.18.0"
   }
 }
