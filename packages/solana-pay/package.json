@@ -1,7 +1,7 @@
 {
   "name": "@gillsdk/solana-pay",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "modern Solana Pay protocol client library, built on top of gill",
   "scripts": {
     "clean": "rimraf coverage dist build node_modules .turbo",
