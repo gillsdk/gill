@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { GILL_HOOK_CLIENT_KEY } from "./const";
 import type { SolanaClient } from "gill";
+import React from "react";
+import { GILL_HOOK_CLIENT_KEY } from "./const.js";
 
 /**
  * Provider to utilize gill hooks for Solana
