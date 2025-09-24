@@ -1,0 +1,5 @@
+{
+  "title": "React",
+  "defaultOpen": false,
+  "pages": ["index", "getting-started", "hooks", "examples"]
+}
