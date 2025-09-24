@@ -1,5 +1,6 @@
 export { debug, isDebugEnabled } from "./debug";
 
+export * from "./base64-bytes-to";
 export * from "./base64-from-transaction";
 export * from "./base64-to-transaction";
 export * from "./const";
