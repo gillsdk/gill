@@ -1,9 +1,10 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import type { SimulateTransactionApi, Simplify, Base64EncodedWireTransaction } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import type { GillUseRpcHook } from "./types";
+import type { Base64EncodedWireTransaction, Simplify, SimulateTransactionApi } from "gill";
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
+
 type RpcConfig = Simplify<Parameters<SimulateTransactionApi["simulateTransaction"]>>[1];
 
 const DEFAULT_CONFIG: RpcConfig = {

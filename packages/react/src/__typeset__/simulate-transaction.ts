@@ -1,5 +1,5 @@
 import { Base64EncodedWireTransaction, SimulateTransactionApi } from "gill";
-import { useSimulateTransaction } from "../hooks";
+import { useSimulateTransaction } from "../hooks/simulate-transaction.js";
 
 // [DESCRIBE] useSimulateTransaction
 {
