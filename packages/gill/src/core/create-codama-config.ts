@@ -49,18 +49,18 @@ export function createCodamaConfig({
         args: [clientJs, { dependencyMap }],
         from: "@codama/renderers-js",
       },
-      rust: clientRust
-        ? {
-            from: "@codama/renderers-rust",
-            args: [
-              clientRust,
-              {
-                crateFolder: "clients/rust",
-                formatCode: true,
-              },
-            ],
-          }
-        : undefined,
+      ...(clientRust && {
+        rust: {
+          from: "@codama/renderers-rust",
+          args: [
+            clientRust,
+            {
+              crateFolder: "clients/rust",
+              formatCode: true,
+            },
+          ],
+        },
+      }),
     },
   };
 }
