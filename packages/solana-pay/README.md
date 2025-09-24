@@ -26,7 +26,7 @@ You can find the gill library docs here:
 
 ## Installation
 
-Install `gill` with your package manager of choice:
+Install `@gillsdk/solana-pay` with your package manager of choice:
 
 ```shell
 npm install gill @gillsdk/solana-pay
