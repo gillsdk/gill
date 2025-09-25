@@ -9,5 +9,6 @@ export * from "./signatures-for-address.js";
 export * from "./simulate-transaction.js";
 export * from "./slot.js";
 export * from "./token-account.js";
+export * from "./token-accounts-by-owner.js";
 export * from "./token-mint.js";
 export * from "./transaction.js";
