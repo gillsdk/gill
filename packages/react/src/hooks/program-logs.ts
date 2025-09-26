@@ -1,11 +1,10 @@
 "use client";
 
-import type { Address } from "gill";
+import type { Address, Commitment } from "gill";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSolanaClient } from "./client.js";
 
 type LogFilter = "all" | "error" | "success";
-type Commitment = "processed" | "confirmed" | "finalized";
 
 export type ProgramLog = {
   signature: string;
