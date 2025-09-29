@@ -1,5 +1,5 @@
 import type { GetSlotApi } from "gill";
-import { useSlot } from "../hooks/slot";
+import { useSlot } from "../hooks/slot.js";
 
 // [DESCRIBE] useSlot
 {

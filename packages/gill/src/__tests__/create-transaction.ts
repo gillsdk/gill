@@ -1,6 +1,6 @@
 import assert from "node:assert";
 
-import { blockhash, generateKeyPairSigner, isKeyPairSigner, type KeyPairSigner } from "@solana/kit";
+import { type Address, blockhash, generateKeyPairSigner, isKeyPairSigner, type KeyPairSigner } from "@solana/kit";
 
 import { createTransaction } from "../core";
 import { hasSetComputeLimitInstruction, hasSetComputeUnitPriceInstruction } from "../programs";
@@ -12,15 +12,15 @@ describe("createTransaction", () => {
     signer = await generateKeyPairSigner();
   });
 
-  test("create a legacy transaction with a signer as the feePayer", () => {
+  it("create a legacy transaction with a signer as the feePayer", () => {
     const tx = createTransaction({
-      version: "legacy",
       feePayer: signer,
       instructions: [],
       latestBlockhash: {
         blockhash: blockhash("GK1nopeF3P8J46dGqq4KfaEWopZU7K65F6CKQXuUdr3z"),
         lastValidBlockHeight: 0n,
       },
+      version: "legacy",
     });
 
     assert.equal(tx.version, "legacy");
@@ -33,11 +33,11 @@ describe("createTransaction", () => {
     assert.equal(hasSetComputeLimitInstruction(tx), false);
   });
 
-  test("create a version 0 transaction with a signer as the feePayer", () => {
+  it("create a version 0 transaction with a signer as the feePayer", () => {
     const tx = createTransaction({
-      version: 0,
       feePayer: signer,
       instructions: [],
+      version: 0,
     });
 
     assert.equal(tx.version, 0);
@@ -49,11 +49,11 @@ describe("createTransaction", () => {
     assert.equal(hasSetComputeLimitInstruction(tx), false);
   });
 
-  test("create a legacy transaction with an `Address` as the feePayer", () => {
+  it("create a legacy transaction with an `Address` as the feePayer", () => {
     const tx = createTransaction({
-      version: "legacy",
       feePayer: signer.address,
       instructions: [],
+      version: "legacy",
     });
 
     assert.equal(tx.version, "legacy");
@@ -65,12 +65,12 @@ describe("createTransaction", () => {
     assert.equal(hasSetComputeLimitInstruction(tx), false);
   });
 
-  test("create a legacy transaction with a compute unit limit instruction", () => {
+  it("create a legacy transaction with a compute unit limit instruction", () => {
     const tx = createTransaction({
-      version: "legacy",
+      computeUnitLimit: 0,
       feePayer: signer.address,
       instructions: [],
-      computeUnitLimit: 0,
+      version: "legacy",
     });
 
     assert.equal(tx.version, "legacy");
@@ -79,12 +79,12 @@ describe("createTransaction", () => {
     assert.equal(hasSetComputeUnitPriceInstruction(tx), false);
   });
 
-  test("create a legacy transaction with a compute unit price instruction", () => {
+  it("create a legacy transaction with a compute unit price instruction", () => {
     const tx = createTransaction({
-      version: "legacy",
+      computeUnitPrice: 0,
       feePayer: signer.address,
       instructions: [],
-      computeUnitPrice: 0,
+      version: "legacy",
     });
 
     assert.equal(tx.version, "legacy");
@@ -93,13 +93,13 @@ describe("createTransaction", () => {
     assert.equal(hasSetComputeUnitPriceInstruction(tx), true);
   });
 
-  test("create a legacy transaction with both compute budget instructions", () => {
+  it("create a legacy transaction with both compute budget instructions", () => {
     const tx = createTransaction({
-      version: "legacy",
-      feePayer: signer.address,
-      instructions: [],
       computeUnitLimit: 0,
       computeUnitPrice: 0,
+      feePayer: signer.address,
+      instructions: [],
+      version: "legacy",
     });
 
     assert.equal(tx.version, "legacy");
@@ -108,15 +108,15 @@ describe("createTransaction", () => {
     assert.equal(hasSetComputeUnitPriceInstruction(tx), true);
   });
 
-  test("create a version 0 transaction with an `Address` as the feePayer", () => {
+  it("create a version 0 transaction with an `Address` as the feePayer", () => {
     const tx = createTransaction({
-      version: 0,
       feePayer: signer.address,
       instructions: [],
       latestBlockhash: {
         blockhash: blockhash("GK1nopeF3P8J46dGqq4KfaEWopZU7K65F6CKQXuUdr3z"),
         lastValidBlockHeight: 0n,
       },
+      version: 0,
     });
 
     assert.equal(tx.version, 0);
@@ -129,12 +129,12 @@ describe("createTransaction", () => {
     assert.equal(hasSetComputeLimitInstruction(tx), false);
   });
 
-  test("create a version 0 transaction with a compute unit limit instruction", () => {
+  it("create a version 0 transaction with a compute unit limit instruction", () => {
     const tx = createTransaction({
-      version: 0,
+      computeUnitLimit: 0,
       feePayer: signer.address,
       instructions: [],
-      computeUnitLimit: 0,
+      version: 0,
     });
 
     assert.equal(tx.version, 0);
@@ -143,12 +143,12 @@ describe("createTransaction", () => {
     assert.equal(hasSetComputeUnitPriceInstruction(tx), false);
   });
 
-  test("create a version 0 transaction with a compute unit price instruction", () => {
+  it("create a version 0 transaction with a compute unit price instruction", () => {
     const tx = createTransaction({
-      version: 0,
+      computeUnitPrice: 0,
       feePayer: signer.address,
       instructions: [],
-      computeUnitPrice: 0,
+      version: 0,
     });
 
     assert.equal(tx.version, 0);
@@ -157,18 +157,121 @@ describe("createTransaction", () => {
     assert.equal(hasSetComputeUnitPriceInstruction(tx), true);
   });
 
-  test("create a version 0 transaction with both compute budget instructions", () => {
+  it("create a version 0 transaction with both compute budget instructions", () => {
     const tx = createTransaction({
-      version: 0,
-      feePayer: signer.address,
-      instructions: [],
       computeUnitLimit: 0,
       computeUnitPrice: 0,
+      feePayer: signer.address,
+      instructions: [],
+      version: 0,
     });
 
     assert.equal(tx.version, 0);
     assert.equal(tx.instructions.length, 2);
     assert.equal(hasSetComputeLimitInstruction(tx), true);
     assert.equal(hasSetComputeUnitPriceInstruction(tx), true);
+  });
+
+  it("auto-detects legacy version when no ALT is used", () => {
+    const tx = createTransaction({
+      feePayer: signer.address,
+      instructions: [],
+    });
+
+    assert.equal(tx.version, "legacy");
+  });
+
+  it("auto-detects v0 version when ALT is detected in instructions", () => {
+    const instructionWithALT = {
+      accounts: [],
+      addressTableLookup: {
+        lookupTableAddress: "22222222222222222222222222222222" as Address,
+        readableIndices: [],
+        writableIndices: [],
+      },
+      data: new Uint8Array(),
+      programAddress: "11111111111111111111111111111111" as Address,
+    };
+
+    const tx = createTransaction({
+      feePayer: signer.address,
+      instructions: [instructionWithALT],
+    });
+
+    assert.equal(tx.version, 0);
+  });
+
+  it("auto-detects v0 version when addressTableLookups is present", () => {
+    const instructionWithALTs = {
+      accounts: [],
+      addressTableLookups: [
+        {
+          lookupTableAddress: "22222222222222222222222222222222" as Address,
+          readableIndices: [],
+          writableIndices: [],
+        },
+      ],
+      data: new Uint8Array(),
+      programAddress: "11111111111111111111111111111111" as Address,
+    };
+
+    const tx = createTransaction({
+      feePayer: signer.address,
+      instructions: [instructionWithALTs],
+    });
+
+    assert.equal(tx.version, 0);
+  });
+
+  it("explicit version overrides auto-detection", () => {
+    const instructionWithALT = {
+      accounts: [],
+      addressTableLookup: {
+        lookupTableAddress: "22222222222222222222222222222222" as Address,
+        readableIndices: [],
+        writableIndices: [],
+      },
+      data: new Uint8Array(),
+      programAddress: "11111111111111111111111111111111" as Address,
+    };
+
+    const tx = createTransaction({
+      feePayer: signer.address,
+      instructions: [instructionWithALT],
+      version: "legacy",
+    });
+
+    assert.equal(tx.version, "legacy");
+  });
+
+  it("explicit auto version behaves same as no version", () => {
+    const tx = createTransaction({
+      feePayer: signer.address,
+      instructions: [],
+      version: "auto",
+    });
+
+    assert.equal(tx.version, "legacy");
+  });
+
+  it("explicit auto version with ALT detects v0", () => {
+    const instructionWithALT = {
+      accounts: [],
+      addressTableLookup: {
+        lookupTableAddress: "22222222222222222222222222222222" as Address,
+        readableIndices: [],
+        writableIndices: [],
+      },
+      data: new Uint8Array(),
+      programAddress: "11111111111111111111111111111111" as Address,
+    };
+
+    const tx = createTransaction({
+      feePayer: signer.address,
+      instructions: [instructionWithALT],
+      version: "auto",
+    });
+
+    assert.equal(tx.version, 0);
   });
 });

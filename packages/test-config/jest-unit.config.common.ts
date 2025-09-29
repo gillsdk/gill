@@ -19,6 +19,10 @@ const config: Partial<Config.InitialProjectOptions> = {
     ".*reexports|index.ts",
   ],
   testPathIgnorePatterns: ["__setup__.ts"],
+  moduleNameMapper: {
+    // Handle .js imports to .ts files for ESM compatibility
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
   transform: {
     "^.+\\.(ts|js)x?$": [
       "@swc/jest",

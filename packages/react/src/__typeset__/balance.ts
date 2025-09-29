@@ -1,5 +1,5 @@
 import { Address, GetBalanceApi } from "gill";
-import { useBalance } from "../hooks";
+import { useBalance } from "../hooks/balance.js";
 
 // [DESCRIBE] useBalance
 {

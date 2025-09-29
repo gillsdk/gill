@@ -1,7 +1,7 @@
 import type { Account, Address } from "gill";
 
-import type { Mint } from "gill/programs/token";
-import { useTokenMint } from "../hooks";
+import type { Mint } from "gill/programs";
+import { useTokenMint } from "../hooks/token-mint.js";
 
 // [DESCRIBE] useTokenMint
 {

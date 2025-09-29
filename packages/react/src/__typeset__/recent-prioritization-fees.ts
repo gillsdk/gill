@@ -1,5 +1,5 @@
 import { Address, GetRecentPrioritizationFeesApi } from "gill";
-import { useRecentPrioritizationFees } from "../hooks";
+import { useRecentPrioritizationFees } from "../hooks/recent-prioritization-fees.js";
 
 // [DESCRIBE] useRecentPrioritizationFees
 {

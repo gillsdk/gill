@@ -70,21 +70,21 @@ getMetadataCodec;
 /**
  * SPL Token 2022 program client
  */
-import { TOKEN_2022_PROGRAM_ADDRESS as TOKEN_2022_PROGRAM_ADDRESS_token } from "gill/programs/token";
+import { TOKEN_2022_PROGRAM_ADDRESS as TOKEN_2022_PROGRAM_ADDRESS_token } from "gill/programs";
 TOKEN_2022_PROGRAM_ADDRESS_token;
 
-import { getMintToInstruction as getMintToInstruction_token } from "gill/programs/token";
+import { getMintToInstruction as getMintToInstruction_token } from "gill/programs";
 getMintToInstruction_token;
 
-import type { ParsedToken2022Instruction as ParsedToken2022Instruction_token } from "gill/programs/token";
+import type { ParsedToken2022Instruction as ParsedToken2022Instruction_token } from "gill/programs";
 null as unknown as ParsedToken2022Instruction_token;
 
 // !this is a custom symbol that gill provides
-import { getAssociatedTokenAccountAddress as getAssociatedTokenAccountAddress_token } from "gill/programs/token";
+import { getAssociatedTokenAccountAddress as getAssociatedTokenAccountAddress_token } from "gill/programs";
 getAssociatedTokenAccountAddress_token;
 
 // !this is a custom symbol that gill provides
-import { TOKEN_PROGRAM_ADDRESS as TOKEN_PROGRAM_ADDRESS_token } from "gill/programs/token";
+import { TOKEN_PROGRAM_ADDRESS as TOKEN_PROGRAM_ADDRESS_token } from "gill/programs";
 TOKEN_PROGRAM_ADDRESS_token;
 
 /**

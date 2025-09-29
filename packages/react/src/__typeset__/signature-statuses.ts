@@ -1,5 +1,5 @@
 import { Signature, SolanaRpcResponse } from "gill";
-import { useSignatureStatuses } from "../hooks/signature-statuses";
+import { useSignatureStatuses } from "../hooks/signature-statuses.js";
 
 // [DESCRIBE] useSignatureStatuses
 {

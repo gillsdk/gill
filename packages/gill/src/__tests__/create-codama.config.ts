@@ -36,9 +36,9 @@ describe("createCodamaConfig", () => {
           ],
           from: "@codama/renderers-js",
         },
-        rust: undefined,
       },
     });
+    expect(config.scripts).not.toHaveProperty("rust");
   });
 
   it("should return accept rust client", () => {

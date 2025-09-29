@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createSolanaClient, type SolanaClient } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
 
 /**
  * Get the current Solana client (including `rpc` and `rpcSubscriptions`)

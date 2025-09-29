@@ -6,7 +6,7 @@ import {
   signTransactionMessageWithSigners,
 } from "gill";
 import { loadKeypairSignerFromFile } from "gill/node";
-import { buildCreateTokenTransaction, TOKEN_2022_PROGRAM_ADDRESS } from "gill/programs/token";
+import { buildCreateTokenTransaction, TOKEN_2022_PROGRAM_ADDRESS } from "gill/programs";
 
 const { rpc, sendAndConfirmTransaction } = createSolanaClient({
   urlOrMoniker: "devnet",
