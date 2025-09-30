@@ -195,7 +195,7 @@ import { createSolanaClient } from "gill";
 import { useUpdateSolanaClient } from "@gillsdk/react";
 
 function NetworkSwitcher() {
-  const updateClient = useUpdateSolanaClient();
+  const { mutate: updateClient } = useUpdateSolanaClient();
 
   const switchToMainnet = () => {
     const mainnetClient = createSolanaClient({
