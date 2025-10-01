@@ -1,12 +1,21 @@
 {
-  "name": "gill-examples-basic",
+  "name": "@gillsdk/examples-basics",
   "license": "MIT",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "airdrop": "ts-node src/airdrop.ts",
+    "basic-compare": "ts-node src/basic-compare.ts",
+    "basic": "ts-node src/basic.ts",
+    "intro": "ts-node src/intro.ts",
+    "reference-keys": "ts-node src/reference-keys.ts",
+    "tokens": "ts-node src/tokens.ts",
+    "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
+    "style:fix": "pnpm style:check --write"
+  },
   "keywords": [],
   "author": "",
   "dependencies": {

@@ -1,7 +1,8 @@
 {
-  "name": "gill-react",
+  "name": "@gillsdk/react",
   "license": "MIT",
-  "version": "0.4.4",
+  "version": "0.5.1",
+  "type": "module",
   "description": "a Solana hooks library for React, built on top of gill - the modern JavaScript/TypeScript library for Solana",
   "scripts": {
     "clean": "rimraf coverage dist build node_modules .turbo",
@@ -17,7 +18,9 @@
     "test:unit:browser": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.browser.ts --rootDir . --silent",
     "test:treeshakability:browser": "agadoo dist/index.browser.mjs",
     "test:treeshakability:native": "agadoo dist/index.native.mjs",
-    "test:treeshakability:node": "agadoo dist/index.node.mjs"
+    "test:treeshakability:node": "agadoo dist/index.node.mjs",
+    "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
+    "style:fix": "pnpm style:check --write"
   },
   "exports": {
     "types": "./dist/index.d.ts",
@@ -33,7 +36,6 @@
   "module": "./dist/index.node.mjs",
   "react-native": "./dist/index.native.mjs",
   "types": "./dist/index.d.ts",
-  "type": "commonjs",
   "files": [
     "./dist/"
   ],
@@ -52,10 +54,10 @@
     "web3js hooks",
     "wagmi"
   ],
-  "author": "Solana Foundation DevRel <devrel@solana.org>",
-  "homepage": "https://github.com/solana-foundation/gill#readme",
+  "author": "Nick Frostbutter <maintainers@gillsdk.com>",
+  "homepage": "https://gillsdk.com",
   "bugs": {
-    "url": "https://github.com/solana-foundation/gill/issues"
+    "url": "https://github.com/gillsdk/gill/issues"
   },
   "browserslist": [
     "supports bigint and not dead",
@@ -67,6 +69,12 @@
     "react": "^18"
   },
   "dependencies": {
+    "@solana/react": "^3.0.3",
+    "@solana/wallet-standard-chains": "^1.1.1",
+    "@solana/wallet-standard-features": "^1.3.0",
+    "@wallet-standard/core": "^1.1.1",
+    "@wallet-standard/react": "^1.0.1",
+    "@wallet-standard/ui": "^1.0.1",
     "gill": "workspace:*"
   },
   "peerDependencies": {

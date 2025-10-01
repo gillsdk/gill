@@ -2,9 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { GetLatestBlockhashApi, Simplify } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import type { GillUseRpcHook } from "./types";
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
 
 type RpcConfig = Simplify<Parameters<GetLatestBlockhashApi["getLatestBlockhash"]>>[0];
 

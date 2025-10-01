@@ -1,0 +1,194 @@
+---
+title: gill vs @solana/kit
+description:
+  "Explore a side-by-side comparison of gill and @solana/kit (formerly known as web3js v2)"
+---
+
+The gill library is built directly on top of
+[`@solana/kit`](https://www.npmjs.com/package/@solana/kit), the new JavaScript primitives developed
+by [Anza](https://anza.xyz) as a more performant replacement for the old
+[`@solana/web3.js`](https://www.npmjs.com/package/@solana/web3.js). Since Kit only ships these new
+low level primitives, developers are forced into a single experience of manually crafting everything
+and ballooning their applications with verbose boilerplate.
+
+Gill is able to ship **both** the same low level primitives as Kit **and** lightly opinionated
+abstractions to simplify common tasks, all from a single compatible interface. By simplifying across
+the board with gill, developers can focus more time on their application's business logic and not
+verbose boilerplate.
+
+<Callout>
+  `@solana/kit` was formerly know as "web3.js v2" as it was originally published as the version
+  `2.x` release of `@solana/web3.js`. Anza engineers noted this to complicate and confuse the
+  upgrade path for the new technologies, so they decided to publish under the new package name of
+  `@solana/kit`.
+</Callout>
+
+You can find the complete scripts that the example code snippets were created from in the gill repo
+[here](https://github.com/gillsdk/gill/tree/master/examples/get-started#comparison-of-gill-vs-solanakit-aka-web3js-v2).
+Both are written with honest intentions, best practices, and attempt to be as concise as possible in
+accomplishing the same task.
+
+## Connecting to the blockchain
+
+Every application will need to create a connection to the blockchain. A complete and usable
+connection consists of the following three parts (at a minimum):
+
+1. `rpc` - used to send [Solana RPC](https://solana.com/docs/rpc) requests over HTTP (the most
+   common way)
+2. `rpcSubscriptions` - used to make certain RPC requests over websockets
+3. `sendAndConfirmTransaction` - function used to actually send a complete transaction to the
+   blockchain for confirmation
+
+The following code snippets demonstrate how to instantiate all three of these connection pieces for
+each of the libraries:
+
+```ts tab="gill"
+import { createSolanaClient } from "gill";
+
+const { rpc, rpcSubscriptions, sendAndConfirmTransaction } = createSolanaClient({
+  urlOrMoniker: "devnet",
+});
+```
+
+```ts tab="@solana/kit"
+import {
+  devnet,
+  createSolanaRpc,
+  createSolanaRpcSubscriptions,
+  sendAndConfirmTransactionFactory,
+} from "@solana/kit";
+
+const rpc = createSolanaRpc(devnet("https://api.devnet.solana.com"));
+
+const rpcSubscriptions = createSolanaRpcSubscriptions(devnet("wss://api.devnet.solana.com"));
+
+const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({
+  rpc,
+  rpcSubscriptions,
+});
+```
+
+## Making RPC requests
+
+For both `@solana/kit` and `gill`, making standard Solana RPC requests is the same: use the
+previously created `rpc` object.
+
+```ts
+// get slot
+const slot = await rpc.getSlot().send();
+
+// get the latest blockhash
+const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+```
+
+## Loading a signer
+
+There are many different ways to obtain a keypair that is capable of performing the Solana specific
+signing operations (aka a "signer"). This will look different for frontend and backend applications.
+
+For local scripts, JavaScript server runtimes (like NodeJS and Bun), and backend applications it's
+common to load a keypair from the file system or an ENV variable. The following is how to accomplish
+this for both libraries:
+
+```ts tab="gill"
+import { loadKeypairSignerFromFile } from "gill/node";
+
+const signer = await loadKeypairSignerFromFile();
+```
+
+```ts tab="@solana/kit"
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { resolve } from "node:path";
+import { createKeyPairFromBytes } from "@solana/kit";
+
+const keypairFilePath = "~/.config/solana/id.json";
+
+const resolvedKeypairPath = resolve(keypairFilePath.replace("~", homedir()));
+
+const keypair = await createKeyPairFromBytes(
+  Uint8Array.from(JSON.parse(readFileSync(resolvedKeypairPath, "utf8"))),
+);
+```
+
+Note that `@solana/kit` has no specific functionality for loading keypairs from files or ENV
+variables, so developers must implement the file/ENV reading operations themselves.
+
+Whereas gill includes multiple functions to handle these very scenarios:
+
+- [`loadKeypairSignerFromFile()`](/api/gill-node/functions/loadKeypairSignerFromFile)
+- [`loadKeypairSignerFromEnvironment()`](/api/gill-node/functions/loadKeypairSignerFromEnvironment)
+- [`loadKeypairSignerFromEnvironmentBase58()`](/api/gill-node/functions/loadKeypairSignerFromEnvironmentBase58)
+
+<Callout>
+  The `loadKeypairSignerFromFile()` function defaults to the Solana CLI's keypair path
+  (`~/.config/solana/id.json`). If you wish to load a different keypair file, provide the path in as
+  an argument.
+</Callout>
+
+## Creating a transaction
+
+After connecting to the blockchain and making RPC requests, the next most common tasks is actually
+creating transactions.
+
+The following are examples of how to create a simple Memo transaction that includes basic
+optimizations (via compute budget instructions):
+
+```ts tab="gill"
+import { createTransaction } from "gill";
+import { getAddMemoInstruction } from "gill/programs";
+
+const transaction = createTransaction({
+  version: "legacy",
+  feePayer: signer,
+  instructions: [
+    getAddMemoInstruction({
+      memo: "gm world!",
+    }),
+  ],
+  latestBlockhash,
+  computeUnitLimit: 5000,
+  computeUnitPrice: 1000,
+});
+```
+
+```ts tab="@solana/kit"
+import {
+  pipe,
+  createTransactionMessage,
+  setTransactionMessageFeePayerSigner,
+  appendTransactionMessageInstructions,
+  setTransactionMessageLifetimeUsingBlockhash,
+} from "@solana/kit";
+import { getAddMemoInstruction } from "@solana-program/memo";
+import {
+  getSetComputeUnitLimitInstruction,
+  getSetComputeUnitPriceInstruction,
+} from "@solana-program/compute-budget";
+
+const transaction = pipe(
+  createTransactionMessage({ version: "legacy" }),
+  (tx) => setTransactionMessageFeePayerSigner(signer, tx),
+  (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+  (tx) =>
+    appendTransactionMessageInstructions(
+      [
+        getAddMemoInstruction({
+          memo: "gm world!",
+        }),
+        getSetComputeUnitLimitInstruction({ units: 5000 }),
+        getSetComputeUnitPriceInstruction({ microLamports: 1000 }),
+      ],
+      tx,
+    ),
+);
+```
+
+Notice that the `@solana/kit` based example above requires manually installing two additional
+packages: `@solana-program/compute-budget` and `@solana-program/memo`.
+
+Whereas gill takes a different approach:
+
+- `createTransaction` natively supports setting the same compute budget instructions
+- the included Memo program client is directly accessible via the `gill/programs` import path
+  without having to manually install the package

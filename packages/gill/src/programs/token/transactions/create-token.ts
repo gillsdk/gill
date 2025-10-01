@@ -1,6 +1,6 @@
 import { TOKEN_2022_PROGRAM_ADDRESS } from "@solana-program/token-2022";
 import type {
-  ITransactionMessageWithFeePayer,
+  TransactionMessageWithFeePayer,
   KeyPairSigner,
   TransactionMessageWithBlockhashLifetime,
   TransactionSigner,
@@ -52,7 +52,7 @@ export async function buildCreateTokenTransaction<
   TFeePayer extends TransactionSigner = TransactionSigner,
 >(
   args: TransactionBuilderInput<TVersion, TFeePayer> & GetCreateTokenTransactionInput,
-): Promise<FullTransaction<TVersion, ITransactionMessageWithFeePayer>>;
+): Promise<FullTransaction<TVersion, TransactionMessageWithFeePayer>>;
 export async function buildCreateTokenTransaction<
   TVersion extends TransactionVersion = "legacy",
   TFeePayer extends TransactionSigner = TransactionSigner,
@@ -60,7 +60,7 @@ export async function buildCreateTokenTransaction<
     TransactionMessageWithBlockhashLifetime["lifetimeConstraint"] = TransactionMessageWithBlockhashLifetime["lifetimeConstraint"],
 >(
   args: TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint> & GetCreateTokenTransactionInput,
-): Promise<FullTransaction<TVersion, ITransactionMessageWithFeePayer, TransactionMessageWithBlockhashLifetime>>;
+): Promise<FullTransaction<TVersion, TransactionMessageWithFeePayer, TransactionMessageWithBlockhashLifetime>>;
 export async function buildCreateTokenTransaction<
   TVersion extends TransactionVersion,
   TFeePayer extends TransactionSigner,

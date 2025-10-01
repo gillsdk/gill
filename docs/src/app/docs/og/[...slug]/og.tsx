@@ -109,7 +109,7 @@ export function generate({
               color: "rgba(240,240,240,0.7)",
             }}
           >
-            https://gill.site
+            https://gillsdk.com
           </p>
         </div>
       </div>

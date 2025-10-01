@@ -35,6 +35,6 @@ coverage
 # GitHub Pages deploy directory
 .ghpages-deploy
 
-.env
-.env.local
+*.env*
+*.local*
 .vercel

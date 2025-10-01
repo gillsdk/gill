@@ -12,6 +12,17 @@ if (BigInt.prototype.toJSON === undefined) {
   };
 }
 
-export * from "./const";
-export * from "./providers";
-export * from "./hooks";
+export * from "./const.js";
+export * from "./hooks/index.js";
+export * from "./providers.js";
+
+/**
+ * Reexporting the Solana Wallet Standard functionality allows gill to
+ * provide a cohesive developer experience
+ */
+export * from "@solana/react";
+export * from "@solana/wallet-standard-chains";
+export * from "@solana/wallet-standard-features";
+export * from "@wallet-standard/core";
+export * from "@wallet-standard/react";
+export * from "@wallet-standard/ui";

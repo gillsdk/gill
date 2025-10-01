@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../../packages/tsconfig/base.json",
-  "display": "gill-examples-tokens",
+  "display": "@gillsdk/examples-tokens",
   "include": ["src"]
 }

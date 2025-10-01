@@ -1,1 +1,1 @@
-# gill-vue
+# @gillsdk/vue
