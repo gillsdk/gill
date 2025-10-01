@@ -6,6 +6,7 @@ export * from "./program-accounts.js";
 export * from "./recent-prioritization-fees.js";
 export * from "./signature-statuses.js";
 export * from "./signatures-for-address.js";
+export * from "./simulate-transaction.js";
 export * from "./slot.js";
 export * from "./token-account.js";
 export * from "./token-mint.js";

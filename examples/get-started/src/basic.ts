@@ -25,7 +25,6 @@ const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 const signer = await loadKeypairSignerFromFile();
 
 const tx = createTransaction({
-  version: "legacy",
   feePayer: signer,
   instructions: [
     getAddMemoInstruction({
