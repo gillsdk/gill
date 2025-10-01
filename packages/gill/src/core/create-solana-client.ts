@@ -84,5 +84,6 @@ export function createSolanaClient<TCluster extends ModifiedClusterUrl>({
     }),
     // @ts-ignore
     simulateTransaction: simulateTransactionFactory({ rpc }),
+    urlOrMoniker: urlOrMoniker.toString() as TCluster,
   };
 }
