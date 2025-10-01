@@ -9,96 +9,19 @@ import type {
   Lamports,
   Rpc,
 } from "@solana/kit";
-import {
-  isAddress,
-  none,
-  parseBase64RpcAccount,
-  SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND,
-  SOLANA_ERROR__ACCOUNTS__FAILED_TO_DECODE_ACCOUNT,
-  SolanaError,
-  some,
-} from "@solana/kit";
-import { assertIsMint, fetchTokenAccounts, FetchTokenAccountsConfig } from "../../programs";
+import { none, parseBase64RpcAccount, some } from "@solana/kit";
+import { fetchTokenAccounts, FetchTokenAccountsConfig } from "../../programs";
 
 // Mock the dependencies
-// jest.mock("@solana-program/token-2022");
-// jest.mock("@solana/kit");
-
-const mockIsAddress = isAddress as jest.MockedFunction<typeof isAddress>;
-
-const mockFetchMint = fetchMint as jest.MockedFunction<typeof fetchMint>;
-const mockDecodeToken = decodeToken as jest.MockedFunction<typeof decodeToken>;
-const mockParseBase64RpcAccount = parseBase64RpcAccount as jest.MockedFunction<typeof parseBase64RpcAccount>;
-const commitment: Commitment = "confirmed";
-
-describe("assertIsMint", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("should throw ACCOUNT_NOT_FOUND error when given an address", () => {
-    const address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" as Address;
-
-    expect(() => assertIsMint(address)).toThrow(SolanaError);
-    expect(() => assertIsMint(address)).toThrow(
-      expect.objectContaining({
-        context: expect.objectContaining({
-          __code: SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND,
-          address: address,
-        }),
-      }),
-    );
-  });
-
-  it("should throw FAILED_TO_DECODE_ACCOUNT error when account has no data property", () => {
-    const invalidAccount = { address: "test" } as any;
-
-    expect(() => assertIsMint(invalidAccount)).toThrow(SolanaError);
-    expect(() => assertIsMint(invalidAccount)).toThrow(
-      expect.objectContaining({
-        context: expect.objectContaining({
-          __code: SOLANA_ERROR__ACCOUNTS__FAILED_TO_DECODE_ACCOUNT,
-        }),
-      }),
-    );
-  });
-
-  it("should throw FAILED_TO_DECODE_ACCOUNT error when account data has no mintAuthority property", () => {
-    const invalidAccount = {
-      address: "test" as Address,
-      data: { someOtherProperty: true },
-    } as any;
-
-    expect(() => assertIsMint(invalidAccount)).toThrow(SolanaError);
-    expect(() => assertIsMint(invalidAccount)).toThrow(
-      expect.objectContaining({
-        context: expect.objectContaining({
-          __code: SOLANA_ERROR__ACCOUNTS__FAILED_TO_DECODE_ACCOUNT,
-        }),
-      }),
-    );
-  });
-
-  it("should not throw when given a valid Mint account", () => {
-    const validMintAccount: Account<Mint> = {
-      address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" as Address,
-      data: {
-        mintAuthority: "authority" as any,
-        supply: 1000000n,
-        decimals: 6,
-        isInitialized: true,
-        freezeAuthority: null as any,
-        extensions: [] as any,
-      },
-      executable: false,
-      lamports: 1461600n as Lamports,
-      programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
-      space: 0n,
-    };
-
-    expect(() => assertIsMint(validMintAccount)).not.toThrow();
-  });
-});
+jest.mock("@solana-program/token-2022", () => ({
+  ...jest.requireActual("@solana-program/token-2022"),
+  fetchMint: jest.fn(),
+  decodeToken: jest.fn(),
+}));
+jest.mock("@solana/kit", () => ({
+  ...jest.requireActual("@solana/kit"),
+  parseBase64RpcAccount: jest.fn(),
+}));
 
 describe("fetchTokenAccounts", () => {
   let mockRpc: jest.Mocked<Rpc<GetTokenAccountsByOwnerApi & GetAccountInfoApi>>;
@@ -106,16 +29,34 @@ describe("fetchTokenAccounts", () => {
   let mockGetTokenAccountsByOwner: jest.MockedFunction<any>;
   let mockGetAccountInfo: jest.MockedFunction<any>;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  const mockFetchMint = fetchMint as jest.MockedFunction<typeof fetchMint>;
+  const mockDecodeToken = decodeToken as jest.MockedFunction<typeof decodeToken>;
+  const mockParseBase64RpcAccount = parseBase64RpcAccount as jest.MockedFunction<typeof parseBase64RpcAccount>;
+  const commitment: Commitment = "confirmed";
 
-    mockSend = jest.fn();
-    mockGetTokenAccountsByOwner = jest.fn().mockReturnValue({ send: mockSend });
-    mockRpc = {
-      getTokenAccountsByOwner: mockGetTokenAccountsByOwner,
-      getAccountInfo: mockGetAccountInfo,
-    } as any;
-  });
+  const mockBase64EncodedRpcAccount = {
+    address: "TokenAccount1" as Address,
+    data: "parsedData" as any,
+    executable: false,
+    lamports: 2039280n as Lamports,
+    exists: true,
+    space: 0n,
+    programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
+  };
+
+  const mockRpcResponse = {
+    value: [
+      {
+        pubkey: "TokenAccount1" as Address,
+        account: {
+          data: "base64EncodedData",
+          executable: false,
+          lamports: 2039280,
+          programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        },
+      },
+    ],
+  };
 
   const mockMintAccount: Account<Mint> = {
     address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" as Address,
@@ -133,7 +74,7 @@ describe("fetchTokenAccounts", () => {
     space: 0n,
   };
 
-  const mockTokenAccount: Account<Token> = {
+  const mockTokenAccount: Account<Token> & { exists: true } = {
     address: "TokenAccount1" as Address,
     data: {
       mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" as Address,
@@ -150,40 +91,31 @@ describe("fetchTokenAccounts", () => {
     lamports: 2039280n as Lamports,
     programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
     space: 0n,
+    exists: true,
   };
+
+  const ownerAddress = "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk" as Address;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockSend = jest.fn();
+    mockGetTokenAccountsByOwner = jest.fn().mockReturnValue({ send: mockSend });
+    mockGetAccountInfo = jest.fn();
+    mockRpc = {
+      getTokenAccountsByOwner: mockGetTokenAccountsByOwner,
+      getAccountInfo: mockGetAccountInfo,
+    } as any;
+  });
 
   it("should fetch token accounts when mint is provided as Address", async () => {
     const mintAddress = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" as Address;
-    const ownerAddress = "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk" as Address;
 
-    // mockIsAddress.mockReturnValue(true);
-    // mockFetchMint.mockResolvedValue(mockMintAccount);
-
-    const mockRpcResponse = {
-      value: [
-        {
-          pubkey: "TokenAccount1" as Address,
-          account: {
-            data: "base64EncodedData",
-            executable: false,
-            lamports: 2039280,
-            programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-          },
-        },
-      ],
-    };
+    mockFetchMint.mockResolvedValue(mockMintAccount);
+    mockDecodeToken.mockReturnValue(mockTokenAccount);
+    mockParseBase64RpcAccount.mockReturnValue(mockBase64EncodedRpcAccount);
 
     mockSend.mockResolvedValue(mockRpcResponse);
-    // mockParseBase64RpcAccount.mockReturnValue({
-    //   address: "TokenAccount1" as Address,
-    //   data: "parsedData" as any,
-    //   executable: false,
-    //   lamports: 2039280n as Lamports,
-    //   exists: true,
-    //   space: 0n,
-    //   programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
-    // });
-    // mockDecodeToken.mockReturnValue(mockTokenAccount);
 
     const result = await fetchTokenAccounts(mockRpc, mintAddress, ownerAddress);
 
@@ -200,174 +132,134 @@ describe("fetchTokenAccounts", () => {
     });
   });
 
-  //   it("should fetch token accounts when mint is provided as Account", async () => {
-  //     const ownerAddress = "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk" as Address;
+  it("should fetch token accounts when mint is provided as Account", async () => {
+    mockDecodeToken.mockReturnValue(mockTokenAccount);
+    mockSend.mockResolvedValue(mockRpcResponse);
+    mockParseBase64RpcAccount.mockReturnValue(mockBase64EncodedRpcAccount);
 
-  //     mockIsAddress.mockReturnValue(false);
+    const result = await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress);
 
-  //     const mockRpcResponse = {
-  //       value: [
-  //         {
-  //           pubkey: "TokenAccount1" as Address,
-  //           account: {
-  //             data: "base64EncodedData",
-  //             executable: false,
-  //             lamports: 2039280,
-  //             programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-  //           },
-  //         },
-  //       ],
-  //     };
+    expect(mockFetchMint).not.toHaveBeenCalled();
+    expect(mockRpc.getTokenAccountsByOwner).toHaveBeenCalledWith(
+      ownerAddress,
+      { mint: mockMintAccount.address },
+      { encoding: "base64" },
+    );
+    expect(result).toEqual({
+      mint: mockMintAccount,
+      totalBalance: 500000n,
+      accounts: [mockTokenAccount],
+    });
+  });
 
-  //     mockSend.mockResolvedValue(mockRpcResponse);
-  //     mockParseBase64RpcAccount.mockReturnValue({
-  //       address: "TokenAccount1" as Address,
-  //       account: {
-  //         data: "parsedData",
-  //         executable: false,
-  //         lamports: 2039280n,
-  //         programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
-  //       },
-  //     });
-  //     mockDecodeToken.mockReturnValue(mockTokenAccount);
+  it("should handle multiple token accounts and calculate total balance", async () => {
+    const mockTokenAccount2: Account<Token> & { exists: true } = {
+      ...mockTokenAccount,
+      address: "TokenAccount2" as Address,
+      data: { ...mockTokenAccount.data, amount: 750000n },
+    };
 
-  //     const result = await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress);
+    const mockRpcResponse = {
+      value: [
+        {
+          pubkey: "TokenAccount1" as Address,
+          account: {
+            data: "base64EncodedData1",
+            executable: false,
+            lamports: 2039280,
+            programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          },
+        },
+        {
+          pubkey: "TokenAccount2" as Address,
+          account: {
+            data: "base64EncodedData2",
+            executable: false,
+            lamports: 2039280,
+            programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          },
+        },
+      ],
+    };
 
-  //     expect(mockFetchMint).not.toHaveBeenCalled();
-  //     expect(mockRpc.getTokenAccountsByOwner).toHaveBeenCalledWith(
-  //       ownerAddress,
-  //       { mint: mockMintAccount.address },
-  //       { encoding: "base64" },
-  //     );
-  //     expect(result).toEqual({
-  //       mint: mockMintAccount,
-  //       totalBalance: 500000n,
-  //       accounts: [mockTokenAccount],
-  //     });
-  //   });
+    mockSend.mockResolvedValue(mockRpcResponse);
+    mockParseBase64RpcAccount
+      .mockReturnValueOnce({
+        address: "TokenAccount1" as Address,
+        account: {
+          data: "parsedData1",
+          executable: false,
+          lamports: 2039280n,
+          programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
+        },
+      } as any)
+      .mockReturnValueOnce({
+        address: "TokenAccount2" as Address,
+        account: {
+          data: "parsedData2",
+          executable: false,
+          lamports: 2039280n,
+          programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
+        },
+      } as any);
 
-  //   it("should handle multiple token accounts and calculate total balance", async () => {
-  //     const ownerAddress = "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk" as Address;
+    mockDecodeToken.mockReturnValueOnce(mockTokenAccount).mockReturnValueOnce(mockTokenAccount2);
 
-  //     mockIsAddress.mockReturnValue(false);
+    const result = await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress);
 
-  //     const mockTokenAccount2: Account<Token> = {
-  //       ...mockTokenAccount,
-  //       address: "TokenAccount2" as Address,
-  //       data: { ...mockTokenAccount.data, amount: 750000n },
-  //     };
+    expect(result.totalBalance).toBe(1250000n); // 500000 + 750000
+    expect(result.accounts).toHaveLength(2);
+    expect(result.accounts).toEqual([mockTokenAccount, mockTokenAccount2]);
+  });
 
-  //     const mockRpcResponse = {
-  //       value: [
-  //         {
-  //           pubkey: "TokenAccount1" as Address,
-  //           account: {
-  //             data: "base64EncodedData1",
-  //             executable: false,
-  //             lamports: 2039280,
-  //             programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-  //           },
-  //         },
-  //         {
-  //           pubkey: "TokenAccount2" as Address,
-  //           account: {
-  //             data: "base64EncodedData2",
-  //             executable: false,
-  //             lamports: 2039280,
-  //             programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-  //           },
-  //         },
-  //       ],
-  //     };
+  it("should pass config options to RPC call", async () => {
+    const config: FetchTokenAccountsConfig = {
+      commitment,
+      minContextSlot: 123456n,
+    };
 
-  //     mockSend.mockResolvedValue(mockRpcResponse);
-  //     mockParseBase64RpcAccount
-  //       .mockReturnValueOnce({
-  //         address: "TokenAccount1" as Address,
-  //         account: {
-  //           data: "parsedData1",
-  //           executable: false,
-  //           lamports: 2039280n,
-  //           programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
-  //         },
-  //       })
-  //       .mockReturnValueOnce({
-  //         address: "TokenAccount2" as Address,
-  //         account: {
-  //           data: "parsedData2",
-  //           executable: false,
-  //           lamports: 2039280n,
-  //           programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
-  //         },
-  //       });
+    const mockRpcResponse = { value: [] };
+    mockSend.mockResolvedValue(mockRpcResponse);
 
-  //     mockDecodeToken.mockReturnValueOnce(mockTokenAccount).mockReturnValueOnce(mockTokenAccount2);
+    await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress, config);
 
-  //     const result = await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress);
+    expect(mockRpc.getTokenAccountsByOwner).toHaveBeenCalledWith(
+      ownerAddress,
+      { mint: mockMintAccount.address },
+      { commitment, minContextSlot: 123456n, encoding: "base64" },
+    );
+  });
 
-  //     expect(result.totalBalance).toBe(1250000n); // 500000 + 750000
-  //     expect(result.accounts).toHaveLength(2);
-  //     expect(result.accounts).toEqual([mockTokenAccount, mockTokenAccount2]);
-  //   });
+  it("should accept abortSignal in config", async () => {
+    const abortController = new AbortController();
+    const config: FetchTokenAccountsConfig = {
+      abortSignal: abortController.signal,
+      commitment,
+    };
 
-  //   it("should pass config options to RPC call", async () => {
-  //     const ownerAddress = "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk" as Address;
-  //     const config: FetchTokenAccountsConfig = {
-  //       commitment,
-  //       minContextSlot: 123456n,
-  //     };
+    const mockRpcResponse = { value: [] };
+    mockSend.mockResolvedValue(mockRpcResponse);
 
-  //     mockIsAddress.mockReturnValue(false);
+    await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress, config);
 
-  //     const mockRpcResponse = { value: [] };
-  //     mockSend.mockResolvedValue(mockRpcResponse);
+    expect(mockRpc.getTokenAccountsByOwner).toHaveBeenCalledWith(
+      ownerAddress,
+      { mint: mockMintAccount.address },
+      { commitment, encoding: "base64" },
+    );
+    expect(mockSend).toHaveBeenCalledWith({ abortSignal: abortController.signal });
+  });
 
-  //     await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress, config);
+  it("should handle empty token accounts response", async () => {
+    const mockRpcResponse = { value: [] };
+    mockSend.mockResolvedValue(mockRpcResponse);
 
-  //     expect(mockRpc.getTokenAccountsByOwner).toHaveBeenCalledWith(
-  //       ownerAddress,
-  //       { mint: mockMintAccount.address },
-  //       { commitment, minContextSlot: 123456n, encoding: "base64" },
-  //     );
-  //   });
+    const result = await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress);
 
-  //   it("should handle abortSignal in config", async () => {
-  //     const ownerAddress = "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk" as Address;
-  //     const abortController = new AbortController();
-  //     const config: FetchTokenAccountsConfig = {
-  //       abortSignal: abortController.signal,
-  //       commitment,
-  //     };
-
-  //     mockIsAddress.mockReturnValue(false);
-
-  //     const mockRpcResponse = { value: [] };
-  //     mockSend.mockResolvedValue(mockRpcResponse);
-
-  //     await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress, config);
-
-  //     expect(mockRpc.getTokenAccountsByOwner).toHaveBeenCalledWith(
-  //       ownerAddress,
-  //       { mint: mockMintAccount.address },
-  //       { commitment, encoding: "base64" },
-  //     );
-  //     expect(mockSend).toHaveBeenCalledWith({ abortSignal: abortController.signal });
-  //   });
-
-  //   it("should handle empty token accounts response", async () => {
-  //     const ownerAddress = "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk" as Address;
-
-  //     mockIsAddress.mockReturnValue(false);
-
-  //     const mockRpcResponse = { value: [] };
-  //     mockSend.mockResolvedValue(mockRpcResponse);
-
-  //     const result = await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress);
-
-  //     expect(result).toEqual({
-  //       mint: mockMintAccount,
-  //       totalBalance: 0n,
-  //       accounts: [],
-  //     });
-  //   });
+    expect(result).toEqual({
+      mint: mockMintAccount,
+      totalBalance: 0n,
+      accounts: [],
+    });
+  });
 });

@@ -3,7 +3,7 @@ import { decodeToken, fetchMint } from "@solana-program/token-2022";
 import type { Account, Address, GetAccountInfoApi, GetTokenAccountsByOwnerApi, Rpc } from "@solana/kit";
 import { isAddress, parseBase64RpcAccount } from "@solana/kit";
 import type { Simplify } from "../../types";
-import { assertIsMint } from "./mint.js";
+import { assertIsMint } from "./assert-is-mint";
 
 type OriginalConfigParam = NonNullable<Parameters<GetTokenAccountsByOwnerApi["getTokenAccountsByOwner"]>[2]>;
 
