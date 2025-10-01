@@ -1,5 +1,5 @@
-import { useTokenAccountBalance } from "../hooks";
-import { GetTokenAccountBalanceApi, Address } from "gill";
+import { Address, GetTokenAccountBalanceApi } from "gill";
+import { useTokenAccountBalance } from "../hooks/token-account-balance.js";
 
 // [DESCRIBE] useTokenAccountBalance
 {

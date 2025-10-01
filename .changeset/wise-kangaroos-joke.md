@@ -2,4 +2,4 @@
 "gill-react": minor
 ---
 
-add's useTokenAccountBalance hook
+adds useTokenAccountBalance hook
