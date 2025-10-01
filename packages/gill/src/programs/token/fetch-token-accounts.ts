@@ -1,26 +1,9 @@
 import type { Mint, Token } from "@solana-program/token-2022";
 import { decodeToken, fetchMint } from "@solana-program/token-2022";
 import type { Account, Address, GetAccountInfoApi, GetTokenAccountsByOwnerApi, Rpc } from "@solana/kit";
-import {
-  isAddress,
-  parseBase64RpcAccount,
-  SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND,
-  SOLANA_ERROR__ACCOUNTS__FAILED_TO_DECODE_ACCOUNT,
-  SolanaError,
-} from "@solana/kit";
+import { isAddress, parseBase64RpcAccount } from "@solana/kit";
 import type { Simplify } from "../../types";
-
-export function assertIsMint<TAddress extends string = string>(
-  accountOrAddress: Account<Mint, TAddress> | Address<TAddress>,
-): asserts accountOrAddress is Account<Mint, TAddress> {
-  if (isAddress(accountOrAddress as Address)) {
-    throw new SolanaError(SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND, { address: accountOrAddress as Address });
-  }
-
-  if ("data" in accountOrAddress === false || "mintAuthority" in accountOrAddress.data === false) {
-    throw new SolanaError(SOLANA_ERROR__ACCOUNTS__FAILED_TO_DECODE_ACCOUNT, { address: accountOrAddress as Address });
-  }
-}
+import { assertIsMint } from "./mint.js";
 
 type OriginalConfigParam = NonNullable<Parameters<GetTokenAccountsByOwnerApi["getTokenAccountsByOwner"]>[2]>;
 
