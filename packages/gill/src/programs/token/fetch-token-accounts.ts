@@ -1,15 +1,6 @@
 import type { Mint, Token } from "@solana-program/token-2022";
 import { decodeToken, fetchMint } from "@solana-program/token-2022";
-import type {
-  Account,
-  Address,
-  Commitment,
-  DataSlice,
-  GetAccountInfoApi,
-  GetTokenAccountsByOwnerApi,
-  Rpc,
-  Slot,
-} from "@solana/kit";
+import type { Account, Address, GetAccountInfoApi, GetTokenAccountsByOwnerApi, Rpc } from "@solana/kit";
 import {
   isAddress,
   parseBase64RpcAccount,
@@ -17,6 +8,7 @@ import {
   SOLANA_ERROR__ACCOUNTS__FAILED_TO_DECODE_ACCOUNT,
   SolanaError,
 } from "@solana/kit";
+import type { Simplify } from "../../types";
 
 export function assertIsMint<TAddress extends string = string>(
   accountOrAddress: Account<Mint, TAddress> | Address<TAddress>,
@@ -30,12 +22,13 @@ export function assertIsMint<TAddress extends string = string>(
   }
 }
 
-export type FetchTokenAccountsConfig = {
-  abortSignal?: AbortSignal;
-  commitment?: Commitment;
-  minContextSlot?: Slot;
-  dataSlice?: DataSlice;
-};
+type OriginalConfigParam = NonNullable<Parameters<GetTokenAccountsByOwnerApi["getTokenAccountsByOwner"]>[2]>;
+
+export type FetchTokenAccountsConfig = Simplify<
+  Omit<OriginalConfigParam, "encoding"> & {
+    abortSignal?: AbortSignal;
+  }
+>;
 
 /**
  * Fetch all the the token accounts for a given `mint` and `owner` Address. Automatically fetching
