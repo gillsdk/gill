@@ -20,3 +20,28 @@ export function SolanaProvider({
   queryClient.setQueryData([GILL_HOOK_CLIENT_KEY], client);
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }
+
+interface SolanaClientContextValue {
+  client: SolanaClient;
+  setClient: (client: SolanaClient) => void;
+}
+
+const SolanaClientContext = React.createContext<SolanaClientContextValue | null>(null);
+
+function SolanaClientProvider({ client, children }: { client: SolanaClient; children: React.ReactNode }) {
+  const [currentClient, setCurrentClient] = React.useState<SolanaClient>(client);
+
+  return (
+    <SolanaClientContext.Provider value={{ client: currentClient, setClient: setCurrentClient }}>
+      {children}
+    </SolanaClientContext.Provider>
+  );
+}
+
+export function useSolanaClientContext() {
+  const context = React.useContext(SolanaClientContext);
+  if (!context) {
+    throw new Error("useSolanaClient must be used within SolanaProvider");
+  }
+  return context;
+}
