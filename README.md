@@ -42,10 +42,11 @@ You can find the gill library docs here:
 
 The following packages are published from within this repo, collectively known as the "gill sdk":
 
-| Package          | Description                                   | Version                                                                                                                       | Source                                                               |
-| :--------------- | :-------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `gill`           | SDK for building on the Solana blockchain     | [![npm](https://img.shields.io/npm/v/gill.svg?logo=npm&color=377CC0)](https://www.npmjs.com/package/gill)                     | [Source](https://github.com/gillsdk/gill/tree/master/packages/gill)  |
-| `@gillsdk/react` | React hooks library for the Solana blockchain | [![npm](https://img.shields.io/npm/v/@gillsdk/react.svg?logo=npm&color=377CC0)](https://www.npmjs.com/package/@gillsdk/react) | [Source](https://github.com/gillsdk/gill/tree/master/packages/react) |
+| Package               | Description                                   | Version                                                                                                                                 | Source                                                                    |
+| :-------------------- | :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `gill`                | SDK for building on the Solana blockchain     | [![npm](https://img.shields.io/npm/v/gill.svg?logo=npm&color=377CC0)](https://www.npmjs.com/package/gill)                               | [Source](https://github.com/gillsdk/gill/tree/master/packages/gill)       |
+| `@gillsdk/react`      | React hooks library for the Solana blockchain | [![npm](https://img.shields.io/npm/v/@gillsdk/react.svg?logo=npm&color=377CC0)](https://www.npmjs.com/package/@gillsdk/react)           | [Source](https://github.com/gillsdk/gill/tree/master/packages/react)      |
+| `@gillsdk/solana-pay` | Modern Solana Pay protocol client library     | [![npm](https://img.shields.io/npm/v/@gillsdk/solana-pay.svg?logo=npm&color=377CC0)](https://www.npmjs.com/package/@gillsdk/solana-pay) | [Source](https://github.com/gillsdk/gill/tree/master/packages/solana-pay) |
 
 ## Development
 
