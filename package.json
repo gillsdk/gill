@@ -20,6 +20,8 @@
     "compile:docs": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} compile:docs",
     "test": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test",
     "test:typecheck": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:typecheck",
+    "test:unit:node": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:unit:node",
+    "test:unit:browser": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:unit:browser",
     "test:treeshakability:native": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:treeshakability:native",
     "test:treeshakability:browser": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:treeshakability:browser",
     "test:treeshakability:node": "turbo run --concurrency=${TURBO_CONCURRENCY:-95.84%} test:treeshakability:node",
