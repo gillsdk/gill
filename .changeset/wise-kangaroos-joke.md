@@ -1,5 +1,5 @@
 ---
-"gill-react": minor
+"@gillsdk/react": minor
 ---
 
 adds useTokenAccountBalance hook
