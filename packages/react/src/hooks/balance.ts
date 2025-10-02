@@ -2,10 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { Address, GetBalanceApi, Simplify } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import type { GillUseRpcHook } from "./types";
 
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
 type RpcConfig = Simplify<Parameters<GetBalanceApi["getBalance"]>>[1];
 
 type UseBalanceResponse = ReturnType<GetBalanceApi["getBalance"]>["value"];
@@ -27,16 +27,16 @@ export function useBalance<TConfig extends RpcConfig = RpcConfig>({
   abortSignal,
   address,
 }: UseBalanceInput<TConfig>) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
     enabled: !!address,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getBalance", address],
     queryFn: async () => {
       const { value } = await rpc.getBalance(address as Address, config).send({ abortSignal });
       return value;
     },
+    queryKey: [GILL_HOOK_CLIENT_KEY, urlOrMoniker, "getBalance", address],
   });
   return {
     ...rest,

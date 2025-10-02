@@ -2,11 +2,11 @@ import { COMPUTE_BUDGET_PROGRAM_ADDRESS, getSetComputeUnitLimitInstruction } fro
 import type {
   CompilableTransactionMessage,
   GetLatestBlockhashApi,
-  ITransactionMessageWithFeePayer,
   Rpc,
   SimulateTransactionApi,
   TransactionMessage,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithFeePayer,
 } from "@solana/kit";
 import {
   appendTransactionMessageInstruction,
@@ -20,7 +20,7 @@ import { debug, isDebugEnabled } from "./debug";
 
 type PrepareCompilableTransactionMessage =
   | CompilableTransactionMessage
-  | (ITransactionMessageWithFeePayer & TransactionMessage);
+  | (TransactionMessageWithFeePayer & TransactionMessage);
 
 export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransactionMessage> = {
   /**
@@ -30,7 +30,7 @@ export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransacti
   /**
    * RPC client capable of simulating transactions and getting the latest blockhash
    **/
-  rpc: Rpc<SimulateTransactionApi & GetLatestBlockhashApi>;
+  rpc: Rpc<GetLatestBlockhashApi & SimulateTransactionApi>;
   /**
    * Multiplier applied to the simulated compute unit value obtained from simulation
    *
@@ -59,7 +59,7 @@ export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransacti
  */
 export async function prepareTransaction<TMessage extends PrepareCompilableTransactionMessage>(
   config: PrepareTransactionConfig<TMessage>,
-) {
+): Promise<TMessage & TransactionMessageWithBlockhashLifetime> {
   // set the config defaults
   if (!config.computeUnitLimitMultiplier) config.computeUnitLimitMultiplier = 1.1;
   if (config.blockhashReset !== false) config.blockhashReset = true;
@@ -89,14 +89,14 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
     });
 
     if (computeBudgetIndex.limit < 0) {
-      config.transaction = appendTransactionMessageInstruction(ix, config.transaction);
+      config.transaction = appendTransactionMessageInstruction(ix, config.transaction) as unknown as TMessage;
     } else if (config.computeUnitLimitReset) {
       const nextInstructions = [...config.transaction.instructions];
       nextInstructions.splice(computeBudgetIndex.limit, 1, ix);
       config.transaction = Object.freeze({
         ...config.transaction,
         instructions: nextInstructions,
-      } as typeof config.transaction);
+      } as TMessage);
     }
   }
 
@@ -105,13 +105,16 @@ export async function prepareTransaction<TMessage extends PrepareCompilableTrans
     const { value: latestBlockhash } = await config.rpc.getLatestBlockhash().send();
     if ("lifetimeConstraint" in config.transaction == false) {
       debug("Transaction missing latest blockhash, fetching one.", "debug");
-      config.transaction = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, config.transaction);
+      config.transaction = setTransactionMessageLifetimeUsingBlockhash(
+        latestBlockhash,
+        config.transaction,
+      ) as unknown as TMessage;
     } else if (config.blockhashReset) {
       debug("Auto resetting the latest blockhash.", "debug");
       config.transaction = Object.freeze({
         ...config.transaction,
         lifetimeConstraint: latestBlockhash,
-      } as typeof config.transaction & TransactionMessageWithBlockhashLifetime);
+      } as TransactionMessageWithBlockhashLifetime & typeof config.transaction);
     }
   }
 

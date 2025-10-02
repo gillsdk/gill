@@ -1,10 +1,14 @@
 {
-  "name": "gill-examples-tokens",
+  "name": "@gillsdk/examples-tokens",
   "version": "1.0.0",
   "description": "",
   "type": "module",
   "author": "nickfrosty",
   "license": "MIT",
+  "scripts": {
+    "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
+    "style:fix": "pnpm style:check --write"
+  },
   "dependencies": {
     "dotenv": "^16.4.5",
     "esrun": "^3.2.26",

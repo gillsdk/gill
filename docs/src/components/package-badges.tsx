@@ -9,19 +9,19 @@ export function PackageBadges({ packageName, className, ...props }: ComponentPro
     <div {...props} className={cn("inline-flex items-center gap-2 mx-auto", className)}>
       <a
         className="!p-0 !m-0"
-        href={`https://github.com/DecalLabs/gill/actions/workflows/publish-packages.yml`}
+        href={`https://github.com/gillsdk/gill/actions/workflows/publish-packages.yml`}
       >
         <img
           className="!p-0 !m-0"
           alt=""
-          src={`https://img.shields.io/github/actions/workflow/status/DecalLabs/gill/publish-packages.yml?logo=GitHub&label=tests`}
+          src={`https://img.shields.io/github/actions/workflow/status/gillsdk/gill/publish-packages.yml?logo=GitHub&label=tests`}
         />
       </a>
       <a className="!p-0 !m-0" href={`https://www.npmjs.com/package/${packageName}`}>
         <img
           alt=""
           className="!p-0 !m-0"
-          src={`https://img.shields.io/npm/v/gill?logo=npm&color=377CC0`}
+          src={`https://img.shields.io/npm/v/${packageName}?logo=npm&color=377CC0`}
         />
       </a>
       <a className="!p-0 !m-0" href={`https://www.npmjs.com/package/${packageName}`}>

@@ -6,7 +6,7 @@ export function getMinimumBalanceForRentExemption(space: bigint | number = 0) {
    * Default values for Rent calculations
    *
    * Values taken from: https://github.com/anza-xyz/solana-sdk/blob/c07f692e41d757057c8700211a9300cdcd6d33b1/rent/src/lib.rs#L93-L97
-   * 
+   *
    */
   const RENT = {
     /**
@@ -25,9 +25,7 @@ export function getMinimumBalanceForRentExemption(space: bigint | number = 0) {
      * - $0.01 per megabyte day
      * - $3.65 per megabyte year
      */
-    DEFAULT_LAMPORTS_PER_BYTE_YEAR: BigInt(
-      Math.floor(((1_000_000_000 / 100) * 365) / (1024 * 1024)),
-    ),
+    DEFAULT_LAMPORTS_PER_BYTE_YEAR: BigInt(Math.floor(((1_000_000_000 / 100) * 365) / (1024 * 1024))),
   };
 
   return (

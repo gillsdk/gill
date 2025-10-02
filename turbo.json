@@ -49,6 +49,10 @@
       "inputs": ["$TURBO_DEFAULT$", "tsconfig.*", "src/**"],
       "outputs": ["dist/**/*.d.ts"]
     },
+    "style:check": {
+      "inputs": ["$TURBO_DEFAULT$", "*"],
+      "outputs": ["*"]
+    },
     "style:fix": {
       "inputs": ["$TURBO_DEFAULT$", "*"],
       "outputs": ["*"]

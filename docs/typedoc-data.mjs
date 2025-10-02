@@ -28,7 +28,7 @@ export const typedocPageIndexData = {
   },
   react: {
     frontmatter: {
-      title: "gill-react",
+      title: "@gillsdk/react",
       description:
         "A React hooks library for easily interacting with the Solana blockchain. Built on top of gill and TanStack Query.",
     },

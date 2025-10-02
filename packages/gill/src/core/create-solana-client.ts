@@ -60,7 +60,7 @@ export function createSolanaClient<TCluster extends ModifiedClusterUrl>({
 
   const rpc = createSolanaRpc<TCluster>(urlOrMoniker.toString() as TCluster, rpcConfig);
 
-  urlOrMoniker.protocol = urlOrMoniker.protocol.replace('http', 'ws');
+  urlOrMoniker.protocol = urlOrMoniker.protocol.replace("http", "ws");
 
   if (rpcSubscriptionsConfig?.port) {
     urlOrMoniker.port = rpcSubscriptionsConfig.port.toString();
@@ -84,5 +84,6 @@ export function createSolanaClient<TCluster extends ModifiedClusterUrl>({
     }),
     // @ts-ignore
     simulateTransaction: simulateTransactionFactory({ rpc }),
+    urlOrMoniker: urlOrMoniker.toString() as TCluster,
   };
 }

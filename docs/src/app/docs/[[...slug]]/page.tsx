@@ -48,6 +48,9 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
 
   const MDX = page.data.body;
   const hasCategory = page.file.name === "index" && page.slugs.length > 0;
+  // Don't show cards for the React section index page
+  const isReactIndex = page.slugs.join("/") === "react";
+  const showCards = !isReactIndex;
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -69,7 +72,7 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
           }}
         />
       </DocsBody>
-      {hasCategory && (
+      {hasCategory && showCards && (
         <Cards>
           {getPageTreePeers(docsSource.pageTree, page.url).map((peer) => (
             <Card key={peer.url} title={peer.name} href={peer.url}>
