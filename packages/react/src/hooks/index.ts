@@ -2,6 +2,7 @@ export * from "./account.js";
 export * from "./balance.js";
 export * from "./client.js";
 export * from "./latest-blockhash.js";
+export * from "./multiple-accounts.js";
 export * from "./program-accounts.js";
 export * from "./recent-prioritization-fees.js";
 export * from "./signature-statuses.js";
