@@ -3,9 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Account, Address, Decoder, FetchAccountsConfig, Simplify } from "gill";
 import { assertAccountsExist, decodeAccount, fetchEncodedAccounts } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import type { GillUseRpcHook } from "./types";
+
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
 
 type RpcConfig = Simplify<Omit<FetchAccountsConfig, "abortSignal">>;
 
@@ -31,13 +32,15 @@ type UseMultipleAccountsResponse<TAddress extends string = string, TDecodedData 
 /**
  * Fetch multiple accounts using the Solana RPC method of
  * [`getMultipleAccounts`](https://solana.com/docs/rpc/http/getmultipleaccounts)
+ *
+ * Optionally provide a {@link Decoder | `decoder`} to automatically decode all Accounts using it.
  */
 export function useMultipleAccounts<
   TConfig extends RpcConfig = RpcConfig,
   TAddress extends string = string,
   TDecodedData extends object = Uint8Array,
 >({ addresses, decoder, config, options, abortSignal }: UseMultipleAccountsInput<TConfig, TAddress, TDecodedData>) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
 
   if (abortSignal) {
     // @ts-expect-error we stripped the `abortSignal` from the type but are now adding it back in
@@ -50,15 +53,13 @@ export function useMultipleAccounts<
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getMultipleAccounts", addresses],
     enabled: addresses.length > 0,
     queryFn: async () => {
       const maybeAccounts = await fetchEncodedAccounts(rpc, addresses, config);
       assertAccountsExist(maybeAccounts);
-      return maybeAccounts.map((acc) =>
-        decoder ? decodeAccount(acc, decoder) : (acc as Account<Uint8Array>),
-      ) as Account<TDecodedData>[];
+      return maybeAccounts.map((acc) => (decoder ? decodeAccount(acc, decoder) : acc));
     },
+    queryKey: [GILL_HOOK_CLIENT_KEY, urlOrMoniker, "getMultipleAccounts", addresses, config?.commitment],
   });
 
   return {

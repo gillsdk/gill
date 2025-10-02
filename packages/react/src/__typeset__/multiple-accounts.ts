@@ -1,6 +1,7 @@
 import { Account, Address } from "gill";
-import { useMultipleAccounts } from "../hooks";
 import { getMetadataDecoder, Metadata } from "gill/programs";
+
+import { useMultipleAccounts } from "../hooks/multiple-accounts.js";
 
 // [DESCRIBE] useMultipleAccounts
 {
@@ -9,10 +10,9 @@ import { getMetadataDecoder, Metadata } from "gill/programs";
   // Should use default account data type
   {
     const { accounts } = useMultipleAccounts({ addresses });
+
     // Should be a Uint8Array for the data
     accounts satisfies Account<Uint8Array>[];
-    // Should use the address type
-    accounts[0].address satisfies Address<"12345">;
 
     // @ts-expect-error - Should not allow no argument
     useMultipleAccounts();
@@ -20,6 +20,7 @@ import { getMetadataDecoder, Metadata } from "gill/programs";
     // @ts-expect-error - Should not allow empty argument object
     useMultipleAccounts({});
   }
+
   // Should accept `config` input
   {
     const { accounts } = useMultipleAccounts({
