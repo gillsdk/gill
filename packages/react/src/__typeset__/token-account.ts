@@ -1,7 +1,7 @@
 import { Account, Address } from "gill";
 
-import { useTokenAccount } from "../hooks/token-account";
-import { Token } from "gill/programs/token";
+import { Token } from "gill/programs";
+import { useTokenAccount } from "../hooks/token-account.js";
 
 // [DESCRIBE] useTokenAccount
 {

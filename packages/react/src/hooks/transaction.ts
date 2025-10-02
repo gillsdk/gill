@@ -2,9 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { GetTransactionApi, Signature, Simplify } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import type { GillUseRpcHook } from "./types";
+
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
 
 type RpcConfig = Simplify<Parameters<GetTransactionApi["getTransaction"]>[1]>;
 
@@ -31,23 +32,23 @@ export function useTransaction<TConfig extends RpcConfig = RpcConfig>({
   abortSignal,
   signature,
 }: UseTransactionInput<TConfig>) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
     enabled: (options?.enabled ?? true) && !!signature,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getTransaction", signature],
     queryFn: async () => {
       const response = await rpc
         .getTransaction(signature as Signature, {
+          encoding: "json",
           // set default values for better DX
           maxSupportedTransactionVersion: 0,
-          encoding: "json",
           ...(config || {}),
         })
         .send({ abortSignal });
       return response;
     },
+    queryKey: [GILL_HOOK_CLIENT_KEY, urlOrMoniker, "getTransaction", signature],
   });
   return {
     ...rest,

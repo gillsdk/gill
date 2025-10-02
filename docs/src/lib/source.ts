@@ -1,4 +1,4 @@
-import { api, docs,} from "@/.source";
+import { api, docs } from "@/.source";
 import { loader } from "fumadocs-core/source";
 
 export const docsSource = loader({
@@ -10,4 +10,3 @@ export const apiSource = loader({
   baseUrl: "/api",
   source: api.toFumadocsSource(),
 });
-

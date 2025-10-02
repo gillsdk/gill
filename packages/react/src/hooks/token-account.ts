@@ -1,10 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import type { GillUseRpcHook } from "./types";
-
 import type { Account, Address, FetchAccountConfig, Simplify } from "gill";
 import { address, assertAccountExists, assertIsAddress, fetchEncodedAccount } from "gill";
 import {
@@ -13,7 +9,11 @@ import {
   fetchMint,
   getAssociatedTokenAccountAddress,
   type Token,
-} from "gill/programs/token";
+} from "gill/programs";
+
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
 
 type RpcConfig = Simplify<Omit<FetchAccountConfig, "abortSignal">>;
 
@@ -32,13 +32,13 @@ type TokenAccountInputWithDeclaredAta<TAddress extends Address = Address> = {
 
 type TokenAccountInputWithDerivedAtaDetails = {
   /**
-   * Address of the {@link https://solana.com/docs/tokens#token-account | Token Account}'s `owner`
-   */
-  owner: Address;
-  /**
    * Address of the {@link https://solana.com/docs/tokens#token-account | Token Account}'s `mint`
    */
   mint: Address;
+  /**
+   * Address of the {@link https://solana.com/docs/tokens#token-account | Token Account}'s `owner`
+   */
+  owner: Address;
   /**
    * The {@link https://solana.com/docs/tokens#token-programs | Token Program} used to create the `mint`
    *
@@ -70,7 +70,7 @@ export function useTokenAccount<TConfig extends RpcConfig = RpcConfig, TAddress 
   // tokenProgram,
   ...tokenAccountOptions
 }: UseTokenAccountInput<TConfig, TAddress>) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
 
   if (abortSignal) {
     // @ts-expect-error the `abortSignal` was stripped from the type but is now being added back in
@@ -115,6 +115,7 @@ export function useTokenAccount<TConfig extends RpcConfig = RpcConfig, TAddress 
     },
     queryKey: [
       GILL_HOOK_CLIENT_KEY,
+      urlOrMoniker,
       "getTokenAccount",
       hasDeclaredAta(tokenAccountOptions)
         ? [{ ata: tokenAccountOptions.ata }]
