@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "exports": {
-    "./eslint.config": "./eslint.config.mjs"
+    "./base": "./base.mjs"
   },
   "devDependencies": {
     "@solana/eslint-config-solana": "^4.0.0",

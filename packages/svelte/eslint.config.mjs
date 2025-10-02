@@ -1,3 +1,3 @@
-import config from "@gillsdk/config-eslint/eslint.config";
+import config from "@gillsdk/config-eslint/base";
 
 export default config;
