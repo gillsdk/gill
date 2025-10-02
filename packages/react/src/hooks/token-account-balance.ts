@@ -24,12 +24,12 @@ export function useTokenAccountBalance<TConfig extends RpcConfig = RpcConfig>({
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    enabled: !!address,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getTokenAccountBalance", address],
+    enabled: (options?.enabled ?? true) && !!address,
     queryFn: async () => {
       const { value } = await rpc.getTokenAccountBalance(address as Address, config).send({ abortSignal });
       return value;
     },
+    queryKey: [GILL_HOOK_CLIENT_KEY, "getTokenAccountBalance", address],
   });
 
   return {

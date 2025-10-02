@@ -53,7 +53,7 @@ export function useMultipleAccounts<
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    enabled: addresses.length > 0,
+    enabled: (options?.enabled ?? true) && addresses.length > 0,
     queryFn: async () => {
       const maybeAccounts = await fetchEncodedAccounts(rpc, addresses, config);
       assertAccountsExist(maybeAccounts);

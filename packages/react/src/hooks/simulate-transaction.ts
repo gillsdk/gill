@@ -40,7 +40,7 @@ export function useSimulateTransaction<TConfig extends RpcConfig = RpcConfig>({
 
   const { data, ...rest } = useQuery({
     ...options,
-    enabled: !!transaction,
+    enabled: (options?.enabled ?? true) && !!transaction,
     queryKey: [GILL_HOOK_CLIENT_KEY, "simulateTransaction", transaction, mergedConfig],
     queryFn: async () => {
       const simulation = await rpc.simulateTransaction(transaction, mergedConfig).send({ abortSignal });
