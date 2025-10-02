@@ -66,7 +66,7 @@ export function useProgramAccounts<TConfig extends RpcConfig = RpcConfig>({
 
   const { data, ...rest } = useQuery({
     ...options,
-    enabled: !!program,
+    enabled: (options?.enabled ?? true) && !!program,
     queryFn: async () => {
       const accounts = await rpc.getProgramAccounts(program as Address, config).send({ abortSignal });
       return accounts;

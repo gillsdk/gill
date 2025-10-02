@@ -32,7 +32,7 @@ export function useSignatureStatuses<TConfig extends RpcConfig = RpcConfig>({
   const { rpc, urlOrMoniker } = useSolanaClient();
   const { data, ...rest } = useQuery({
     ...options,
-    enabled: signatures && signatures.length > 0,
+    enabled: (options?.enabled ?? true) && signatures && signatures.length > 0,
     queryFn: async () => {
       const { value } = await rpc.getSignatureStatuses(signatures as Signature[], config).send({ abortSignal });
       return value;

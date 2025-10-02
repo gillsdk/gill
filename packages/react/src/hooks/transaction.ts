@@ -36,7 +36,7 @@ export function useTransaction<TConfig extends RpcConfig = RpcConfig>({
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    enabled: !!signature,
+    enabled: (options?.enabled ?? true) && !!signature,
     queryFn: async () => {
       const response = await rpc
         .getTransaction(signature as Signature, {

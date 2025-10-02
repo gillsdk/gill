@@ -54,7 +54,7 @@ export function useAccount<
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    enabled: !!address,
+    enabled: (options?.enabled ?? true) && !!address,
     queryFn: async () => {
       const account = await fetchEncodedAccount(rpc, address as Address, config);
       assertAccountExists(account);

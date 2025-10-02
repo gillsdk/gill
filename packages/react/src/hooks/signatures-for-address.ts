@@ -34,7 +34,7 @@ export function useSignaturesForAddress<TConfig extends RpcConfig = RpcConfig>({
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    enabled: !!address,
+    enabled: (options?.enabled ?? true) && !!address,
     queryFn: async () => {
       const signatures = await rpc.getSignaturesForAddress(address as Address, config).send({ abortSignal });
       return signatures;
