@@ -84,3 +84,10 @@ const transaction = createTransaction({
   instructions: [],
 });
 ```
+## Import existing wallet keys
+
+If you already have a wallet from popular wallet apps like Phantom, Solflare, or a Solana CLI keypair, you can easily import those keys to use with gill. Different wallets export keys in different formats, but gill provides functions to handle each format.
+
+### From Phantom wallet (Base58 format)
+
+Phantom wallet typically exports private keys as Base58-encoded strings. These are usually 88 characters long for a full keypair or 44 characters for just the private key.

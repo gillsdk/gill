@@ -1,5 +1,6 @@
-import { createSignerFromKeyPair, type KeyPairSigner } from "@solana/kit";
+import { createSignerFromKeyPair, type KeyPairSigner, type TransactionSigner } from "@solana/kit";
 import { createKeypairFromBase58 } from "../core";
+import { getOrCreateSigner } from "./signers-cache";
 
 /**
  * Load a `CryptoKeyPair` from an environment variable containing a base58 encoded keypair
@@ -19,9 +20,13 @@ export async function loadKeypairFromEnvironmentBase58<TName extends keyof NodeJ
  * Load a `KeyPairSigner` from an environment variable containing a base58 encoded keypair
  *
  * @param variableName - environment variable name accessible via `process.env[variableName]`
+ * @param existingSigner - optional existing signer to deduplicate against. If the loaded keypair has the same address, returns the existing signer instead of creating a new one
  */
 export async function loadKeypairSignerFromEnvironmentBase58<TName extends keyof NodeJS.ProcessEnv | string>(
   variableName: TName,
+  existingSigner?: TransactionSigner,
 ): Promise<KeyPairSigner> {
-  return createSignerFromKeyPair(await loadKeypairFromEnvironmentBase58(variableName));
+  const keypair = await loadKeypairFromEnvironmentBase58(variableName);
+  const tempSigner = await createSignerFromKeyPair(keypair);
+  return getOrCreateSigner(tempSigner.address, () => tempSigner);
 }
