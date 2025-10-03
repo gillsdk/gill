@@ -54,16 +54,16 @@ getMetadataCodec;
 /**
  * SPL Token 2022 program client
  */
-import { TOKEN_2022_PROGRAM_ADDRESS } from "gill/programs/token";
+import { TOKEN_2022_PROGRAM_ADDRESS } from "gill/programs";
 TOKEN_2022_PROGRAM_ADDRESS;
 
-import { getMintToInstruction } from "gill/programs/token";
+import { getMintToInstruction } from "gill/programs";
 getMintToInstruction;
 
 // !this is a custom symbol that gill provides
-import { getAssociatedTokenAccountAddress } from "gill/programs/token";
+import { getAssociatedTokenAccountAddress } from "gill/programs";
 getAssociatedTokenAccountAddress;
 
 // !this is a custom symbol that gill provides
-import { TOKEN_PROGRAM_ADDRESS } from "gill/programs/token";
+import { TOKEN_PROGRAM_ADDRESS } from "gill/programs";
 TOKEN_PROGRAM_ADDRESS;

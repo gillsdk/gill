@@ -12,11 +12,12 @@ import type {
   Simplify,
   SolanaRpcResponse,
 } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import type { GillUseRpcHook } from "./types";
 
-type Encoding = "base64" | "jsonParsed" | "base64+zstd";
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
+
+type Encoding = "base64" | "base64+zstd" | "jsonParsed";
 
 type RpcConfig = Simplify<
   Parameters<GetProgramAccountsApi["getProgramAccounts"]>[1] &
@@ -61,16 +62,16 @@ export function useProgramAccounts<TConfig extends RpcConfig = RpcConfig>({
   abortSignal,
   program,
 }: UseProgramAccountsInput<TConfig>) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
 
   const { data, ...rest } = useQuery({
     ...options,
-    enabled: !!program,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getProgramAccounts", program],
+    enabled: (options?.enabled ?? true) && !!program,
     queryFn: async () => {
       const accounts = await rpc.getProgramAccounts(program as Address, config).send({ abortSignal });
       return accounts;
     },
+    queryKey: [GILL_HOOK_CLIENT_KEY, urlOrMoniker, "getProgramAccounts", program],
   });
 
   return {

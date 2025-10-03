@@ -1,5 +1,6 @@
 export { debug, isDebugEnabled } from "./debug";
 
+export * from "./base64-bytes-to";
 export * from "./base64-from-transaction";
 export * from "./base64-to-transaction";
 export * from "./const";
@@ -8,6 +9,7 @@ export * from "./create-solana-client";
 export * from "./create-transaction";
 export * from "./explorer";
 export * from "./get-oldest-signature";
+export * from "./get-signature-from-bytes";
 export * from "./insert-reference-key";
 export * from "./keypairs-base58";
 export * from "./keypairs-extractable";
