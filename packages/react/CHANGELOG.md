@@ -1,5 +1,59 @@
 # @gillsdk/react
 
+## 0.6.0
+
+### Minor Changes
+
+- [#267](https://github.com/gillsdk/gill/pull/267)
+  [`459e9a7`](https://github.com/gillsdk/gill/commit/459e9a778b1316374c7028144dd41cde0c5c2455) Thanks
+  [@tobeycodes](https://github.com/tobeycodes)! - fix: update solana client race condition
+
+- [#270](https://github.com/gillsdk/gill/pull/270)
+  [`91a3ac2`](https://github.com/gillsdk/gill/commit/91a3ac24d2b79f9d22e7a2b3df88cbd2a8465063) Thanks
+  [@nickfrosty](https://github.com/nickfrosty)! - include wallet standard basics
+
+- [#228](https://github.com/gillsdk/gill/pull/228)
+  [`83bba6a`](https://github.com/gillsdk/gill/commit/83bba6a3643c5eb719f5018917308fd8dad6e540) Thanks
+  [@JkrishnaD](https://github.com/JkrishnaD)! - update `useProgramAccounts` hook by removing the base58 encodings
+
+- [#271](https://github.com/gillsdk/gill/pull/271)
+  [`4f69014`](https://github.com/gillsdk/gill/commit/4f69014f182c7ea0a2d21d9b73e95acf704da8f1) Thanks
+  [@nickfrosty](https://github.com/nickfrosty)! - update to esm over commonJS, including updating relative imports
+
+- [#180](https://github.com/gillsdk/gill/pull/180)
+  [`6ddaef9`](https://github.com/gillsdk/gill/commit/6ddaef9e530325678aa0c81a52661d003bf4a518) Thanks
+  [@kirtiraj22](https://github.com/kirtiraj22)! - adds useMultipleAccounts hook
+
+- [#174](https://github.com/gillsdk/gill/pull/174)
+  [`d59e1fd`](https://github.com/gillsdk/gill/commit/d59e1fdc05a194f286c142bb8b9495432a7649fd) Thanks
+  [@pratikbuilds](https://github.com/pratikbuilds)! - adds useSimulateTransaction hook
+
+- [#176](https://github.com/gillsdk/gill/pull/176)
+  [`34a0ac9`](https://github.com/gillsdk/gill/commit/34a0ac9d74e84b1a1bd0348daad3abae2e1f2a93) Thanks
+  [@pratikbuilds](https://github.com/pratikbuilds)! - adds useTokenAccountBalance hook
+
+### Patch Changes
+
+- [#264](https://github.com/gillsdk/gill/pull/264)
+  [`9c22897`](https://github.com/gillsdk/gill/commit/9c228971124c7e711cbbad15b7298fca5dec4c62) Thanks
+  [@nickfrosty](https://github.com/nickfrosty)! - updated token program imports from "gill/programs/token" to
+  "gill/programs"
+
+- [#233](https://github.com/gillsdk/gill/pull/233)
+  [`0474578`](https://github.com/gillsdk/gill/commit/04745787a188baa1395cd1a6cc4ff07b98b305d7) Thanks
+  [@vict0rcarvalh0](https://github.com/vict0rcarvalh0)! - fix(react): respect user-provided enabled field in hooks
+
+- Updated dependencies [[`55e5628`](https://github.com/gillsdk/gill/commit/55e562846a0865c0c9773f638e5a48b35e89ed5b),
+  [`2efea9f`](https://github.com/gillsdk/gill/commit/2efea9fde46aca6c030c6bcc07ae2aee4f359ea8),
+  [`459e9a7`](https://github.com/gillsdk/gill/commit/459e9a778b1316374c7028144dd41cde0c5c2455),
+  [`8849226`](https://github.com/gillsdk/gill/commit/8849226d153f9a2660796b829ad44b5e37bae1a0),
+  [`9c22897`](https://github.com/gillsdk/gill/commit/9c228971124c7e711cbbad15b7298fca5dec4c62),
+  [`b94c6f4`](https://github.com/gillsdk/gill/commit/b94c6f4cf0f83bfea550b19580d930fbde908911),
+  [`ee23f2a`](https://github.com/gillsdk/gill/commit/ee23f2a3fbabd31c3ca040e7def970aa552afdf9),
+  [`54e2e96`](https://github.com/gillsdk/gill/commit/54e2e96f87192d36080ececfba0cc3b64c608485),
+  [`8a50e71`](https://github.com/gillsdk/gill/commit/8a50e7151da1b1f270850b25127ac0a671fe6aa5)]:
+  - gill@0.12.0
+
 ## 0.5.1
 
 ### Patch Changes
