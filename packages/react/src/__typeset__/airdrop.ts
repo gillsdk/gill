@@ -1,4 +1,4 @@
-import { Address, Signature } from "gill";
+import { Address, Signature, type Lamports } from "gill";
 import { useAirdrop } from "../hooks";
 
 // [DESCRIBE] useAirdrop
@@ -9,14 +9,16 @@ import { useAirdrop } from "../hooks";
     const { mutate, mutateAsync, data } = useAirdrop();
 
     // Should allow calling mutate with address and lamports
-    mutate({ address, lamports: 1_000_000_000n });
+    const oneSol = 1_000_000_000n as Lamports;
+    mutate({ address, lamports: oneSol });
+    // @ts-expect-error - number is not Lamports
     mutate({ address, lamports: 1000000000 });
 
     // Should return signature in data when successful
     data satisfies { signature: Signature } | undefined;
 
     // Should allow calling mutateAsync
-    mutateAsync({ address, lamports: 1_000_000_000n });
+    mutateAsync({ address, lamports: oneSol });
   }
 
   {
@@ -25,7 +27,8 @@ import { useAirdrop } from "../hooks";
     });
 
     // Should work with config
-    mutate({ address, lamports: 1_000_000_000n });
+    const oneSol = 1_000_000_000n as Lamports;
+    mutate({ address, lamports: oneSol });
   }
 
   {
@@ -35,7 +38,8 @@ import { useAirdrop } from "../hooks";
     });
 
     // Should work with abort signal
-    mutate({ address, lamports: 1_000_000_000n });
+    const oneSol = 1_000_000_000n as Lamports;
+    mutate({ address, lamports: oneSol });
   }
 
   {

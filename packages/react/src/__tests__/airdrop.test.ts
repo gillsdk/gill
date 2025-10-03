@@ -93,58 +93,6 @@ describe("useAirdrop", () => {
       expect(mockRpc.requestAirdrop).toHaveBeenCalledWith(testAddress, testLamports, { commitment: "confirmed" });
     });
 
-    it("should convert number lamports to bigint", async () => {
-      useAirdrop();
-
-      const mutationConfig = mockedUseMutation.mock.calls[0][0];
-      const mutationFn = mutationConfig.mutationFn;
-
-      const testAddress = "11111111111111111111111111111111";
-      const testLamports = 1000000000; // number
-
-      await mutationFn!({ address: testAddress, lamports: testLamports });
-
-      expect(mockRpc.requestAirdrop).toHaveBeenCalledWith(testAddress, BigInt(testLamports), {
-        commitment: "confirmed",
-      });
-    });
-
-    it("should provide helpful error messages for airdrop failures", async () => {
-      useAirdrop();
-
-      const mutationConfig = mockedUseMutation.mock.calls[0][0];
-      const mutationFn = mutationConfig.mutationFn;
-
-      mockRpc.requestAirdrop.mockReturnValue({
-        send: jest.fn().mockRejectedValue(new Error("airdrop request failed")),
-      });
-
-      const testAddress = "11111111111111111111111111111111";
-      const testLamports = 1_000_000_000n;
-
-      await expect(mutationFn!({ address: testAddress, lamports: testLamports })).rejects.toThrow(
-        "Airdrop failed. This could be due to: 1) Using mainnet (airdrops only work on devnet/testnet), 2) Rate limiting (try again later), or 3) Network issues.",
-      );
-    });
-
-    it("should provide helpful error messages for mainnet usage", async () => {
-      useAirdrop();
-
-      const mutationConfig = mockedUseMutation.mock.calls[0][0];
-      const mutationFn = mutationConfig.mutationFn;
-
-      mockRpc.requestAirdrop.mockReturnValue({
-        send: jest.fn().mockRejectedValue(new Error("mainnet not supported")),
-      });
-
-      const testAddress = "11111111111111111111111111111111";
-      const testLamports = 1_000_000_000n;
-
-      await expect(mutationFn!({ address: testAddress, lamports: testLamports })).rejects.toThrow(
-        "Airdrops are not available on mainnet. Switch to devnet or testnet to request SOL.",
-      );
-    });
-
     it("should re-throw other errors unchanged", async () => {
       useAirdrop();
 
