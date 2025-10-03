@@ -10,6 +10,7 @@ import {
 } from "@solana/kit";
 import { DEFAULT_CLI_KEYPAIR_PATH } from "./const";
 import type { loadKeypairFromEnvironmentBase58, loadKeypairSignerFromEnvironmentBase58 } from "./load-keypair-base58";
+import { getOrCreateSigner } from "./signers-cache";
 
 /**
  * Load a `CryptoKeyPair` from a filesystem wallet json file
@@ -33,14 +34,9 @@ export async function loadKeypairSignerFromFile(
   filePath: string = DEFAULT_CLI_KEYPAIR_PATH,
   existingSigner?: TransactionSigner,
 ): Promise<KeyPairSigner> {
-  const newSigner = await createSignerFromKeyPair(await loadKeypairFromFile(filePath));
-
-  // If an existing signer is provided and has the same address, return it for deduplication
-  if (existingSigner && existingSigner.address === newSigner.address) {
-    return existingSigner as KeyPairSigner;
-  }
-
-  return newSigner;
+  const keypair = await loadKeypairFromFile(filePath);
+  const tempSigner = await createSignerFromKeyPair(keypair);
+  return getOrCreateSigner(tempSigner.address, () => tempSigner);
 }
 
 /**
@@ -73,12 +69,7 @@ export async function loadKeypairSignerFromEnvironment<TName extends keyof NodeJ
   variableName: TName,
   existingSigner?: TransactionSigner,
 ): Promise<KeyPairSigner> {
-  const newSigner = await createSignerFromKeyPair(await loadKeypairFromEnvironment(variableName));
-
-  // If an existing signer is provided and has the same address, return it for deduplication
-  if (existingSigner && existingSigner.address === newSigner.address) {
-    return existingSigner as KeyPairSigner;
-  }
-
-  return newSigner;
+  const keypair = await loadKeypairFromEnvironment(variableName);
+  const tempSigner = await createSignerFromKeyPair(keypair);
+  return getOrCreateSigner(tempSigner.address, () => tempSigner);
 }

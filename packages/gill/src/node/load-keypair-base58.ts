@@ -1,5 +1,6 @@
 import { createSignerFromKeyPair, type KeyPairSigner, type TransactionSigner } from "@solana/kit";
 import { createKeypairFromBase58 } from "../core";
+import { getOrCreateSigner } from "./signers-cache";
 
 /**
  * Load a `CryptoKeyPair` from an environment variable containing a base58 encoded keypair
@@ -25,12 +26,7 @@ export async function loadKeypairSignerFromEnvironmentBase58<TName extends keyof
   variableName: TName,
   existingSigner?: TransactionSigner,
 ): Promise<KeyPairSigner> {
-  const newSigner = await createSignerFromKeyPair(await loadKeypairFromEnvironmentBase58(variableName));
-
-  // If an existing signer is provided and has the same address, return it for deduplication
-  if (existingSigner && existingSigner.address === newSigner.address) {
-    return existingSigner as KeyPairSigner;
-  }
-
-  return newSigner;
+  const keypair = await loadKeypairFromEnvironmentBase58(variableName);
+  const tempSigner = await createSignerFromKeyPair(keypair);
+  return getOrCreateSigner(tempSigner.address, () => tempSigner);
 }
