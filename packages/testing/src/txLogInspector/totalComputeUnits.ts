@@ -20,7 +20,6 @@ export default function totalComputeUnits(logs: string[]): number {
     // Match lines like: "consumed 5000 of 200000 compute units"
     const match = log.match(/consumed (\d+) of \d+ compute units/);
     if (match) {
-      // Parse the number of units used and add to total
       const units = parseInt(match[1], 10);
       if (!isNaN(units)) total += units;
     }

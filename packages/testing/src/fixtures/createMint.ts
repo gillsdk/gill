@@ -4,7 +4,6 @@ import {
   createTransaction,
   type KeyPairSigner,
   type SolanaClient,
-  type Address,
   signTransactionMessageWithSigners,
   SendAndConfirmTransactionWithSignersFunction,
   Signature,
@@ -21,6 +20,12 @@ import {
  * Parameters for creating a new token mint.
  */
 type CreateMintParams = {
+  /**
+   * Optional fee payer for account creation and transaction fees.
+   * Defaults to loading a local keypair via `loadKeypairSignerFromFile()`.
+   * Also used as default mint/freeze authority if not provided.
+   */
+  payer?: KeyPairSigner;
   /** Number of decimals for the token (default: 9) */
   decimals?: number;
   /** Authority allowed to mint new tokens (defaults to fee payer) */
@@ -33,91 +38,64 @@ type CreateMintParams = {
  * Result returned when creating a new mint.
  */
 type CreateMintResult = {
-  /** Address of the newly created mint */
-  mintAddress: Address;
+  /** The new mint account (keypair) */
+  mint: KeyPairSigner;
   /** Signature of the transaction that created the mint */
   transactionSignature: Signature;
 };
 
 /**
  * Creates a new SPL token mint.
- *
- * This function handles:
- * - Generating a new keypair for the mint account
- * - Calculating required lamports for rent exemption
- * - Creating and initializing the mint with specified decimals, mint authority, and freeze authority
- * - Sending and confirming the transaction
- *
- * @param rpc - Solana RPC client
- * @param sendAndConfirmTransaction - Function to send and confirm signed transactions
- * @param params - Optional parameters for decimals, mint authority, and freeze authority
- * @returns CreateMintResult object containing the mint address and transaction signature
- *
- * @example
- * const { mintAddress, transactionSignature } = await createMint(rpc, sendAndConfirmTransaction, { decimals: 6 });
  */
-export async function createMint(
+export default async function createMint(
   rpc: SolanaClient["rpc"],
   sendAndConfirmTransaction: SendAndConfirmTransactionWithSignersFunction,
   params: CreateMintParams = {},
 ): Promise<CreateMintResult> {
-  try {
-    // Load the default signer from local keypair file
-    const signer = await loadKeypairSignerFromFile();
+  const { payer, decimals = 9, mintAuthority, freezeAuthority } = params;
 
-    // Use provided options or defaults
-    const decimals = params.decimals ?? 9;
-    const mintAuthority = params.mintAuthority ?? signer;
-    const freezeAuthority = params.freezeAuthority ?? signer;
+  // Use payer or load local keypair
+  const signer = payer ?? (await loadKeypairSignerFromFile());
 
-    // Generate a new keypair for the mint
-    const mint = await generateKeyPairSigner();
-
-    // Calculate space required for mint account
-    const space = getMintSize();
-
-    // Get the latest blockhash for transaction
-    const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
-
-    // Create transaction with instructions to create and initialize the mint
-    const createMintTx = createTransaction({
-      feePayer: signer,
-      version: "legacy",
-      instructions: [
-        getCreateAccountInstruction({
-          space,
-          lamports: getMinimumBalanceForRentExemption(space),
-          newAccount: mint,
-          payer: signer,
-          programAddress: TOKEN_PROGRAM_ADDRESS,
-        }),
-        getInitializeMintInstruction(
-          {
-            mint: mint.address,
-            mintAuthority: mintAuthority.address,
-            freezeAuthority: freezeAuthority.address,
-            decimals,
-          },
-          {
-            programAddress: TOKEN_PROGRAM_ADDRESS,
-          },
-        ),
-      ],
-      latestBlockhash,
-    });
-
-    // Sign the transaction with all required signers
-    const signedTransaction = await signTransactionMessageWithSigners(createMintTx);
-
-    // Send and confirm the transaction
-    const transactionSignature = await sendAndConfirmTransaction(signedTransaction);
-
-    return { mintAddress: mint.address, transactionSignature };
-  } catch (error: unknown) {
-    // Provide descriptive error messages for easier debugging
-    if (error instanceof Error) {
-      throw new Error(`createMint failed: ${error.message}`);
-    }
-    throw new Error("createMint failed: Unknown error");
+  if (decimals < 0 || decimals > 9) {
+    throw new Error(`Invalid decimals value: ${decimals}. Must be between 0 and 9.`);
   }
+
+  // Use signer as default authority if not provided
+  const mintAuth = mintAuthority ?? signer;
+  const freezeAuth = freezeAuthority ?? signer;
+
+  const mint = await generateKeyPairSigner();
+  const space = getMintSize();
+
+  const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+  const createMintTx = createTransaction({
+    feePayer: signer,
+    version: "legacy",
+    instructions: [
+      getCreateAccountInstruction({
+        space,
+        lamports: getMinimumBalanceForRentExemption(space),
+        newAccount: mint,
+        payer: signer,
+        programAddress: TOKEN_PROGRAM_ADDRESS,
+      }),
+      getInitializeMintInstruction(
+        {
+          mint: mint.address,
+          mintAuthority: mintAuth.address,
+          freezeAuthority: freezeAuth.address,
+          decimals,
+        },
+        { programAddress: TOKEN_PROGRAM_ADDRESS },
+      ),
+    ],
+    latestBlockhash,
+  });
+
+  const signedTransaction = await signTransactionMessageWithSigners(createMintTx);
+  const transactionSignature = await sendAndConfirmTransaction(signedTransaction);
+
+  return { mint, transactionSignature };
 }

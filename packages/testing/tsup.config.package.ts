@@ -7,7 +7,7 @@ export default defineConfig((options = {}) => [
     ...options,
     entry: {
       index: "src/index.ts",
-      "localValidator/index": "src/localValidator/index.ts",
+      "localValidator/index": "src/localValidator/localValidator.ts",
     },
   }),
   ...getBaseConfig("browser", ["cjs", "esm"], options),

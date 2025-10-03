@@ -1,3 +1,3 @@
-export * from "./fixtures/index.js";
-export * from "./txLogInspector/index.js";
-export * from "./matchers/index.js";
+export * from "./fixtures/index";
+export * from "./txLogInspector/index";
+export * from "./matchers/index";

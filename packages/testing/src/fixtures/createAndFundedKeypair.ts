@@ -1,10 +1,11 @@
-import { 
-  airdropFactory, 
-  generateKeyPairSigner, 
-  lamports, 
-  type Lamports, 
-  type KeyPairSigner, 
-  SolanaClient 
+import {
+  airdropFactory,
+  generateKeyPairSigner,
+  lamports,
+  type Lamports,
+  type KeyPairSigner,
+  SolanaClient,
+  Signature,
 } from "gill";
 
 /**
@@ -14,7 +15,7 @@ export type FundedKeypairResult = {
   /** The newly generated keypair funded with SOL */
   fundedKeypair: KeyPairSigner;
   /** Signature of the airdrop transaction */
-  signature: string;
+  transactionSignature: Signature;
   /** Balance of the funded account after the airdrop */
   balance: Lamports;
 };
@@ -34,30 +35,24 @@ export type FundedKeypairResult = {
  * @example
  * const { fundedKeypair, signature, balance } = await createAndFundedKeypair(rpc, rpcSubscriptions);
  */
-export async function createAndFundedKeypair(
+export default async function createAndFundedKeypair(
   rpc: SolanaClient["rpc"],
   rpcSubscriptions: SolanaClient["rpcSubscriptions"],
   lamportsAmount: Lamports = lamports(10_000_000_000n), // default = 10 SOL
 ): Promise<FundedKeypairResult> {
-  try {
-    // Generate a new keypair
-    const fundedKeypair = await generateKeyPairSigner();
-
-    // Perform an airdrop to fund the account
-    const signature = await airdropFactory({ rpc, rpcSubscriptions })({
-      commitment: "confirmed",
-      lamports: lamportsAmount,
-      recipientAddress: fundedKeypair.address,
-    });
-
-    // Fetch the balance after funding
-    const { value: balance } = await rpc.getBalance(fundedKeypair.address).send();
-
-    return { fundedKeypair, signature, balance };
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw new Error(`createFundedKeypair failed: ${error.message}`);
-    }
-    throw new Error("createFundedKeypair failed: Unknown error");
+  if (lamportsAmount <= 0n) {
+    throw new Error("Airdrop amount must be greater than zero lamports");
   }
+
+  const fundedKeypair = await generateKeyPairSigner();
+
+  const transactionSignature = await airdropFactory({ rpc, rpcSubscriptions })({
+    commitment: "confirmed",
+    lamports: lamportsAmount,
+    recipientAddress: fundedKeypair.address,
+  });
+
+  const { value: balance } = await rpc.getBalance(fundedKeypair.address).send();
+
+  return { fundedKeypair, transactionSignature, balance };
 }
