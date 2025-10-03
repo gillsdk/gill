@@ -2,7 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import type { Address, Commitment, Lamports, Signature } from "gill";
-import { useSolanaClient } from "./client";
+import { useSolanaClient } from "./client.js";
 
 type AirdropConfig = {
   /**

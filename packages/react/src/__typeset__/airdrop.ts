@@ -1,5 +1,5 @@
 import { Address, Signature, type Lamports } from "gill";
-import { useAirdrop } from "../hooks";
+import { useAirdrop } from "../hooks/airdrop.js";
 
 // [DESCRIBE] useAirdrop
 {

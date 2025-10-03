@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useAirdrop } from "../hooks/airdrop";
+import { useAirdrop } from "../hooks/airdrop.js";
 
 // Mock React Query and client hook
 
