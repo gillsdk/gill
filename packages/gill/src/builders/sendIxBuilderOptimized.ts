@@ -24,19 +24,16 @@ interface InstructionBuilder {
   withMemo: (message: string, signers?: Array<TransactionPartialSigner | TransactionSigner>) => InstructionBuilder;
   withPriorityFee: (microLamports: number) => InstructionBuilder;
   withComputeLimit: (units: number) => InstructionBuilder;
-  transferSol: (amount: Lamports, destination: Address, source: TransactionPartialSigner) => InstructionBuilder;
+  transferSol: (amount: Lamports, destination: Address, source?: TransactionPartialSigner) => InstructionBuilder;
   transferTokens: (config: ITransferTokens) => InstructionBuilder;
-  build: (
-    feePayer: Address | TransactionPartialSigner | TransactionSigner,
-    options?: {
-      latestBlockhash?: { blockhash: Blockhash; lastValidBlockHeight: bigint };
-      version?: TransactionVersion;
-    },
-  ) => ReturnType<typeof createTransaction>;
+  build: (options?: {
+    latestBlockhash?: { blockhash: Blockhash; lastValidBlockHeight: bigint };
+    version?: TransactionVersion;
+  }) => ReturnType<typeof createTransaction>;
 }
 
 interface ITransferTokens {
-  source: TransactionPartialSigner | TransactionSigner;
+  source?: TransactionPartialSigner | TransactionSigner;
   destination: Address;
   sourceAta: Address;
   destinationAta: Address;
@@ -45,7 +42,6 @@ interface ITransferTokens {
   authority?: TransactionSigner | Address;
   tokenProgram?: Address;
 }
-
 /**
  *### A builder function that builds on top of the previous ix and returns both instructions ready to be built with `.build()` 
 
@@ -55,31 +51,27 @@ interface ITransferTokens {
   withMemo: (message: string, signers?: Array<TransactionPartialSigner | TransactionSigner>) => InstructionBuilder;
   withPriorityFee: (microLamports: number) => InstructionBuilder;
   withComputeLimit: (units: number) => InstructionBuilder;
-  transferSol: (amount: Lamports, destination: Address, source: TransactionPartialSigner) => InstructionBuilder;
+  transferSol: (amount: Lamports, destination: Address, source?: TransactionPartialSigner) => InstructionBuilder;
   transferTokens: (config: ITransferTokens) => InstructionBuilder;
-  build: (
-    feePayer: Address | TransactionPartialSigner | TransactionSigner,
-    options?: {
-      latestBlockhash?: { blockhash: Blockhash; lastValidBlockHeight: bigint };
-      version?: TransactionVersion;
-    },
-  ) => ReturnType<typeof createTransaction>;
+  build: (options?: {
+    latestBlockhash?: { blockhash: Blockhash; lastValidBlockHeight: bigint };
+    version?: TransactionVersion;
+  }) => ReturnType<typeof createTransaction>;
 }
  
  * @example 
-  let new_ix = createInstruction()
+  let new_ix = createInstruction(kp)
     .withMemo("Hello, this is an ix")
-    .transferSol(lamports(lamportsToSend), destinationAddres, kp)
+    .transferSol(lamports(lamportsToSend), destinationAddres)
     .transferTokens({
       amount: 5_000_000,
       destinationAta,
       sourceAta,
-      source: kp,
       mint: tokenMint,
       destination: destinationAddres,
       tokenProgram: TOKEN_PROGRAM_ADDRESS,
     })
-    .build(kp, {
+    .build({
       version: "legacy",
     });
   const txSignature = await sendAndConfirmTransaction(new_ix);
@@ -92,12 +84,15 @@ interface ITransferTokens {
     })
   );
  */
-export const createInstruction = (): InstructionBuilder => {
+export const createInstruction = (feePayer: TransactionSigner | TransactionPartialSigner): InstructionBuilder => {
   const builder = (instructions: Instruction[] = []): InstructionBuilder => ({
     instructions,
 
     withMemo: (message: string, signers?) => {
-      const memoIx = getAddMemoInstruction({ memo: message, signers });
+      const memoIx = getAddMemoInstruction({
+        memo: message,
+        signers: signers ?? [feePayer],
+      });
       instructions.push(memoIx);
       return builder(instructions);
     },
@@ -115,17 +110,22 @@ export const createInstruction = (): InstructionBuilder => {
     },
 
     transferSol: (amount, destination, source) => {
-      const transferIx = getTransferSolInstruction({ amount, destination, source });
+      const transferIx = getTransferSolInstruction({
+        amount,
+        destination,
+        source: source ?? feePayer,
+      });
+
       instructions.push(transferIx);
       return builder(instructions);
     },
 
     transferTokens: (config: ITransferTokens) => {
       const tokenIx = getTransferTokensInstructions({
-        feePayer: config.source,
+        feePayer: config.source ?? feePayer,
         mint: config.mint,
         amount: config.amount,
-        authority: config.authority ?? config.source,
+        authority: config.authority ?? config.source ?? feePayer,
         sourceAta: config.sourceAta,
         destination: config.destination,
         destinationAta: config.destinationAta,
@@ -135,7 +135,7 @@ export const createInstruction = (): InstructionBuilder => {
       return builder(instructions);
     },
 
-    build: (feePayer, options?) => {
+    build: (options?) => {
       return createTransaction({
         instructions,
         feePayer,
