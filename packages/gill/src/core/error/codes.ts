@@ -63,8 +63,7 @@ export const GILL_ERROR_PROGRAM_UNSUPPORTED_TOKEN_PROGRAM = 11000001;
  * is not safe, for a variety of reasons covered here: https://stackoverflow.com/a/28818850
  */
 
-export type GILLCUSTOMERRORCODE =
-  | SolanaErrorCode
+export type GillCustomErrorCode =
   | typeof GILL_ERROR_CLUSTER_INVALID_CLUSTER_URL
   | typeof GILL_ERROR_ENVIRONMENT_VARIABLE_ALREADY_EXIST
   | typeof GILL_ERROR_EXPECTED_ADDRESS
@@ -75,3 +74,7 @@ export type GILLCUSTOMERRORCODE =
   | typeof GILL_ERROR_NOT_FOUND_ENVIRONMENT_VARIABLE
   | typeof GILL_ERROR_PROGRAM_UNSUPPORTED_TOKEN_PROGRAM
   | typeof GILL_ERROR_UNSUPPORTED_PROTOCOL;
+
+
+export type GillErrorCode = GillCustomErrorCode | SolanaErrorCode;
+ 
