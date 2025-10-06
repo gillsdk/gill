@@ -1,10 +1,10 @@
-import { type Address, Commitment, createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
+import { type Address, Commitment } from "@solana/kit";
 
+import type { SolanaClient } from "../../types/rpc";
 import { createWebsocketWatcherWithFallback } from "./watcher-with-fallback";
 
 type AccountInfoShape = {
-  //   TODO: look into if this can be specified
-  // data shape depends on encoding not sure yet how this can be type;  typing as unknown to stay generic
+  // data shape depends on encoding;  typing as unknown to stay generic
   data: unknown;
   executable: boolean;
   lamports: bigint;
@@ -17,50 +17,58 @@ type AccountUpdate = {
   value: AccountInfoShape | null; // null if account doesn't exist
 };
 
-type WatchOptions = {
-  accountAddress: Address;
-  commitment?: Commitment;
-  dataEncoding?: "base58" | "base64" | "base64+zstd" | "jsonParsed";
-  // default 8000
-  // background heartbeat poll even when WS is up
-  heartbeatPollMs?: number;
-  // polling only
-  pollIntervalMs?: number;
-  rpcUrl: string;
-  // default 5000
-  // ws connection timeout before falling back to pollling
-  wsConnectTimeoutMs?: number;
-  wsUrl?: string; // default 30000
-};
-
 type OnUpdate = (u: AccountUpdate) => void;
 type OnError = (e: unknown) => void;
 
-export const watchAccount = async (opts: WatchOptions, onUpdate: OnUpdate, onError?: OnError) => {
-  const {
-    rpcUrl,
-    wsUrl,
-    commitment = "confirmed",
-    pollIntervalMs = 5000,
-    wsConnectTimeoutMs = 8000,
-    heartbeatPollMs = 30000,
-    accountAddress,
-  } = opts;
+type WatchAccountArgs = {
+  accountAddress: Address;
+  commitment?: Commitment;
+  onError?: OnError;
+  onUpdate: OnUpdate;
+  pollIntervalMs?: number;
+  rpc: SolanaClient["rpc"];
+  wsConnectTimeoutMs?: number;
+  wsSubscription: SolanaClient["rpcSubscriptions"];
+};
 
-  const rpc = createSolanaRpc(rpcUrl);
-  const wsSubscription = wsUrl ? createSolanaRpcSubscriptions(wsUrl) : null;
-
+/**
+ * Watches a Solana account for changes.
+ *
+ * This function uses a watching strategy that attempts to use a WebSocket
+ * subscription for real-time updates and automatically falls back to HTTP
+ * polling if the WebSocket is unavailable or fails.
+ *
+ * The consumer of this function is responsible for implementing any retry or
+ * backoff logic for persistent errors by using the `onError` callback and
+ * calling the returned `stop` function when appropriate.
+ *
+ * Note: This watcher requires a WebSocket client (`wsSubscription`) and does
+ * not support a polling-only mode.
+ *
+ * @param args - The arguments for watching the account.
+ * @returns A function to stop the watcher.
+ */
+export const watchAccount = async ({
+  rpc,
+  wsSubscription,
+  commitment = "confirmed",
+  pollIntervalMs = 5000,
+  wsConnectTimeoutMs = 8000,
+  accountAddress,
+  onUpdate,
+  onError,
+}: WatchAccountArgs) => {
   const abortController = new AbortController();
   let closed = false;
   let lastSlot: bigint = -1n;
 
-  //   TODO: investigate how to type the `value`
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const emitIfNewer = (slot: bigint, value: any) => {
+  const emitIfNewer = (slot: bigint, value: AccountInfoShape | null) => {
     if (slot <= lastSlot) {
       return false;
     }
+
     lastSlot = slot;
+
     onUpdate({
       slot,
       value:
@@ -74,63 +82,37 @@ export const watchAccount = async (opts: WatchOptions, onUpdate: OnUpdate, onErr
               rentEpoch: value.rentEpoch,
             },
     });
+
     return true;
   };
 
-  const pollFn = async (onEmit: (slot: bigint, value: unknown) => void, abortSignal: AbortSignal) => {
-    const { context, value } = await rpc.getAccountInfo(accountAddress, { commitment, encoding: "base58" }).send({
+  const pollFn = async (onEmit: (slot: bigint, value: AccountInfoShape | null) => void, abortSignal: AbortSignal) => {
+    const { context, value } = await rpc.getAccountInfo(accountAddress, { commitment }).send({
       abortSignal,
     });
     onEmit(context.slot, value);
   };
 
-  if (wsSubscription) {
-    console.log("Initiating watch account using WebSocket");
-    await createWebsocketWatcherWithFallback({
-      abortController,
-      closedRef: { value: closed },
-      onError,
-      onUpdate: emitIfNewer,
-      opts: { heartbeatPollMs, pollIntervalMs, wsConnectTimeoutMs },
-      pollFn,
-      wsSubscribeFn: (abortSignal) =>
-        wsSubscription
-          .accountNotifications(accountAddress, { commitment, encoding: "base58" })
-          .subscribe({ abortSignal }),
-    });
-  } else {
-    console.log("WebSocket not available, starting polling");
-    // Manual polling when no WS
-    const startPolling = async () => {
-      await pollFn(emitIfNewer, abortController.signal);
+  const wsSubscribeFn = async (abortSignal: AbortSignal) => {
+    return await wsSubscription.accountNotifications(accountAddress, { commitment }).subscribe({ abortSignal });
+  };
 
-      const pollOnce = async () => {
-        if (closed) {
-          return;
-        }
-        try {
-          await pollFn(emitIfNewer, abortController.signal);
-        } catch (e) {
-          if (!closed && onError) {
-            onError(e);
-          }
-        }
-      };
+  await createWebsocketWatcherWithFallback({
+    abortController,
+    closedRef: { value: closed },
+    onError,
+    onUpdate: emitIfNewer,
+    opts: { pollIntervalMs, wsConnectTimeoutMs },
+    pollFn,
+    wsSubscribeFn,
+  });
 
-      const pollTimer = setInterval(() => void pollOnce(), pollIntervalMs);
-      return pollTimer;
-    };
-    await startPolling();
-  }
-
-  // return unified stopper
   const stop = () => {
     if (closed) {
       return;
     }
     closed = true;
     abortController.abort();
-    console.log("=== Watch Account Stopped ===");
   };
 
   return stop;
