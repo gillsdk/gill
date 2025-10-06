@@ -1,10 +1,10 @@
 import { type Address, Commitment } from "@solana/kit";
 
 import type { SolanaClient } from "../../types/rpc";
-import { createWebsocketWatcherWithFallback } from "./watcher-with-fallback";
+import { createUnifiedWatcher, type UnifiedWatcherOptions, type WatcherStrategy } from "./unified-watcher";
 
 type AccountInfoShape = {
-  // data shape depends on encoding;  typing as unknown to stay generic
+  // Data shape depends on encoding; keep generic.
   data: unknown;
   executable: boolean;
   lamports: bigint;
@@ -14,7 +14,7 @@ type AccountInfoShape = {
 
 type AccountUpdate = {
   slot: bigint;
-  value: AccountInfoShape | null; // null if account doesn't exist
+  value: AccountInfoShape | null;
 };
 
 type OnUpdate = (u: AccountUpdate) => void;
@@ -34,18 +34,15 @@ type WatchAccountArgs = {
 /**
  * Watches a Solana account for changes.
  *
- * This function uses a watching strategy that attempts to use a WebSocket
- * subscription for real-time updates and automatically falls back to HTTP
- * polling if the WebSocket is unavailable or fails.
+ * This function builds on the unified watcher and provides a resource-specific
+ * strategy for accounts. It tries WS subscription first and falls back to HTTP
+ * polling when needed.
  *
- * The consumer of this function is responsible for implementing any retry or
- * backoff logic for persistent errors by using the `onError` callback and
- * calling the returned `stop` function when appropriate.
+ * Consumer responsibilities:
+ * - Implement any retry/backoff for persistent errors using `onError` and by
+ *   calling the returned `stop` function as appropriate.
  *
- * Note: This watcher requires a WebSocket client (`wsSubscription`) and does
- * not support a polling-only mode.
- *
- * @param args - The arguments for watching the account.
+ * @param args - Arguments to configure the account watcher.
  * @returns A function to stop the watcher.
  */
 export const watchAccount = async ({
@@ -58,62 +55,24 @@ export const watchAccount = async ({
   onUpdate,
   onError,
 }: WatchAccountArgs) => {
-  const abortController = new AbortController();
-  let closed = false;
-  let lastSlot: bigint = -1n;
-
-  const emitIfNewer = (slot: bigint, value: AccountInfoShape | null) => {
-    if (slot <= lastSlot) {
-      return false;
-    }
-
-    lastSlot = slot;
-
-    onUpdate({
-      slot,
-      value:
-        value == null
-          ? null
-          : {
-              data: value.data,
-              executable: value.executable,
-              lamports: value.lamports,
-              owner: value.owner,
-              rentEpoch: value.rentEpoch,
-            },
-    });
-
-    return true;
+  const strategy: WatcherStrategy<AccountInfoShape, AccountInfoShape> = {
+    normalize: (raw) => raw ?? null,
+    poll: async (onEmit, abortSignal) => {
+      const { context, value } = await rpc.getAccountInfo(accountAddress, { commitment }).send({ abortSignal });
+      onEmit(context.slot, value ?? null);
+    },
+    subscribe: async (abortSignal) => {
+      return await wsSubscription.accountNotifications(accountAddress, { commitment }).subscribe({ abortSignal });
+    },
   };
 
-  const pollFn = async (onEmit: (slot: bigint, value: AccountInfoShape | null) => void, abortSignal: AbortSignal) => {
-    const { context, value } = await rpc.getAccountInfo(accountAddress, { commitment }).send({
-      abortSignal,
-    });
-    onEmit(context.slot, value);
-  };
-
-  const wsSubscribeFn = async (abortSignal: AbortSignal) => {
-    return await wsSubscription.accountNotifications(accountAddress, { commitment }).subscribe({ abortSignal });
-  };
-
-  await createWebsocketWatcherWithFallback({
-    abortController,
-    closedRef: { value: closed },
+  const opts: UnifiedWatcherOptions<AccountInfoShape> = {
     onError,
-    onUpdate: emitIfNewer,
-    opts: { pollIntervalMs, wsConnectTimeoutMs },
-    pollFn,
-    wsSubscribeFn,
-  });
-
-  const stop = () => {
-    if (closed) {
-      return;
-    }
-    closed = true;
-    abortController.abort();
+    onUpdate,
+    pollIntervalMs,
+    wsConnectTimeoutMs,
   };
 
+  const { stop } = await createUnifiedWatcher(strategy, opts);
   return stop;
 };
