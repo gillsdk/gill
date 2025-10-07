@@ -1,15 +1,15 @@
-import { type AccountInfoBase, type Address, Commitment } from "@solana/kit";
+import {
+  AccountInfoBase,
+  type AccountInfoWithBase64EncodedData,
+  type Address,
+  assertAccountExists,
+  Commitment,
+  MaybeEncodedAccount,
+  parseBase64RpcAccount,
+} from "@solana/kit";
 
 import { SolanaClient } from "../../types/rpc.js";
 import { createUnifiedWatcher, type UnifiedWatcherOptions, type WatcherStrategy } from "./unified-watcher";
-
-type AccountInfoShape = AccountInfoBase & {
-  /**
-   * Raw account data; its structure depends on the RPC encoding used.
-   * Kept as unknown to remain generic.
-   */
-  data: unknown;
-};
 
 type AccountUpdate = {
   /**
@@ -19,7 +19,7 @@ type AccountUpdate = {
   /**
    * Account info at the given slot, or null if the account does not exist.
    */
-  value: AccountInfoShape | null;
+  value: MaybeEncodedAccount;
 };
 
 type WatchAccountArgs = {
@@ -75,6 +75,7 @@ type WatchAccountArgs = {
    */
   wsConnectTimeoutMs?: number;
 };
+type Base64EncodedRpcAccount = AccountInfoBase & AccountInfoWithBase64EncodedData;
 
 /**
  * Watches a Solana account for changes.
@@ -98,21 +99,30 @@ export const watchAccount = async ({
   maxRetries,
   retryDelayMs,
 }: WatchAccountArgs) => {
-  const strategy: WatcherStrategy<AccountInfoShape, AccountInfoShape> = {
-    normalize: (raw) => raw ?? null,
+  const strategy: WatcherStrategy<Base64EncodedRpcAccount, MaybeEncodedAccount> = {
+    normalize: (raw) => {
+      const parsed = parseBase64RpcAccount(accountAddress, raw);
+      return parsed;
+    },
     poll: async (onEmit, abortSignal) => {
-      const { context, value } = await rpc.getAccountInfo(accountAddress, { commitment }).send({ abortSignal });
-      onEmit({ slot: context.slot, value: value ?? null });
+      const { context, value } = await rpc
+        .getAccountInfo(accountAddress, { commitment, encoding: "base64" })
+        .send({ abortSignal });
+      const parsedAccount = parseBase64RpcAccount(accountAddress, value);
+      assertAccountExists(parsedAccount);
+      onEmit({ slot: context.slot, value: parsedAccount });
     },
     subscribe: async (abortSignal) => {
-      return await rpcSubscriptions.accountNotifications(accountAddress, { commitment }).subscribe({ abortSignal });
+      return await rpcSubscriptions
+        .accountNotifications(accountAddress, { commitment, encoding: "base64" })
+        .subscribe({ abortSignal });
     },
   };
 
-  const opts: UnifiedWatcherOptions<AccountInfoShape> = {
+  const opts: UnifiedWatcherOptions<MaybeEncodedAccount> = {
     maxRetries,
     onError,
-    onUpdate: (slot, value) => onUpdate({ slot, value }),
+    onUpdate,
     pollIntervalMs,
     retryDelayMs,
     wsConnectTimeoutMs,
