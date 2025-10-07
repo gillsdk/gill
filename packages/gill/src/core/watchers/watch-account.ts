@@ -1,30 +1,14 @@
-import { type Address, Commitment } from "@solana/kit";
+import { type AccountInfoBase, type Address, Commitment } from "@solana/kit";
 
 import { SolanaClient } from "../../types/rpc.js";
 import { createUnifiedWatcher, type UnifiedWatcherOptions, type WatcherStrategy } from "./unified-watcher";
 
-type AccountInfoShape = {
+type AccountInfoShape = AccountInfoBase & {
   /**
    * Raw account data; its structure depends on the RPC encoding used.
    * Kept as unknown to remain generic.
    */
   data: unknown;
-  /**
-   * Whether the account is executable (program account).
-   */
-  executable: boolean;
-  /**
-   * Balance of the account in lamports.
-   */
-  lamports: bigint;
-  /**
-   * Owner program address of the account.
-   */
-  owner: Address;
-  /**
-   * Rent epoch for the account.
-   */
-  rentEpoch: bigint;
 };
 
 type AccountUpdate = {
@@ -37,17 +21,6 @@ type AccountUpdate = {
    */
   value: AccountInfoShape | null;
 };
-
-type OnUpdate = (u: AccountUpdate) => void;
-/**
- * Invoked on each accepted update with the normalized account payload.
- */
-
-type OnError = (e: unknown) => void;
-/**
- * Notified on recoverable errors (WS connect failures, polling errors, etc.).
- * Use to log, metric, or decide whether to stop/retry at a higher level.
- */
 
 type WatchAccountArgs = {
   /**
@@ -70,12 +43,12 @@ type WatchAccountArgs = {
   /**
    * Optional error callback for non-fatal failures.
    */
-  onError?: OnError;
+  onError?: (e: unknown) => void;
 
   /**
    * Update handler receiving { slot, value }.
    */
-  onUpdate: OnUpdate;
+  onUpdate: (u: AccountUpdate) => void;
 
   /**
    * Poll interval (ms) when in polling mode. Defaults to 5000.
