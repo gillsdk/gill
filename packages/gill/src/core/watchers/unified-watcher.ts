@@ -1,128 +1,143 @@
-/**
-
- */
-
 export type Slot = bigint;
 
 export type SubscriptionContext = { slot: Slot };
-export type SubscriptionItem<T> = { context: SubscriptionContext; value: T };
 
-export type UnifiedUpdate<T> = {
-  slot: Slot;
-  value: T | null;
-};
+export type SubscriptionItem<T> = { context: SubscriptionContext; value: T };
 
 export type UnifiedWatcherOptions<TNormalized> = {
   /**
-   * Optional external AbortController. If not provided, a new one is created.
+   * External AbortController to manage lifecycle.
+   * If omitted, a new controller is created internally.
    */
   abortController?: AbortController;
 
   /**
-   * Optional error handler for non-fatal errors.
+   * Maximum number of consecutive WS connection attempts before falling back to polling.
+   */
+  maxRetries?: number;
+
+  /**
+   * Optional error handler for non-fatal errors:
+   * - WS connection failures and retries
+   * - Polling failures
+   * - Stream processing errors
    */
   onError?: (e: unknown) => void;
 
   /**
-   * Callback invoked on each new update (monotonic by slot).
+   * Handler invoked for each accepted update (after slot de-duplication).
    */
-  onUpdate: (u: UnifiedUpdate<TNormalized>) => void;
+  onUpdate: (slot: Slot, value: TNormalized | null) => void;
 
   /**
-   * Interval for polling mode in milliseconds.
+   * Polling interval (ms) used when in polling mode.
+   * If omitted or <= 0, periodic polling is disabled (single poll may still run).
    */
-  pollIntervalMs: number;
+  pollIntervalMs?: number;
 
   /**
-   * Timeout for WebSocket connection attempt in milliseconds.
+   * Delay (ms) between WS connection attempts.
+   */
+  retryDelayMs?: number;
+
+  /**
+   * Maximum time (ms) to wait for WS connection before considering it failed
+   * and proceeding with retry or fallback to polling.
    */
   wsConnectTimeoutMs: number;
 };
 
 export type WatcherStrategy<TRaw, TNormalized> = {
   /**
-   * Converts raw WS payload into the normalized value type.
+   * Converts a raw WS payload into the normalized value type consumed by onUpdate.
    */
   normalize: (raw: TRaw | null) => TNormalized | null;
 
   /**
-   * Performs a single poll of the current state and emits exactly once.
+   * Performs a single poll and emits at most one update via onEmit.
+   * - slot is optional; if omitted, the watcher will synthesize one.
+   * - value should be normalized or null.
+   * Implementations should throw on fatal errors to allow retry/handling upstream.
    */
-  poll: (onEmit: (slot: Slot, value: TNormalized | null) => void, abortSignal: AbortSignal) => Promise<void>;
+  poll?: (
+    onEmit: (update: { slot?: Slot; value: TNormalized | null }) => void,
+    abortSignal: AbortSignal,
+  ) => Promise<void>;
 
   /**
-   * Creates a WebSocket subscription and returns an async iterable of updates.
+   * Starts a WS subscription and returns an async iterable of updates.
+   * Each item can be either:
+   * - SubscriptionItem<TRaw> (preferred): includes context.slot.
+   * - TRaw: raw payload without context; slot will be synthesized by the watcher.
    */
-  subscribe: (abortSignal: AbortSignal) => Promise<AsyncIterable<SubscriptionItem<TRaw>>>;
+  subscribe: (abortSignal: AbortSignal) => Promise<AsyncIterable<SubscriptionItem<TRaw> | TRaw>>;
 };
 
-// Helper function to perform a single poll.
+const attemptSubscription = async <TRaw>(
+  subscribeFn: () => Promise<AsyncIterable<SubscriptionItem<TRaw> | TRaw>>,
+  timeoutMs: number,
+  abortSignal: AbortSignal,
+): Promise<AsyncIterable<SubscriptionItem<TRaw> | TRaw>> => {
+  if (abortSignal.aborted) {
+    throw new Error("Aborted");
+  }
+  const connectPromise = subscribeFn();
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`ws connect timeout (${timeoutMs}ms)`)), timeoutMs),
+  );
+  return await Promise.race([connectPromise, timeoutPromise]);
+};
+
 const executePoll = async <TNormalized>(
-  poll: (onEmit: (slot: Slot, value: TNormalized | null) => void, abortSignal: AbortSignal) => Promise<void>,
+  poll: (
+    onEmit: (update: { slot?: Slot; value: TNormalized | null }) => void,
+    abortSignal: AbortSignal,
+  ) => Promise<void>,
   onUpdate: (slot: Slot, value: TNormalized | null) => void,
+  getLastSlot: () => Slot,
   closedRef: { value: boolean },
   abortSignal: AbortSignal,
   onError?: (e: unknown) => void,
 ) => {
-  if (closedRef.value) return;
+  if (closedRef.value) {
+    return;
+  }
+
   try {
-    await poll(onUpdate, abortSignal);
+    const onEmitFromPoll = ({ slot, value }: { slot?: Slot; value: TNormalized | null }) => {
+      const newSlot = slot ?? getLastSlot() + 1n;
+      onUpdate(newSlot, value);
+    };
+    await poll(onEmitFromPoll, abortSignal);
   } catch (e) {
-    if (!closedRef.value && onError) onError(e);
+    if (!closedRef.value && onError) {
+      onError(e);
+    }
   }
 };
 
-/**
- * A unified watcher abstraction that prefers WebSocket subscriptions for
- * real-time updates and automatically falls back to HTTP polling if WS is
- * unavailable or fails.
- *
- * Flow:
- * 1. Race WS connect against a timeout.
- * 2. If WS connects:
- *    - Perform an initial poll to seed current state.
- *    - Stream updates from WS.
- *    - If WS ends or errors, fallback to polling.
- * 3. If WS connect fails (timeout/error):
- *    - Start polling immediately.
- *
- * @param strategy - Resource-specific poll/subscribe/normalize implementation.
- * @param opts - Timing and callbacks configuration.
- * @returns An object with a `stop()` function to terminate the watcher.
- */
 export const createUnifiedWatcher = async <TRaw, TNormalized>(
   strategy: WatcherStrategy<TRaw, TNormalized>,
   opts: UnifiedWatcherOptions<TNormalized>,
-) => {
-  const { pollIntervalMs, wsConnectTimeoutMs, onUpdate, onError, abortController = new AbortController() } = opts;
+): Promise<{ stop: () => void }> => {
+  const {
+    pollIntervalMs,
+    wsConnectTimeoutMs,
+    onUpdate,
+    onError,
+    abortController = new AbortController(),
+    maxRetries = 3,
+    retryDelayMs = 2000, // Default to a 2-second fixed retry delay
+  } = opts;
 
   const closedRef = { value: false };
+
   let pollTimer: NodeJS.Timeout | null = null;
+
   let lastSlot: Slot = -1n;
 
-  const emitIfNewer = (slot: Slot, value: TNormalized | null) => {
-    if (slot <= lastSlot) return;
-    lastSlot = slot;
-    onUpdate({ slot, value });
-  };
+  const hasPoll = typeof strategy.poll === "function";
 
-  const singlePoll = () => executePoll(strategy.poll, emitIfNewer, closedRef, abortController.signal, onError);
-
-  const startPolling = async () => {
-    await singlePoll();
-    if (closedRef.value) return;
-    pollTimer = setInterval(() => void singlePoll(), pollIntervalMs);
-  };
-
-  // Race WebSocket connect against a timeout.
-  const connectPromise = strategy.subscribe(abortController.signal);
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("ws connect timeout")), wsConnectTimeoutMs),
-  );
-
-  /**
-   * Stops the watcher, cancels timers and aborts in-flight operations.
-   */
   const stop = () => {
     if (closedRef.value) return;
     closedRef.value = true;
@@ -130,43 +145,100 @@ export const createUnifiedWatcher = async <TRaw, TNormalized>(
     abortController.abort();
   };
 
-  try {
-    const stream = await Promise.race([connectPromise, timeoutPromise]);
+  const emitIfNewer = (slot: Slot, value: TNormalized | null) => {
+    if (slot <= lastSlot) return;
+    lastSlot = slot;
+    onUpdate(slot, value);
+  };
 
-    // Initial poll to seed current state.
+  const singlePoll = () => {
+    if (!strategy.poll) return Promise.resolve();
+    return executePoll(strategy.poll, emitIfNewer, () => lastSlot, closedRef, abortController.signal, onError);
+  };
+
+  const startPollingFallback = async () => {
+    if (closedRef.value || !hasPoll) return;
     await singlePoll();
-
-    if (closedRef.value) {
-      return { stop };
+    if (closedRef.value) return;
+    if (pollIntervalMs && pollIntervalMs > 0) {
+      pollTimer = setInterval(() => void singlePoll(), pollIntervalMs);
     }
+  };
 
-    try {
-      for await (const {
-        context: { slot },
-        value,
-      } of stream) {
-        if (closedRef.value) break;
-        emitIfNewer(slot, strategy.normalize(value));
-      }
+  // Main loop: attempts WS connection with retry; falls back to polling after max retries.
+  const run = async () => {
+    let connectAttempt = 0;
 
-      // If the WS stream ends naturally, fallback to polling.
-      if (!closedRef.value) {
-        await startPolling();
-      }
-    } catch (e) {
-      // On WS error, report and fallback to polling.
-      if (!closedRef.value) {
+    while (!closedRef.value) {
+      try {
+        const stream = await attemptSubscription(
+          () => strategy.subscribe(abortController.signal),
+          wsConnectTimeoutMs,
+          abortController.signal,
+        );
+
+        connectAttempt = 0; // Reset on successful connection.
+
+        // Seed state via a poll (if available) before consuming the stream.
+        if (hasPoll) {
+          await singlePoll();
+        }
+
+        if (closedRef.value) {
+          return;
+        }
+
+        for await (const item of stream) {
+          if (closedRef.value) {
+            break;
+          }
+
+          let slot: Slot;
+          let value: TRaw;
+
+          if (
+            typeof item === "object" &&
+            item !== null &&
+            "context" in item &&
+            typeof item.context === "object" &&
+            item.context !== null &&
+            "slot" in item.context
+          ) {
+            const subItem = item;
+            slot = subItem.context.slot;
+            value = subItem.value;
+          } else {
+            // No context provided by the stream; synthesize a monotonic slot.
+            lastSlot = lastSlot + 1n;
+            slot = lastSlot;
+            value = item as TRaw;
+          }
+
+          emitIfNewer(slot, strategy.normalize(value));
+        }
+
+        if (closedRef.value) return;
+        // If the stream ends naturally, loop to attempt reconnection again.
+      } catch (e) {
+        if (closedRef.value) return;
+
         onError?.(e);
-        await startPolling();
+
+        connectAttempt++;
+        if (connectAttempt >= maxRetries) {
+          onError?.(new Error(`Failed to connect to WebSocket after ${maxRetries} attempts.`));
+          await startPollingFallback();
+          return; // Exit loop and remain in polling mode.
+        }
+
+        // Fixed-delay retry (could be replaced with exponential backoff).
+        await new Promise<void>((resolve) => setTimeout(resolve, retryDelayMs));
       }
     }
-  } catch (e) {
-    // On WS connect timeout/failure, start polling immediately.
-    if (!closedRef.value) {
-      onError?.(e);
-      await startPolling();
-    }
-  }
+  };
+
+  // Start the watcher loop.
+  await run();
 
   return { stop };
 };
