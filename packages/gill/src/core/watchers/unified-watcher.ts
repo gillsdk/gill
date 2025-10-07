@@ -27,7 +27,7 @@ export type UnifiedWatcherOptions<TNormalized> = {
   /**
    * Handler invoked for each accepted update (after slot de-duplication).
    */
-  onUpdate: (slot: Slot, value: TNormalized | null) => void;
+  onUpdate: (u: { slot: Slot; value: TNormalized }) => void;
 
   /**
    * Polling interval (ms) used when in polling mode.
@@ -51,7 +51,7 @@ export type WatcherStrategy<TRaw, TNormalized> = {
   /**
    * Converts a raw WS payload into the normalized value type consumed by onUpdate.
    */
-  normalize: (raw: TRaw | null) => TNormalized | null;
+  normalize: (raw: TRaw | null) => TNormalized;
 
   /**
    * Performs a single poll and emits at most one update via onEmit.
@@ -59,10 +59,7 @@ export type WatcherStrategy<TRaw, TNormalized> = {
    * - value should be normalized or null.
    * Implementations should throw on fatal errors to allow retry/handling upstream.
    */
-  poll?: (
-    onEmit: (update: { slot?: Slot; value: TNormalized | null }) => void,
-    abortSignal: AbortSignal,
-  ) => Promise<void>;
+  poll?: (onEmit: (update: { slot?: Slot; value: TNormalized }) => void, abortSignal: AbortSignal) => Promise<void>;
 
   /**
    * Starts a WS subscription and returns an async iterable of updates.
@@ -89,11 +86,8 @@ const attemptSubscription = async <TRaw>(
 };
 
 const executePoll = async <TNormalized>(
-  poll: (
-    onEmit: (update: { slot?: Slot; value: TNormalized | null }) => void,
-    abortSignal: AbortSignal,
-  ) => Promise<void>,
-  onUpdate: (slot: Slot, value: TNormalized | null) => void,
+  poll: (onEmit: (update: { slot?: Slot; value: TNormalized }) => void, abortSignal: AbortSignal) => Promise<void>,
+  onUpdate: (slot: Slot, value: TNormalized) => void,
   getLastSlot: () => Slot,
   closedRef: { value: boolean },
   abortSignal: AbortSignal,
@@ -104,10 +98,11 @@ const executePoll = async <TNormalized>(
   }
 
   try {
-    const onEmitFromPoll = ({ slot, value }: { slot?: Slot; value: TNormalized | null }) => {
+    const onEmitFromPoll = ({ slot, value }: { slot?: Slot; value: TNormalized }) => {
       const newSlot = slot ?? getLastSlot() + 1n;
       onUpdate(newSlot, value);
     };
+
     await poll(onEmitFromPoll, abortSignal);
   } catch (e) {
     if (!closedRef.value && onError) {
@@ -145,14 +140,18 @@ export const createUnifiedWatcher = async <TRaw, TNormalized>(
     abortController.abort();
   };
 
-  const emitIfNewer = (slot: Slot, value: TNormalized | null) => {
-    if (slot <= lastSlot) return;
+  const emitIfNewer = (slot: Slot, value: TNormalized) => {
+    if (slot <= lastSlot) {
+      return;
+    }
     lastSlot = slot;
-    onUpdate(slot, value);
+    onUpdate({ slot, value });
   };
 
   const singlePoll = () => {
-    if (!strategy.poll) return Promise.resolve();
+    if (!strategy.poll) {
+      return Promise.resolve();
+    }
     return executePoll(strategy.poll, emitIfNewer, () => lastSlot, closedRef, abortController.signal, onError);
   };
 
