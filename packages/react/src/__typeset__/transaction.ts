@@ -1,4 +1,5 @@
 import { GetTransactionApi, Signature } from "gill";
+
 import { useTransaction } from "../hooks/transaction.js";
 
 // [DESCRIBE] useTransaction
@@ -19,12 +20,12 @@ import { useTransaction } from "../hooks/transaction.js";
   {
     // Should accept `config` input
     const { transaction } = useTransaction({
-      signature,
       config: {
         commitment: "confirmed",
-        maxSupportedTransactionVersion: 0,
         encoding: "json",
+        maxSupportedTransactionVersion: 0,
       },
+      signature,
     });
     transaction satisfies ReturnType<GetTransactionApi["getTransaction"]>;
   }

@@ -1,4 +1,5 @@
 import { Address, GetTokenAccountBalanceApi } from "gill";
+
 import { useTokenAccountBalance } from "../hooks/token-account-balance.js";
 
 // [DESCRIBE] useTokenAccountBalance
@@ -20,11 +21,11 @@ import { useTokenAccountBalance } from "../hooks/token-account-balance.js";
 
   {
     const { balance } = useTokenAccountBalance({
+      abortSignal: new AbortController().signal,
       address: "123" as Address,
       config: {
         commitment: "confirmed",
       },
-      abortSignal: new AbortController().signal,
     });
     balance satisfies ReturnType<GetTokenAccountBalanceApi["getTokenAccountBalance"]>;
   }

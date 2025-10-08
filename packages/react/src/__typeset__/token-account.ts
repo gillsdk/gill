@@ -1,6 +1,6 @@
 import { Account, Address } from "gill";
-
 import { Token } from "gill/programs";
+
 import { useTokenAccount } from "../hooks/token-account.js";
 
 // [DESCRIBE] useTokenAccount
@@ -50,9 +50,9 @@ import { useTokenAccount } from "../hooks/token-account.js";
   // Should accept `config` input with `mint` and `owner`
   {
     const { account } = useTokenAccount({
+      config: { commitment: "confirmed" },
       mint,
       owner,
-      config: { commitment: "confirmed" },
     });
     // Should have `exists=true` declared
     account satisfies { exists: true };
