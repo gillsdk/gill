@@ -6,7 +6,7 @@
  * @see https://github.com/codama-idl/codama
  */
 
-import { combineCodec, getEnumDecoder, getEnumEncoder, type Codec, type Decoder, type Encoder } from "@solana/kit";
+import { type Codec, combineCodec, type Decoder, type Encoder,getEnumDecoder, getEnumEncoder } from "@solana/kit";
 
 export enum TokenStandard {
   NonFungible,

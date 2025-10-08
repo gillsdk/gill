@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+ 
 
 import type { Rpc, RpcDevnet, RpcMainnet, RpcTestnet, SimulateTransactionApi } from "@solana/kit";
 import { CompilableTransactionMessage, FullySignedTransaction, Transaction } from "@solana/kit";
+
 import { simulateTransactionFactory } from "../core/simulate-transaction";
 
 const rpc = null as unknown as Rpc<SimulateTransactionApi>;

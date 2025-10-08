@@ -1,12 +1,13 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+ 
 
 import type {
   Address,
-  KeyPairSigner,
   BaseTransactionMessage,
+  KeyPairSigner,
   TransactionMessageWithBlockhashLifetime,
 } from "@solana/kit";
 import { signTransactionMessageWithSigners } from "@solana/kit";
+
 import { buildMintTokensTransaction } from "../programs/token";
 
 // [DESCRIBE] buildMintTokensTransaction
@@ -22,32 +23,32 @@ async () => {
   // Legacy transaction
   {
     (await buildMintTokensTransaction({
-      feePayer: signer,
-      mint,
-      destination,
       amount: 0,
       ata,
+      destination,
+      feePayer: signer,
+      mint,
       mintAuthority,
     })) satisfies BaseTransactionMessage<"legacy">;
 
     (await buildMintTokensTransaction({
-      feePayer: signer,
-      version: "legacy",
-      mint,
-      destination,
       amount: 0n,
       ata,
+      destination,
+      feePayer: signer,
+      mint,
       mintAuthority,
+      version: "legacy",
     })) satisfies BaseTransactionMessage<"legacy">;
 
     const txNotSignable = (await buildMintTokensTransaction({
-      feePayer: signer,
-      version: "legacy",
-      mint,
-      destination,
       amount: 0,
       ata,
+      destination,
+      feePayer: signer,
+      mint,
       mintAuthority,
+      version: "legacy",
       // @ts-expect-error Should not have a Lifetime
     })) satisfies TransactionMessageWithBlockhashLifetime;
 
@@ -55,14 +56,14 @@ async () => {
     signTransactionMessageWithSigners(txNotSignable);
 
     const txSignable = (await buildMintTokensTransaction({
-      feePayer: signer,
-      version: "legacy",
-      mint,
-      destination,
       amount: 0,
       ata,
-      mintAuthority,
+      destination,
+      feePayer: signer,
       latestBlockhash,
+      mint,
+      mintAuthority,
+      version: "legacy",
     })) satisfies BaseTransactionMessage<"legacy"> & TransactionMessageWithBlockhashLifetime;
 
     // Should be a signable transaction
@@ -72,23 +73,23 @@ async () => {
   // Version 0 transaction
   {
     (await buildMintTokensTransaction({
-      feePayer: signer,
-      version: 0,
-      mint,
-      destination,
       amount: 0,
       ata,
+      destination,
+      feePayer: signer,
+      mint,
       mintAuthority,
+      version: 0,
     })) satisfies BaseTransactionMessage<0>;
 
     const txNotSignable = (await buildMintTokensTransaction({
-      feePayer: signer,
-      version: 0,
-      mint,
-      destination,
       amount: 0,
       ata,
+      destination,
+      feePayer: signer,
+      mint,
       mintAuthority,
+      version: 0,
       // @ts-expect-error Should not have a Lifetime
     })) satisfies TransactionMessageWithBlockhashLifetime;
 
@@ -96,14 +97,14 @@ async () => {
     signTransactionMessageWithSigners(txNotSignable);
 
     const txSignable = (await buildMintTokensTransaction({
-      feePayer: signer,
-      version: 0,
-      mint,
-      destination,
       amount: 0n,
       ata,
-      mintAuthority,
+      destination,
+      feePayer: signer,
       latestBlockhash,
+      mint,
+      mintAuthority,
+      version: 0,
     })) satisfies BaseTransactionMessage<0> & TransactionMessageWithBlockhashLifetime;
 
     // Should be a signable transaction

@@ -5,6 +5,11 @@ export default [
     ...solanaConfig,
     ...solanaJestConfig,
     {
+        languageOptions: {
+            parserOptions: {
+                projectService: true,
+            },
+        },
         rules: {
             '@typescript-eslint/no-base-to-string': 'off',
             '@typescript-eslint/no-unsafe-argument': 'off',

@@ -1,9 +1,10 @@
+import { type Address, generateKeyPairSigner, type KeyPairSigner } from "@solana/kit";
 import {
   getCreateAssociatedTokenIdempotentInstruction,
   getMintToInstruction,
   TOKEN_2022_PROGRAM_ADDRESS,
 } from "@solana-program/token-2022";
-import { generateKeyPairSigner, type Address, type KeyPairSigner } from "@solana/kit";
+
 import { getMintTokensInstructions, GetMintTokensInstructionsArgs, TOKEN_PROGRAM_ADDRESS } from "../programs/token";
 
 // Mock the imported functions
@@ -49,12 +50,12 @@ describe("getMintTokensInstructions", () => {
 
   it("should create instructions with default token program", () => {
     const args: GetMintTokensInstructionsArgs = {
+      amount: mockAmount,
+      ata: mockAta,
+      destination: mockDestination.address,
       feePayer: mockPayer,
       mint: mockMint.address,
       mintAuthority: mockMintAuthority,
-      destination: mockDestination.address,
-      ata: mockAta,
-      amount: mockAmount,
     };
 
     const instructions = getMintTokensInstructions(args);
@@ -62,19 +63,19 @@ describe("getMintTokensInstructions", () => {
     expect(instructions).toHaveLength(2);
 
     expect(getCreateAssociatedTokenIdempotentInstruction).toHaveBeenCalledWith({
-      owner: mockDestination.address,
-      mint: mockMint.address,
       ata: mockAta,
+      mint: mockMint.address,
+      owner: mockDestination.address,
       payer: mockPayer,
       tokenProgram: TOKEN_PROGRAM_ADDRESS,
     });
 
     expect(getMintToInstruction).toHaveBeenCalledWith(
       {
+        amount: mockAmount,
         mint: mockMint.address,
         mintAuthority: mockMintAuthority,
         token: mockAta,
-        amount: mockAmount,
       },
       {
         programAddress: TOKEN_PROGRAM_ADDRESS,
@@ -84,12 +85,12 @@ describe("getMintTokensInstructions", () => {
 
   it("should create instructions with Token-2022 program", () => {
     const args: GetMintTokensInstructionsArgs = {
+      amount: mockAmount,
+      ata: mockAta,
+      destination: mockDestination.address,
       feePayer: mockPayer,
       mint: mockMint.address,
       mintAuthority: mockMintAuthority,
-      destination: mockDestination.address,
-      ata: mockAta,
-      amount: mockAmount,
       tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
     };
 
@@ -97,9 +98,9 @@ describe("getMintTokensInstructions", () => {
 
     expect(instructions).toHaveLength(2);
     expect(getCreateAssociatedTokenIdempotentInstruction).toHaveBeenCalledWith({
-      owner: mockDestination.address,
-      mint: mockMint.address,
       ata: mockAta,
+      mint: mockMint.address,
+      owner: mockDestination.address,
       payer: mockPayer,
       tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
     });
@@ -107,12 +108,12 @@ describe("getMintTokensInstructions", () => {
 
   it("should accept Address type for mint, mintAuthority, and destination", () => {
     const args: GetMintTokensInstructionsArgs = {
+      amount: mockAmount,
+      ata: mockAta,
+      destination: "ownerAddress" as Address,
       feePayer: mockPayer,
       mint: "mintAddress" as Address,
       mintAuthority: "mintAuthorityAddress" as Address,
-      destination: "ownerAddress" as Address,
-      ata: mockAta,
-      amount: mockAmount,
     };
 
     const instructions = getMintTokensInstructions(args);
@@ -120,19 +121,19 @@ describe("getMintTokensInstructions", () => {
     expect(instructions).toHaveLength(2);
 
     expect(getCreateAssociatedTokenIdempotentInstruction).toHaveBeenCalledWith({
-      owner: args.destination,
-      mint: args.mint,
       ata: mockAta,
+      mint: args.mint,
+      owner: args.destination,
       payer: mockPayer,
       tokenProgram: TOKEN_PROGRAM_ADDRESS,
     });
 
     expect(getMintToInstruction).toHaveBeenCalledWith(
       {
+        amount: mockAmount,
         mint: "mintAddress",
         mintAuthority: "mintAuthorityAddress",
         token: mockAta,
-        amount: mockAmount,
       },
       {
         programAddress: TOKEN_PROGRAM_ADDRESS,
@@ -142,12 +143,12 @@ describe("getMintTokensInstructions", () => {
 
   it("should accept number type for amount", () => {
     const args: GetMintTokensInstructionsArgs = {
+      amount: 1000,
+      ata: mockAta,
+      destination: mockDestination.address,
       feePayer: mockPayer,
       mint: mockMint.address,
       mintAuthority: mockMintAuthority,
-      destination: mockDestination.address,
-      ata: mockAta,
-      amount: 1000,
     };
 
     const instructions = getMintTokensInstructions(args);
@@ -155,10 +156,10 @@ describe("getMintTokensInstructions", () => {
     expect(instructions).toHaveLength(2);
     expect(getMintToInstruction).toHaveBeenCalledWith(
       {
+        amount: 1000,
         mint: mockMint.address,
         mintAuthority: mockMintAuthority,
         token: mockAta,
-        amount: 1000,
       },
       {
         programAddress: TOKEN_PROGRAM_ADDRESS,
@@ -168,12 +169,12 @@ describe("getMintTokensInstructions", () => {
 
   it("should throw error for unsupported token program", () => {
     const args: GetMintTokensInstructionsArgs = {
+      amount: mockAmount,
+      ata: mockAta,
+      destination: mockDestination.address,
       feePayer: mockPayer,
       mint: mockMint.address,
       mintAuthority: mockMintAuthority,
-      destination: mockDestination.address,
-      ata: mockAta,
-      amount: mockAmount,
       tokenProgram: "UnsupportedProgramId" as Address,
     };
 

@@ -1,7 +1,7 @@
-import type { Simplify } from "../types/index";
-
 import type { Address, GetSignaturesForAddressApi, Rpc } from "@solana/kit";
 import { isSolanaError, SOLANA_ERROR__TRANSACTION_ERROR__UNKNOWN, SolanaError } from "@solana/kit";
+
+import type { Simplify } from "../types/index";
 
 type GetOldestSignatureForAddressRpc<TCluster> = Rpc<GetSignaturesForAddressApi> & {
   "~cluster"?: TCluster;

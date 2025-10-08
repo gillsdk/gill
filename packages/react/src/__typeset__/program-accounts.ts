@@ -6,6 +6,7 @@ import {
   Base58EncodedBytes,
   SolanaRpcResponse,
 } from "gill";
+
 import { useProgramAccounts } from "../hooks/program-accounts.js";
 
 // [DESCRIBE] useProgramAccounts
@@ -18,18 +19,18 @@ import { useProgramAccounts } from "../hooks/program-accounts.js";
     baseConfigAccounts[0].account.data satisfies AccountInfoWithBase64EncodedData["data"];
 
     const { accounts: baseConfigAccounts2 } = useProgramAccounts({
-      program,
       config: {
         commitment: "finalized",
       },
+      program,
     });
     baseConfigAccounts2[0].account.data satisfies AccountInfoWithBase64EncodedData["data"];
 
     const { accounts: baseConfigContextAccounts } = useProgramAccounts({
-      program,
       config: {
         withContext: true,
       },
+      program,
     });
 
     // Should include context in response
@@ -40,23 +41,23 @@ import { useProgramAccounts } from "../hooks/program-accounts.js";
   // base64 encoded `data`
   {
     const { accounts: base64Accounts } = useProgramAccounts({
-      program,
       config: {
         commitment: "finalized",
         encoding: "base64",
       },
+      program,
     });
     base64Accounts[0].account satisfies AccountInfoWithBase64EncodedData;
     // @ts-expect-error Should not be base58 encoded bytes
     base64Accounts[0].account.data satisfies Base58EncodedBytes;
 
     const { accounts: base64ContextAccounts } = useProgramAccounts({
-      program,
       config: {
         commitment: "finalized",
         encoding: "base64",
         withContext: true,
       },
+      program,
     });
 
     // Should include context in response
@@ -70,23 +71,23 @@ import { useProgramAccounts } from "../hooks/program-accounts.js";
   // base64+zstd encoded `data`
   {
     const { accounts: base64ZstdAccounts } = useProgramAccounts({
-      program,
       config: {
         commitment: "finalized",
         encoding: "base64+zstd",
       },
+      program,
     });
     base64ZstdAccounts[0].account satisfies AccountInfoWithBase64EncodedZStdCompressedData;
     // @ts-expect-error Should not be base58 encoded bytes
     base64ZstdAccounts[0].account.data satisfies Base58EncodedBytes;
 
     const { accounts: base64ZstdContextAccounts } = useProgramAccounts({
-      program,
       config: {
         commitment: "finalized",
         encoding: "base64+zstd",
         withContext: true,
       },
+      program,
     });
 
     // Should include context in response
@@ -100,11 +101,11 @@ import { useProgramAccounts } from "../hooks/program-accounts.js";
   // json parsed encoded `data`
   {
     const { accounts: jsonParsedAccounts } = useProgramAccounts({
-      program,
       config: {
         commitment: "finalized",
         encoding: "jsonParsed",
       },
+      program,
     });
 
     jsonParsedAccounts[0].account satisfies AccountInfoWithBase64EncodedData | AccountInfoWithJsonData;
@@ -112,12 +113,12 @@ import { useProgramAccounts } from "../hooks/program-accounts.js";
     jsonParsedAccounts[0].account.data satisfies Base58EncodedBytes;
 
     const { accounts: jsonParsedContextAccounts } = useProgramAccounts({
-      program,
       config: {
         commitment: "finalized",
         encoding: "jsonParsed",
         withContext: true,
       },
+      program,
     });
     jsonParsedContextAccounts.value[0].account.data;
 

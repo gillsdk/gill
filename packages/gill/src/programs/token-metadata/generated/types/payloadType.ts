@@ -7,24 +7,25 @@
  */
 
 import {
+  type Address,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getAddressDecoder,
   getAddressEncoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
+  type GetDiscriminatedUnionVariant,
+  type GetDiscriminatedUnionVariantContent,
   getStructDecoder,
   getStructEncoder,
   getTupleDecoder,
   getTupleEncoder,
   getU64Decoder,
   getU64Encoder,
-  type Address,
-  type Codec,
-  type Decoder,
-  type Encoder,
-  type GetDiscriminatedUnionVariant,
-  type GetDiscriminatedUnionVariantContent,
 } from '@solana/kit';
+
 import {
   getProofInfoDecoder,
   getProofInfoEncoder,
@@ -37,16 +38,10 @@ import {
 } from '.';
 
 export type PayloadType =
-  | { __kind: 'Pubkey'; fields: readonly [Address] }
-  | { __kind: 'Seeds'; fields: readonly [SeedsVec] }
-  | { __kind: 'MerkleProof'; fields: readonly [ProofInfo] }
-  | { __kind: 'Number'; fields: readonly [bigint] };
+  { __kind: 'MerkleProof'; fields: readonly [ProofInfo] } | { __kind: 'Number'; fields: readonly [bigint] } | { __kind: 'Pubkey'; fields: readonly [Address] } | { __kind: 'Seeds'; fields: readonly [SeedsVec] };
 
 export type PayloadTypeArgs =
-  | { __kind: 'Pubkey'; fields: readonly [Address] }
-  | { __kind: 'Seeds'; fields: readonly [SeedsVecArgs] }
-  | { __kind: 'MerkleProof'; fields: readonly [ProofInfoArgs] }
-  | { __kind: 'Number'; fields: readonly [number | bigint] };
+  { __kind: 'MerkleProof'; fields: readonly [ProofInfoArgs] } | { __kind: 'Number'; fields: readonly [bigint | number] } | { __kind: 'Pubkey'; fields: readonly [Address] } | { __kind: 'Seeds'; fields: readonly [SeedsVecArgs] };
 
 export function getPayloadTypeEncoder(): Encoder<PayloadTypeArgs> {
   return getDiscriminatedUnionEncoder([

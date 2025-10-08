@@ -1,6 +1,6 @@
 import type { Account, Address } from "gill";
-
 import type { Mint } from "gill/programs";
+
 import { useTokenMint } from "../hooks/token-mint.js";
 
 // [DESCRIBE] useTokenMint
@@ -27,8 +27,8 @@ import { useTokenMint } from "../hooks/token-mint.js";
   // Should accept `config` input
   {
     const { account } = useTokenMint({
-      mint,
       config: { commitment: "confirmed" },
+      mint,
     });
     // Should have `exists=true` declared
     account satisfies { exists: true };

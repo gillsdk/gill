@@ -7,10 +7,18 @@
  */
 
 import {
+  type Account,
+  type Address,
   assertAccountExists,
   assertAccountsExist,
+  type Codec,
   combineCodec,
   decodeAccount,
+  type Decoder,
+  type EncodedAccount,
+  type Encoder,
+  type FetchAccountConfig,
+  type FetchAccountsConfig,
   fetchEncodedAccount,
   fetchEncodedAccounts,
   getAddressDecoder,
@@ -23,20 +31,19 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
-  type Account,
-  type Address,
-  type Codec,
-  type Decoder,
-  type EncodedAccount,
-  type Encoder,
-  type FetchAccountConfig,
-  type FetchAccountsConfig,
   type MaybeAccount,
   type MaybeEncodedAccount,
   type Option,
   type OptionOrNullable,
 } from "@solana/kit";
+
 import {
+  type Collection,
+  type CollectionArgs,
+  type CollectionDetails,
+  type CollectionDetailsArgs,
+  type Data,
+  type DataArgs,
   getCollectionDecoder,
   getCollectionDetailsDecoder,
   getCollectionDetailsEncoder,
@@ -51,12 +58,6 @@ import {
   getTokenStandardEncoder,
   getUsesDecoder,
   getUsesEncoder,
-  type Collection,
-  type CollectionArgs,
-  type CollectionDetails,
-  type CollectionDetailsArgs,
-  type Data,
-  type DataArgs,
   type Key,
   type KeyArgs,
   type ProgrammableConfig,
@@ -68,33 +69,33 @@ import {
 } from "../types";
 
 export type Metadata = {
-  key: Key;
-  updateAuthority: Address;
-  mint: Address;
-  data: Data;
-  primarySaleHappened: boolean;
-  isMutable: boolean;
-  editionNonce: Option<number>;
-  tokenStandard: Option<TokenStandard>;
   collection: Option<Collection>;
-  uses: Option<Uses>;
   collectionDetails: Option<CollectionDetails>;
+  data: Data;
+  editionNonce: Option<number>;
+  isMutable: boolean;
+  key: Key;
+  mint: Address;
+  primarySaleHappened: boolean;
   programmableConfig: Option<ProgrammableConfig>;
+  tokenStandard: Option<TokenStandard>;
+  updateAuthority: Address;
+  uses: Option<Uses>;
 };
 
 export type MetadataArgs = {
-  key: KeyArgs;
-  updateAuthority: Address;
-  mint: Address;
-  data: DataArgs;
-  primarySaleHappened: boolean;
-  isMutable: boolean;
-  editionNonce: OptionOrNullable<number>;
-  tokenStandard: OptionOrNullable<TokenStandardArgs>;
   collection: OptionOrNullable<CollectionArgs>;
-  uses: OptionOrNullable<UsesArgs>;
   collectionDetails: OptionOrNullable<CollectionDetailsArgs>;
+  data: DataArgs;
+  editionNonce: OptionOrNullable<number>;
+  isMutable: boolean;
+  key: KeyArgs;
+  mint: Address;
+  primarySaleHappened: boolean;
   programmableConfig: OptionOrNullable<ProgrammableConfigArgs>;
+  tokenStandard: OptionOrNullable<TokenStandardArgs>;
+  updateAuthority: Address;
+  uses: OptionOrNullable<UsesArgs>;
 };
 
 export function getMetadataEncoder(): Encoder<MetadataArgs> {

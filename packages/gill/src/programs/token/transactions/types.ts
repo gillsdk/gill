@@ -4,6 +4,7 @@ import type {
   TransactionSigner,
   TransactionVersion,
 } from "@solana/kit";
+
 import type { CreateTransactionInput, Simplify } from "../../../types";
 
 export type TransactionBuilderInput<
@@ -11,6 +12,6 @@ export type TransactionBuilderInput<
   TFeePayer extends Address | TransactionSigner = TransactionSigner,
   TLifetimeConstraint extends TransactionMessageWithBlockhashLifetime["lifetimeConstraint"] | undefined = undefined,
 > = Simplify<
-  Omit<CreateTransactionInput<TVersion, TFeePayer, TLifetimeConstraint>, "version" | "instructions" | "feePayer"> &
+  Omit<CreateTransactionInput<TVersion, TFeePayer, TLifetimeConstraint>, "feePayer" | "instructions" | "version"> &
     Partial<Pick<CreateTransactionInput<TVersion, TFeePayer, TLifetimeConstraint>, "version">>
 >;

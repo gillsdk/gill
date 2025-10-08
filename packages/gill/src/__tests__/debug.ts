@@ -92,11 +92,11 @@ describe("debug logger", () => {
 
   // Mock all console methods
   beforeEach(() => {
-    console.log = jest.fn();
-    console.debug = jest.fn();
-    console.info = jest.fn();
-    console.warn = jest.fn();
-    console.error = jest.fn();
+    jest.spyOn(console, 'log').mockImplementation();
+    jest.spyOn(console, 'debug').mockImplementation();
+    jest.spyOn(console, 'info').mockImplementation();
+    jest.spyOn(console, 'warn').mockImplementation();
+    jest.spyOn(console, 'error').mockImplementation();
 
     // Reset env and global
     jest.resetModules();

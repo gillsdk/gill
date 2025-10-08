@@ -7,28 +7,27 @@
  */
 
 import {
+  type Address,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getAddressDecoder,
   getAddressEncoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
+  type GetDiscriminatedUnionVariant,
+  type GetDiscriminatedUnionVariantContent,
   getStructDecoder,
   getStructEncoder,
   getTupleDecoder,
   getTupleEncoder,
   getUnitDecoder,
   getUnitEncoder,
-  type Address,
-  type Codec,
-  type Decoder,
-  type Encoder,
-  type GetDiscriminatedUnionVariant,
-  type GetDiscriminatedUnionVariantContent,
 } from '@solana/kit';
 
 export type EscrowAuthority =
-  | { __kind: 'TokenOwner' }
-  | { __kind: 'Creator'; fields: readonly [Address] };
+  { __kind: 'Creator'; fields: readonly [Address] } | { __kind: 'TokenOwner' };
 
 export type EscrowAuthorityArgs = EscrowAuthority;
 

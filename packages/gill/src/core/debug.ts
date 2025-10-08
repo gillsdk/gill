@@ -2,13 +2,13 @@
  *
  */
 
-type LogLevel = "debug" | "info" | "warn" | "error";
+type LogLevel = "debug" | "error" | "info" | "warn";
 
 const GILL_LOG_LEVELS: Record<LogLevel, number> = {
   debug: 0,
+  error: 3,
   info: 1,
   warn: 2,
-  error: 3,
 };
 
 declare global {
