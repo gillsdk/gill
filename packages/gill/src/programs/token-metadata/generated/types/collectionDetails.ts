@@ -7,22 +7,22 @@
  */
 
 import {
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   fixDecoderSize,
   fixEncoderSize,
   getBytesDecoder,
   getBytesEncoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
+  type GetDiscriminatedUnionVariant,
+  type GetDiscriminatedUnionVariantContent,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
-  type Codec,
-  type Decoder,
-  type Encoder,
-  type GetDiscriminatedUnionVariant,
-  type GetDiscriminatedUnionVariantContent,
   type ReadonlyUint8Array,
 } from '@solana/kit';
 
@@ -31,7 +31,7 @@ export type CollectionDetails =
   | { __kind: 'V2'; padding: ReadonlyUint8Array };
 
 export type CollectionDetailsArgs =
-  | { __kind: 'V1'; size: number | bigint }
+  | { __kind: 'V1'; size: bigint | number }
   | { __kind: 'V2'; padding: ReadonlyUint8Array };
 
 export function getCollectionDetailsEncoder(): Encoder<CollectionDetailsArgs> {

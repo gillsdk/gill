@@ -1,4 +1,5 @@
 import type { DevnetUrl, MainnetUrl, TestnetUrl } from "@solana/kit";
+
 import type { LocalnetUrl, ModifiedClusterUrl, SolanaClusterMoniker } from "../types/rpc";
 
 export function localnet(putativeString: string): LocalnetUrl {
@@ -11,7 +12,7 @@ export function localnet(putativeString: string): LocalnetUrl {
  * Note: These RPC URLs are rate limited and not suitable for production applications.
  */
 export function getPublicSolanaRpcUrl(
-  cluster: SolanaClusterMoniker | "mainnet-beta" | "localhost",
+  cluster: SolanaClusterMoniker | "localhost" | "mainnet-beta",
 ): ModifiedClusterUrl {
   switch (cluster) {
     case "devnet":

@@ -1,13 +1,14 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+ 
 
 import type {
   BaseTransactionMessage,
-  TransactionMessageWithFeePayer,
   Rpc,
   SolanaRpcApi,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithFeePayer,
 } from "@solana/kit";
 import { signTransactionMessageWithSigners } from "@solana/kit";
+
 import { prepareTransaction } from "../core";
 
 // [DESCRIBE] prepareTransaction
@@ -17,9 +18,7 @@ async () => {
   const transactionWithoutBlockhash = null as unknown as BaseTransactionMessage<"legacy"> &
     TransactionMessageWithFeePayer;
 
-  const transactionWithBlockhash = null as unknown as BaseTransactionMessage<"legacy"> &
-    TransactionMessageWithFeePayer &
-    TransactionMessageWithBlockhashLifetime;
+  const transactionWithBlockhash = null as unknown as BaseTransactionMessage<"legacy"> & TransactionMessageWithBlockhashLifetime & TransactionMessageWithFeePayer;
 
   // @ts-expect-error Base transaction should not be a signable
   signTransactionMessageWithSigners(transaction);

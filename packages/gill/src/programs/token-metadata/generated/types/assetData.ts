@@ -9,7 +9,11 @@
 import {
   addDecoderSizePrefix,
   addEncoderSizePrefix,
+  type Address,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getAddressDecoder,
   getAddressEncoder,
   getArrayDecoder,
@@ -26,14 +30,17 @@ import {
   getU32Encoder,
   getUtf8Decoder,
   getUtf8Encoder,
-  type Address,
-  type Codec,
-  type Decoder,
-  type Encoder,
   type Option,
   type OptionOrNullable,
 } from '@solana/kit';
+
 import {
+  type Collection,
+  type CollectionArgs,
+  type CollectionDetails,
+  type CollectionDetailsArgs,
+  type Creator,
+  type CreatorArgs,
   getCollectionDecoder,
   getCollectionDetailsDecoder,
   getCollectionDetailsEncoder,
@@ -44,12 +51,6 @@ import {
   getTokenStandardEncoder,
   getUsesDecoder,
   getUsesEncoder,
-  type Collection,
-  type CollectionArgs,
-  type CollectionDetails,
-  type CollectionDetailsArgs,
-  type Creator,
-  type CreatorArgs,
   type TokenStandard,
   type TokenStandardArgs,
   type Uses,
@@ -57,33 +58,33 @@ import {
 } from '.';
 
 export type AssetData = {
-  name: string;
-  symbol: string;
-  uri: string;
-  sellerFeeBasisPoints: number;
-  creators: Option<Array<Creator>>;
-  primarySaleHappened: boolean;
-  isMutable: boolean;
-  tokenStandard: TokenStandard;
   collection: Option<Collection>;
-  uses: Option<Uses>;
   collectionDetails: Option<CollectionDetails>;
+  creators: Option<Array<Creator>>;
+  isMutable: boolean;
+  name: string;
+  primarySaleHappened: boolean;
   ruleSet: Option<Address>;
+  sellerFeeBasisPoints: number;
+  symbol: string;
+  tokenStandard: TokenStandard;
+  uri: string;
+  uses: Option<Uses>;
 };
 
 export type AssetDataArgs = {
-  name: string;
-  symbol: string;
-  uri: string;
-  sellerFeeBasisPoints: number;
-  creators: OptionOrNullable<Array<CreatorArgs>>;
-  primarySaleHappened: boolean;
-  isMutable: boolean;
-  tokenStandard: TokenStandardArgs;
   collection: OptionOrNullable<CollectionArgs>;
-  uses: OptionOrNullable<UsesArgs>;
   collectionDetails: OptionOrNullable<CollectionDetailsArgs>;
+  creators: OptionOrNullable<Array<CreatorArgs>>;
+  isMutable: boolean;
+  name: string;
+  primarySaleHappened: boolean;
   ruleSet: OptionOrNullable<Address>;
+  sellerFeeBasisPoints: number;
+  symbol: string;
+  tokenStandard: TokenStandardArgs;
+  uri: string;
+  uses: OptionOrNullable<UsesArgs>;
 };
 
 export function getAssetDataEncoder(): Encoder<AssetDataArgs> {

@@ -7,7 +7,13 @@
  */
 
 import {
+  type AccountMeta,
+  type AccountSignerMeta,
+  type Address,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getAddressDecoder,
   getAddressEncoder,
   getBooleanDecoder,
@@ -18,13 +24,6 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
-  transformEncoder,
-  type Address,
-  type Codec,
-  type Decoder,
-  type Encoder,
-  type AccountMeta,
-  type AccountSignerMeta,
   type Instruction,
   type InstructionWithAccounts,
   type InstructionWithData,
@@ -32,11 +31,13 @@ import {
   type OptionOrNullable,
   type ReadonlySignerAccount,
   type TransactionSigner,
+  transformEncoder,
   type WritableAccount,
 } from "@solana/kit";
+
 import { getAccountMetaFactory, ResolvedAccount } from "../../../shared";
 import { TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getDataV2Decoder, getDataV2Encoder, type DataV2, type DataV2Args } from "../types";
+import { type DataV2, type DataV2Args,getDataV2Decoder, getDataV2Encoder } from "../types";
 
 export const UPDATE_METADATA_ACCOUNT_V2_DISCRIMINATOR = 15;
 
@@ -46,34 +47,32 @@ export function getUpdateMetadataAccountV2DiscriminatorBytes() {
 
 export type UpdateMetadataAccountV2Instruction<
   TProgram extends string = typeof TOKEN_METADATA_PROGRAM_ADDRESS,
-  TAccountMetadata extends string | AccountMeta<string> = string,
-  TAccountUpdateAuthority extends string | AccountMeta<string> = string,
+  TAccountMetadata extends AccountMeta<string> | string = string,
+  TAccountUpdateAuthority extends AccountMeta<string> | string = string,
   TRemainingAccounts extends readonly AccountMeta<string>[] = [],
-> = Instruction<TProgram> &
-  InstructionWithData<Uint8Array> &
-  InstructionWithAccounts<
+> = Instruction<TProgram> & InstructionWithAccounts<
     [
       TAccountMetadata extends string ? WritableAccount<TAccountMetadata> : TAccountMetadata,
       TAccountUpdateAuthority extends string
-        ? ReadonlySignerAccount<TAccountUpdateAuthority> & AccountSignerMeta<TAccountUpdateAuthority>
+        ? AccountSignerMeta<TAccountUpdateAuthority> & ReadonlySignerAccount<TAccountUpdateAuthority>
         : TAccountUpdateAuthority,
       ...TRemainingAccounts,
     ]
-  >;
+  > & InstructionWithData<Uint8Array>;
 
 export type UpdateMetadataAccountV2InstructionData = {
-  discriminator: number;
   data: Option<DataV2>;
-  updateAuthority: Option<Address>;
-  primarySaleHappened: Option<boolean>;
+  discriminator: number;
   isMutable: Option<boolean>;
+  primarySaleHappened: Option<boolean>;
+  updateAuthority: Option<Address>;
 };
 
 export type UpdateMetadataAccountV2InstructionDataArgs = {
   data: OptionOrNullable<DataV2Args>;
-  updateAuthority: OptionOrNullable<Address>;
-  primarySaleHappened: OptionOrNullable<boolean>;
   isMutable: OptionOrNullable<boolean>;
+  primarySaleHappened: OptionOrNullable<boolean>;
+  updateAuthority: OptionOrNullable<Address>;
 };
 
 export function getUpdateMetadataAccountV2InstructionDataEncoder(): Encoder<UpdateMetadataAccountV2InstructionDataArgs> {
@@ -116,14 +115,14 @@ export type UpdateMetadataAccountV2Input<
   TAccountMetadata extends string = string,
   TAccountUpdateAuthority extends string = string,
 > = {
+  data: UpdateMetadataAccountV2InstructionDataArgs["data"];
+  isMutable: UpdateMetadataAccountV2InstructionDataArgs["isMutable"];
   /** Metadata account */
   metadata: Address<TAccountMetadata>;
+  primarySaleHappened: UpdateMetadataAccountV2InstructionDataArgs["primarySaleHappened"];
   /** Update authority key */
   updateAuthority: TransactionSigner<TAccountUpdateAuthority>;
-  data: UpdateMetadataAccountV2InstructionDataArgs["data"];
   updateAuthorityArg: UpdateMetadataAccountV2InstructionDataArgs["updateAuthority"];
-  primarySaleHappened: UpdateMetadataAccountV2InstructionDataArgs["primarySaleHappened"];
-  isMutable: UpdateMetadataAccountV2InstructionDataArgs["isMutable"];
 };
 
 export function getUpdateMetadataAccountV2Instruction<
@@ -139,10 +138,10 @@ export function getUpdateMetadataAccountV2Instruction<
 
   // Original accounts.
   const originalAccounts = {
-    metadata: { value: input.metadata ?? null, isWritable: true },
+    metadata: { isWritable: true, value: input.metadata ?? null },
     updateAuthority: {
-      value: input.updateAuthority ?? null,
       isWritable: false,
+      value: input.updateAuthority ?? null,
     },
   };
   const accounts = originalAccounts as Record<keyof typeof originalAccounts, ResolvedAccount>;
@@ -153,8 +152,8 @@ export function getUpdateMetadataAccountV2Instruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   const instruction = {
     accounts: [getAccountMeta(accounts.metadata), getAccountMeta(accounts.updateAuthority)],
-    programAddress,
     data: getUpdateMetadataAccountV2InstructionDataEncoder().encode(args as UpdateMetadataAccountV2InstructionDataArgs),
+    programAddress,
   } as UpdateMetadataAccountV2Instruction<TProgramAddress, TAccountMetadata, TAccountUpdateAuthority>;
 
   return instruction;
@@ -164,7 +163,6 @@ export type ParsedUpdateMetadataAccountV2Instruction<
   TProgram extends string = typeof TOKEN_METADATA_PROGRAM_ADDRESS,
   TAccountMetas extends readonly AccountMeta[] = readonly AccountMeta[],
 > = {
-  programAddress: Address<TProgram>;
   accounts: {
     /** Metadata account */
     metadata: TAccountMetas[0];
@@ -172,6 +170,7 @@ export type ParsedUpdateMetadataAccountV2Instruction<
     updateAuthority: TAccountMetas[1];
   };
   data: UpdateMetadataAccountV2InstructionData;
+  programAddress: Address<TProgram>;
 };
 
 export function parseUpdateMetadataAccountV2Instruction<
@@ -186,16 +185,17 @@ export function parseUpdateMetadataAccountV2Instruction<
   }
   let accountIndex = 0;
   const getNextAccount = () => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const accountMeta = instruction.accounts![accountIndex]!;
     accountIndex += 1;
     return accountMeta;
   };
   return {
-    programAddress: instruction.programAddress,
     accounts: {
       metadata: getNextAccount(),
       updateAuthority: getNextAccount(),
     },
     data: getUpdateMetadataAccountV2InstructionDataDecoder().decode(instruction.data),
+    programAddress: instruction.programAddress,
   };
 }

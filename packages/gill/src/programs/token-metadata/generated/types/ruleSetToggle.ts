@@ -7,29 +7,27 @@
  */
 
 import {
+  type Address,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getAddressDecoder,
   getAddressEncoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
+  type GetDiscriminatedUnionVariant,
+  type GetDiscriminatedUnionVariantContent,
   getStructDecoder,
   getStructEncoder,
   getTupleDecoder,
   getTupleEncoder,
   getUnitDecoder,
   getUnitEncoder,
-  type Address,
-  type Codec,
-  type Decoder,
-  type Encoder,
-  type GetDiscriminatedUnionVariant,
-  type GetDiscriminatedUnionVariantContent,
 } from '@solana/kit';
 
 export type RuleSetToggle =
-  | { __kind: 'None' }
-  | { __kind: 'Clear' }
-  | { __kind: 'Set'; fields: readonly [Address] };
+  { __kind: 'Clear' } | { __kind: 'None' } | { __kind: 'Set'; fields: readonly [Address] };
 
 export type RuleSetToggleArgs = RuleSetToggle;
 

@@ -7,9 +7,14 @@
  */
 
 import {
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
+  type GetDiscriminatedUnionVariant,
+  type GetDiscriminatedUnionVariantContent,
   getStructDecoder,
   getStructEncoder,
   getTupleDecoder,
@@ -18,22 +23,13 @@ import {
   getU64Encoder,
   getUnitDecoder,
   getUnitEncoder,
-  type Codec,
-  type Decoder,
-  type Encoder,
-  type GetDiscriminatedUnionVariant,
-  type GetDiscriminatedUnionVariantContent,
 } from '@solana/kit';
 
 export type PrintSupply =
-  | { __kind: 'Zero' }
-  | { __kind: 'Limited'; fields: readonly [bigint] }
-  | { __kind: 'Unlimited' };
+  { __kind: 'Limited'; fields: readonly [bigint] } | { __kind: 'Unlimited' } | { __kind: 'Zero' };
 
 export type PrintSupplyArgs =
-  | { __kind: 'Zero' }
-  | { __kind: 'Limited'; fields: readonly [number | bigint] }
-  | { __kind: 'Unlimited' };
+  { __kind: 'Limited'; fields: readonly [bigint | number] } | { __kind: 'Unlimited' } | { __kind: 'Zero' };
 
 export function getPrintSupplyEncoder(): Encoder<PrintSupplyArgs> {
   return getDiscriminatedUnionEncoder([

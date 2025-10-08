@@ -1,4 +1,5 @@
 import { blockhash, createKeyPairFromBytes, createSignerFromKeyPair } from "@solana/kit";
+
 import {
   createKeypairFromBase58,
   createKeypairSignerFromBase58,
@@ -19,7 +20,7 @@ const MOCK_KEY_BYTES = new Uint8Array([
 const MOCK_KEY_BASE58 = "4AxFzQaPR6N9dWP5K3GdZRLuWJcdgPznM4h42ASqByP3c6vywVLKs32rwPPsuvsJh1E6fLjkAbe8dzhTj3w173Ky";
 
 describe("createKeypairFromBase58", () => {
-  test("creates a valid CryptoKeyPair from a base58 encoded secret key", async () => {
+  it("creates a valid CryptoKeyPair from a base58 encoded secret key", async () => {
     const [keypair, referenceKeypair] = await Promise.all([
       createKeypairFromBase58(MOCK_KEY_BASE58),
       createKeyPairFromBytes(MOCK_KEY_BYTES),
@@ -34,19 +35,19 @@ describe("createKeypairFromBase58", () => {
     expect(signer.address.toString()).toBe(referenceSigner.address.toString());
   });
 
-  test("throws error when given invalid base58 string", async () => {
+  it("throws error when given invalid base58 string", async () => {
     const invalidBase58 = "INVALID-BASE58-O0l";
 
     await expect(createKeypairFromBase58(invalidBase58)).rejects.toThrow();
   });
 
-  test("throws error when given base58 address", async () => {
+  it("throws error when given base58 address", async () => {
     await expect(createKeypairFromBase58(EXPECTED_ADDRESS)).rejects.toThrow();
   });
 });
 
 describe("createKeypairSignerFromBase58", () => {
-  test("creates a valid CryptoKeyPair from a base58 encoded secret key", async () => {
+  it("creates a valid CryptoKeyPair from a base58 encoded secret key", async () => {
     const referenceKeypair = await createKeyPairFromBytes(MOCK_KEY_BYTES);
 
     const [signer, referenceSigner] = await Promise.all([
@@ -58,30 +59,30 @@ describe("createKeypairSignerFromBase58", () => {
     expect(signer.address.toString()).toBe(referenceSigner.address.toString());
   });
 
-  test("throws error when given invalid base58 string", async () => {
+  it("throws error when given invalid base58 string", async () => {
     const invalidBase58 = "INVALID-BASE58-O0l";
 
     await expect(createKeypairSignerFromBase58(invalidBase58)).rejects.toThrow();
   });
 
-  test("throws error when given base58 address", async () => {
+  it("throws error when given base58 address", async () => {
     await expect(createKeypairSignerFromBase58(EXPECTED_ADDRESS)).rejects.toThrow();
   });
 
-  test("can sign transactions", async () => {
+  it("can sign transactions", async () => {
     const signer = await createKeypairSignerFromBase58(MOCK_KEY_BASE58);
 
     const expected =
       "AVwKxtJbYr4VoTGC59X+au7C6zMKOfBh6eWU8f293dCDZY0qVEDBz+7zPFUiDb5eF7Z/1oeB11+6edzGR4vyIQgBAAABPn7nGD13WXM5fEfdlnV2LOqGW2SYUAuOHQB6koxrrsTjfKbGfbEEIU1AEH81ttgpyiNLO+xurYCsjdCVcfR4YQA=";
 
     const tx = createTransaction({
-      version: "legacy",
       feePayer: signer,
       instructions: [],
       latestBlockhash: {
         blockhash: blockhash("GK1nopeF3P8J46dGqq4KfaEWopZU7K65F6CKQXuUdr3z"),
         lastValidBlockHeight: 0n,
       },
+      version: "legacy",
     });
 
     const result = await transactionToBase64WithSigners(tx);

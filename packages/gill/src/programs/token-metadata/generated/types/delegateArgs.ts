@@ -7,136 +7,111 @@
  */
 
 import {
+  type Address,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getAddressDecoder,
   getAddressEncoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
+  type GetDiscriminatedUnionVariant,
+  type GetDiscriminatedUnionVariantContent,
   getOptionDecoder,
   getOptionEncoder,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
-  type Address,
-  type Codec,
-  type Decoder,
-  type Encoder,
-  type GetDiscriminatedUnionVariant,
-  type GetDiscriminatedUnionVariantContent,
   type Option,
   type OptionOrNullable,
 } from '@solana/kit';
+
 import {
-  getAuthorizationDataDecoder,
-  getAuthorizationDataEncoder,
   type AuthorizationData,
   type AuthorizationDataArgs,
+  getAuthorizationDataDecoder,
+  getAuthorizationDataEncoder,
 } from '.';
 
 export type DelegateArgs =
-  | { __kind: 'CollectionV1'; authorizationData: Option<AuthorizationData> }
-  | {
+  {
+      __kind: 'LockedTransferV1';
+      amount: bigint;
+      authorizationData: Option<AuthorizationData>;
+      lockedAddress: Address;
+    } | {
+      __kind: 'ProgrammableConfigItemV1';
+      authorizationData: Option<AuthorizationData>;
+    } | {
+      __kind: 'ProgrammableConfigV1';
+      authorizationData: Option<AuthorizationData>;
+    } | {
       __kind: 'SaleV1';
       amount: bigint;
       authorizationData: Option<AuthorizationData>;
-    }
-  | {
-      __kind: 'TransferV1';
-      amount: bigint;
-      authorizationData: Option<AuthorizationData>;
-    }
-  | { __kind: 'DataV1'; authorizationData: Option<AuthorizationData> }
-  | {
-      __kind: 'UtilityV1';
-      amount: bigint;
-      authorizationData: Option<AuthorizationData>;
-    }
-  | {
+    } | {
       __kind: 'StakingV1';
       amount: bigint;
       authorizationData: Option<AuthorizationData>;
-    }
-  | { __kind: 'StandardV1'; amount: bigint }
-  | {
-      __kind: 'LockedTransferV1';
+    } | {
+      __kind: 'TransferV1';
       amount: bigint;
-      lockedAddress: Address;
       authorizationData: Option<AuthorizationData>;
-    }
-  | {
-      __kind: 'ProgrammableConfigV1';
+    } | {
+      __kind: 'UtilityV1';
+      amount: bigint;
       authorizationData: Option<AuthorizationData>;
-    }
-  | { __kind: 'AuthorityItemV1'; authorizationData: Option<AuthorizationData> }
-  | { __kind: 'DataItemV1'; authorizationData: Option<AuthorizationData> }
-  | { __kind: 'CollectionItemV1'; authorizationData: Option<AuthorizationData> }
-  | {
-      __kind: 'ProgrammableConfigItemV1';
-      authorizationData: Option<AuthorizationData>;
-    }
-  | { __kind: 'PrintDelegateV1'; authorizationData: Option<AuthorizationData> };
+    } | { __kind: 'AuthorityItemV1'; authorizationData: Option<AuthorizationData> } | { __kind: 'CollectionItemV1'; authorizationData: Option<AuthorizationData> } | { __kind: 'CollectionV1'; authorizationData: Option<AuthorizationData> } | { __kind: 'DataItemV1'; authorizationData: Option<AuthorizationData> } | { __kind: 'DataV1'; authorizationData: Option<AuthorizationData> } | { __kind: 'PrintDelegateV1'; authorizationData: Option<AuthorizationData> } | { __kind: 'StandardV1'; amount: bigint };
 
 export type DelegateArgsArgs =
-  | {
-      __kind: 'CollectionV1';
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'SaleV1';
-      amount: number | bigint;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'TransferV1';
-      amount: number | bigint;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'DataV1';
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'UtilityV1';
-      amount: number | bigint;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'StakingV1';
-      amount: number | bigint;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | { __kind: 'StandardV1'; amount: number | bigint }
-  | {
-      __kind: 'LockedTransferV1';
-      amount: number | bigint;
-      lockedAddress: Address;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'ProgrammableConfigV1';
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
+  {
       __kind: 'AuthorityItemV1';
       authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'DataItemV1';
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
+    } | {
       __kind: 'CollectionItemV1';
       authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'ProgrammableConfigItemV1';
+    } | {
+      __kind: 'CollectionV1';
       authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
+    } | {
+      __kind: 'DataItemV1';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+    } | {
+      __kind: 'DataV1';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+    } | {
+      __kind: 'LockedTransferV1';
+      amount: bigint | number;
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+      lockedAddress: Address;
+    } | {
       __kind: 'PrintDelegateV1';
       authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    };
+    } | {
+      __kind: 'ProgrammableConfigItemV1';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+    } | {
+      __kind: 'ProgrammableConfigV1';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+    } | {
+      __kind: 'SaleV1';
+      amount: bigint | number;
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+    } | {
+      __kind: 'StakingV1';
+      amount: bigint | number;
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+    } | {
+      __kind: 'TransferV1';
+      amount: bigint | number;
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+    } | {
+      __kind: 'UtilityV1';
+      amount: bigint | number;
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+    } | { __kind: 'StandardV1'; amount: bigint | number };
 
 export function getDelegateArgsEncoder(): Encoder<DelegateArgsArgs> {
   return getDiscriminatedUnionEncoder([

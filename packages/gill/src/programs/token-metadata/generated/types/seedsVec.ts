@@ -9,7 +9,10 @@
 import {
   addDecoderSizePrefix,
   addEncoderSizePrefix,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getArrayDecoder,
   getArrayEncoder,
   getBytesDecoder,
@@ -18,9 +21,6 @@ import {
   getStructEncoder,
   getU32Decoder,
   getU32Encoder,
-  type Codec,
-  type Decoder,
-  type Encoder,
   type ReadonlyUint8Array,
 } from '@solana/kit';
 

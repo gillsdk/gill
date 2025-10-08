@@ -7,7 +7,11 @@
  */
 
 import {
+  type Address,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getAddressDecoder,
   getAddressEncoder,
   getBooleanDecoder,
@@ -16,13 +20,9 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
-  type Address,
-  type Codec,
-  type Decoder,
-  type Encoder,
 } from '@solana/kit';
 
-export type Creator = { address: Address; verified: boolean; share: number };
+export type Creator = { address: Address; share: number, verified: boolean; };
 
 export type CreatorArgs = Creator;
 

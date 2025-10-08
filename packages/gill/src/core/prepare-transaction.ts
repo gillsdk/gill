@@ -1,4 +1,3 @@
-import { COMPUTE_BUDGET_PROGRAM_ADDRESS, getSetComputeUnitLimitInstruction } from "@solana-program/compute-budget";
 import type {
   CompilableTransactionMessage,
   GetLatestBlockhashApi,
@@ -14,23 +13,23 @@ import {
   getComputeUnitEstimateForTransactionMessageFactory,
   setTransactionMessageLifetimeUsingBlockhash,
 } from "@solana/kit";
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS, getSetComputeUnitLimitInstruction } from "@solana-program/compute-budget";
+
 import { isSetComputeLimitInstruction } from "../programs/compute-budget";
 import { transactionToBase64WithSigners } from "./base64-to-transaction";
 import { debug, isDebugEnabled } from "./debug";
 
 type PrepareCompilableTransactionMessage =
   | CompilableTransactionMessage
-  | (TransactionMessageWithFeePayer & TransactionMessage);
+  | (TransactionMessage & TransactionMessageWithFeePayer);
 
 export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransactionMessage> = {
   /**
-   * Transaction to prepare for sending to the blockchain
-   */
-  transaction: TMessage;
-  /**
-   * RPC client capable of simulating transactions and getting the latest blockhash
+   * Whether or not you wish to force reset the latest blockhash (if one is already set)
+   *
+   * Default: `true`
    **/
-  rpc: Rpc<GetLatestBlockhashApi & SimulateTransactionApi>;
+  blockhashReset?: boolean;
   /**
    * Multiplier applied to the simulated compute unit value obtained from simulation
    *
@@ -43,11 +42,13 @@ export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransacti
    **/
   computeUnitLimitReset?: boolean;
   /**
-   * Whether or not you wish to force reset the latest blockhash (if one is already set)
-   *
-   * Default: `true`
+   * RPC client capable of simulating transactions and getting the latest blockhash
    **/
-  blockhashReset?: boolean;
+  rpc: Rpc<GetLatestBlockhashApi & SimulateTransactionApi>;
+  /**
+   * Transaction to prepare for sending to the blockchain
+   */
+  transaction: TMessage;
 };
 
 /**

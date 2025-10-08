@@ -1,6 +1,6 @@
-import { COMPUTE_BUDGET_PROGRAM_ADDRESS, ComputeBudgetInstruction } from "@solana-program/compute-budget";
 import type { Instruction, InstructionWithData, TransactionMessage } from "@solana/kit";
 import { isInstructionForProgram, isInstructionWithData } from "@solana/kit";
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS, ComputeBudgetInstruction } from "@solana-program/compute-budget";
 
 /**
  * Check if a given instruction is a `SetComputeUnitLimit` instruction

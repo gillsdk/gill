@@ -3,6 +3,7 @@ import { homedir } from "node:os";
 import { resolve } from "node:path";
 
 import { createKeyPairFromBytes, createSignerFromKeyPair, type KeyPairSigner } from "@solana/kit";
+
 import { DEFAULT_CLI_KEYPAIR_PATH } from "./const";
 import type { loadKeypairFromEnvironmentBase58, loadKeypairSignerFromEnvironmentBase58 } from "./load-keypair-base58";
 
@@ -14,7 +15,7 @@ import type { loadKeypairFromEnvironmentBase58, loadKeypairSignerFromEnvironment
  */
 export async function loadKeypairFromFile(filePath: string = DEFAULT_CLI_KEYPAIR_PATH): Promise<CryptoKeyPair> {
   const resolvedPath = resolve(filePath.startsWith("~") ? filePath.replace("~", homedir()) : filePath);
-  return createKeyPairFromBytes(Uint8Array.from(JSON.parse(readFileSync(resolvedPath, "utf8"))));
+  return await createKeyPairFromBytes(Uint8Array.from(JSON.parse(readFileSync(resolvedPath, "utf8"))));
 }
 
 /**
@@ -24,7 +25,7 @@ export async function loadKeypairFromFile(filePath: string = DEFAULT_CLI_KEYPAIR
  * @param filePath - file path to a json keypair file, default={@link DEFAULT_CLI_KEYPAIR_PATH}
  */
 export async function loadKeypairSignerFromFile(filePath: string = DEFAULT_CLI_KEYPAIR_PATH): Promise<KeyPairSigner> {
-  return createSignerFromKeyPair(await loadKeypairFromFile(filePath));
+  return await createSignerFromKeyPair(await loadKeypairFromFile(filePath));
 }
 
 /**
@@ -35,13 +36,13 @@ export async function loadKeypairSignerFromFile(filePath: string = DEFAULT_CLI_K
  *
  * @param variableName - environment variable name accessible via `process.env[variableName]`
  */
-export async function loadKeypairFromEnvironment<TName extends keyof NodeJS.ProcessEnv | string>(
+export async function loadKeypairFromEnvironment<TName extends string | keyof NodeJS.ProcessEnv>(
   variableName: TName,
 ): Promise<CryptoKeyPair> {
   if (!process.env[variableName]) {
     throw new Error(`Environment variable '${variableName}' not set`);
   }
-  return createKeyPairFromBytes(Uint8Array.from(JSON.parse(process.env[variableName])));
+  return await createKeyPairFromBytes(Uint8Array.from(JSON.parse(process.env[variableName])));
 }
 
 /**
@@ -52,8 +53,8 @@ export async function loadKeypairFromEnvironment<TName extends keyof NodeJS.Proc
  *
  * @param variableName - environment variable name accessible via `process.env[variableName]`
  */
-export async function loadKeypairSignerFromEnvironment<TName extends keyof NodeJS.ProcessEnv | string>(
+export async function loadKeypairSignerFromEnvironment<TName extends string | keyof NodeJS.ProcessEnv>(
   variableName: TName,
 ): Promise<KeyPairSigner> {
-  return createSignerFromKeyPair(await loadKeypairFromEnvironment(variableName));
+  return await createSignerFromKeyPair(await loadKeypairFromEnvironment(variableName));
 }

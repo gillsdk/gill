@@ -1,8 +1,9 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+ 
 
 import type { BaseTransactionMessage, KeyPairSigner, TransactionMessageWithBlockhashLifetime } from "@solana/kit";
 import { signTransactionMessageWithSigners } from "@solana/kit";
-import { GetCreateTokenInstructionsArgs, buildCreateTokenTransaction } from "../programs/token";
+
+import { buildCreateTokenTransaction,GetCreateTokenInstructionsArgs } from "../programs/token";
 
 // [DESCRIBE] buildCreateTokenTransaction
 async () => {
@@ -15,22 +16,22 @@ async () => {
   {
     (await buildCreateTokenTransaction({
       feePayer: signer,
-      mint,
       metadata,
+      mint,
     })) satisfies BaseTransactionMessage<"legacy">;
 
     (await buildCreateTokenTransaction({
       feePayer: signer,
-      version: "legacy",
-      mint,
       metadata,
+      mint,
+      version: "legacy",
     })) satisfies BaseTransactionMessage<"legacy">;
 
     const txNotSignable = (await buildCreateTokenTransaction({
       feePayer: signer,
-      version: "legacy",
-      mint,
       metadata,
+      mint,
+      version: "legacy",
       // @ts-expect-error Should not have a Lifetime
     })) satisfies TransactionMessageWithBlockhashLifetime;
 
@@ -39,10 +40,10 @@ async () => {
 
     const txSignable = (await buildCreateTokenTransaction({
       feePayer: signer,
-      version: "legacy",
-      mint,
-      metadata,
       latestBlockhash,
+      metadata,
+      mint,
+      version: "legacy",
     })) satisfies BaseTransactionMessage<"legacy"> & TransactionMessageWithBlockhashLifetime;
 
     // Should be a signable transaction
@@ -53,16 +54,16 @@ async () => {
   {
     (await buildCreateTokenTransaction({
       feePayer: signer,
-      version: 0,
-      mint,
       metadata,
+      mint,
+      version: 0,
     })) satisfies BaseTransactionMessage<0>;
 
     const txNotSignable = (await buildCreateTokenTransaction({
       feePayer: signer,
-      version: 0,
-      mint,
       metadata,
+      mint,
+      version: 0,
       // @ts-expect-error Should not have a Lifetime
     })) satisfies TransactionMessageWithBlockhashLifetime;
 
@@ -71,10 +72,10 @@ async () => {
 
     const txSignable = (await buildCreateTokenTransaction({
       feePayer: signer,
-      version: 0,
-      mint,
-      metadata,
       latestBlockhash,
+      metadata,
+      mint,
+      version: 0,
     })) satisfies BaseTransactionMessage<0> & TransactionMessageWithBlockhashLifetime;
 
     // Should be a signable transaction

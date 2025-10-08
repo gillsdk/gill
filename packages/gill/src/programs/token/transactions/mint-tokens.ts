@@ -1,10 +1,11 @@
 import type {
   Address,
-  TransactionMessageWithFeePayer,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithFeePayer,
   TransactionSigner,
   TransactionVersion,
 } from "@solana/kit";
+
 import { checkedAddress, checkedTransactionSigner, createTransaction } from "../../../core";
 import type { FullTransaction, Simplify } from "../../../types";
 import { checkedTokenProgramAddress, getAssociatedTokenAccountAddress } from "../addresses";
@@ -53,7 +54,7 @@ export async function buildMintTokensTransaction<
   TVersion extends TransactionVersion = "legacy",
   TFeePayer extends TransactionSigner = TransactionSigner,
 >(
-  args: TransactionBuilderInput<TVersion, TFeePayer> & GetCreateTokenTransactionInput,
+  args: GetCreateTokenTransactionInput & TransactionBuilderInput<TVersion, TFeePayer>,
 ): Promise<FullTransaction<TVersion, TransactionMessageWithFeePayer>>;
 export async function buildMintTokensTransaction<
   TVersion extends TransactionVersion = "legacy",
@@ -61,13 +62,13 @@ export async function buildMintTokensTransaction<
   TLifetimeConstraint extends
     TransactionMessageWithBlockhashLifetime["lifetimeConstraint"] = TransactionMessageWithBlockhashLifetime["lifetimeConstraint"],
 >(
-  args: TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint> & GetCreateTokenTransactionInput,
+  args: GetCreateTokenTransactionInput & TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint>,
 ): Promise<FullTransaction<TVersion, TransactionMessageWithFeePayer, TransactionMessageWithBlockhashLifetime>>;
 export async function buildMintTokensTransaction<
   TVersion extends TransactionVersion,
   TFeePayer extends TransactionSigner,
   TLifetimeConstraint extends TransactionMessageWithBlockhashLifetime["lifetimeConstraint"],
->(args: TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint> & GetCreateTokenTransactionInput) {
+>(args: GetCreateTokenTransactionInput & TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint>) {
   args.tokenProgram = checkedTokenProgramAddress(args.tokenProgram);
   args.feePayer = checkedTransactionSigner(args.feePayer);
   args.mint = checkedAddress(args.mint);
@@ -94,22 +95,22 @@ export async function buildMintTokensTransaction<
 
   return createTransaction(
     (({ feePayer, version, computeUnitLimit, computeUnitPrice, latestBlockhash }: typeof args) => ({
-      feePayer,
-      version: version || "legacy",
       computeUnitLimit,
       computeUnitPrice,
-      latestBlockhash,
+      feePayer,
       instructions: getMintTokensInstructions(
         (({ tokenProgram, feePayer, mint, ata, mintAuthority, amount, destination }: typeof args) => ({
-          tokenProgram,
+          amount,
+          ata: ata as Address,
+          destination,
           feePayer,
           mint,
           mintAuthority,
-          ata: ata as Address,
-          amount,
-          destination,
+          tokenProgram,
         }))(args),
       ),
+      latestBlockhash,
+      version: version || "legacy",
     }))(args),
   );
 }

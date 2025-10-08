@@ -20,20 +20,21 @@ import {
   TransactionWithBlockhashLifetime,
   TransactionWithDurableNonceLifetime,
 } from "@solana/kit";
+
 import { createTransaction } from "../core";
 import { sendAndConfirmTransactionWithSignersFactory } from "../core/send-and-confirm-transaction-with-signers";
 
 const rpc = null as unknown as Rpc<
-  GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi
+  GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi
 >;
 const rpcDevnet = null as unknown as RpcDevnet<
-  GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi
+  GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi
 >;
 const rpcTestnet = null as unknown as RpcTestnet<
-  GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi
+  GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi
 >;
 const rpcMainnet = null as unknown as RpcMainnet<
-  GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi
+  GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi
 >;
 
 const rpcSubscriptions = null as unknown as RpcSubscriptions<SignatureNotificationsApi & SlotNotificationsApi>;
@@ -106,16 +107,16 @@ const latestBlockhash = "" as unknown as ReturnType<GetLatestBlockhashApi["getLa
     // Should accept a legacy transaction, with or without a latest blockhash
     {
       const transactionWithoutLatestBlockhash = createTransaction({
-        version: "legacy",
         feePayer: signer,
         instructions: [instruction],
+        version: "legacy",
       });
 
       const transactionWithLatestBlockhash = createTransaction({
-        version: "legacy",
         feePayer: signer,
         instructions: [instruction],
         latestBlockhash,
+        version: "legacy",
       });
 
       // Should accept a signable transaction WITHOUT the latest blockhash
@@ -128,16 +129,16 @@ const latestBlockhash = "" as unknown as ReturnType<GetLatestBlockhashApi["getLa
     // Should accept a versioned transaction, with or without a latest blockhash
     {
       const transactionWithoutLatestBlockhash = createTransaction({
-        version: 0,
         feePayer: signer,
         instructions: [instruction],
+        version: 0,
       });
 
       const transactionWithLatestBlockhash = createTransaction({
-        version: 0,
         feePayer: signer,
         instructions: [instruction],
         latestBlockhash,
+        version: 0,
       });
 
       // Should accept a signable transaction WITHOUT the latest blockhash

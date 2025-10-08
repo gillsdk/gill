@@ -7,27 +7,36 @@
  */
 
 import {
+  type Address,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getAddressDecoder,
   getAddressEncoder,
   getBooleanDecoder,
   getBooleanEncoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
+  type GetDiscriminatedUnionVariant,
+  type GetDiscriminatedUnionVariantContent,
   getOptionDecoder,
   getOptionEncoder,
   getStructDecoder,
   getStructEncoder,
-  type Address,
-  type Codec,
-  type Decoder,
-  type Encoder,
-  type GetDiscriminatedUnionVariant,
-  type GetDiscriminatedUnionVariantContent,
   type Option,
   type OptionOrNullable,
 } from '@solana/kit';
+
 import {
+  type AuthorizationData,
+  type AuthorizationDataArgs,
+  type CollectionDetailsToggle,
+  type CollectionDetailsToggleArgs,
+  type CollectionToggle,
+  type CollectionToggleArgs,
+  type Data,
+  type DataArgs,
   getAuthorizationDataDecoder,
   getAuthorizationDataEncoder,
   getCollectionDetailsToggleDecoder,
@@ -42,14 +51,6 @@ import {
   getTokenStandardEncoder,
   getUsesToggleDecoder,
   getUsesToggleEncoder,
-  type AuthorizationData,
-  type AuthorizationDataArgs,
-  type CollectionDetailsToggle,
-  type CollectionDetailsToggleArgs,
-  type CollectionToggle,
-  type CollectionToggleArgs,
-  type Data,
-  type DataArgs,
   type RuleSetToggle,
   type RuleSetToggleArgs,
   type TokenStandard,
@@ -59,133 +60,117 @@ import {
 } from '.';
 
 export type UpdateArgs =
-  | {
-      __kind: 'V1';
-      newUpdateAuthority: Option<Address>;
-      data: Option<Data>;
-      primarySaleHappened: Option<boolean>;
-      isMutable: Option<boolean>;
-      collection: CollectionToggle;
-      collectionDetails: CollectionDetailsToggle;
-      uses: UsesToggle;
-      ruleSet: RuleSetToggle;
-      authorizationData: Option<AuthorizationData>;
-    }
-  | {
-      __kind: 'AsUpdateAuthorityV2';
-      newUpdateAuthority: Option<Address>;
-      data: Option<Data>;
-      primarySaleHappened: Option<boolean>;
-      isMutable: Option<boolean>;
-      collection: CollectionToggle;
-      collectionDetails: CollectionDetailsToggle;
-      uses: UsesToggle;
-      ruleSet: RuleSetToggle;
-      tokenStandard: Option<TokenStandard>;
-      authorizationData: Option<AuthorizationData>;
-    }
-  | {
+  {
       __kind: 'AsAuthorityItemDelegateV2';
+      authorizationData: Option<AuthorizationData>;
+      isMutable: Option<boolean>;
       newUpdateAuthority: Option<Address>;
       primarySaleHappened: Option<boolean>;
-      isMutable: Option<boolean>;
       tokenStandard: Option<TokenStandard>;
-      authorizationData: Option<AuthorizationData>;
-    }
-  | {
+    } | {
       __kind: 'AsCollectionDelegateV2';
+      authorizationData: Option<AuthorizationData>;
       collection: CollectionToggle;
-      authorizationData: Option<AuthorizationData>;
-    }
-  | {
-      __kind: 'AsDataDelegateV2';
-      data: Option<Data>;
-      authorizationData: Option<AuthorizationData>;
-    }
-  | {
-      __kind: 'AsProgrammableConfigDelegateV2';
-      ruleSet: RuleSetToggle;
-      authorizationData: Option<AuthorizationData>;
-    }
-  | {
-      __kind: 'AsDataItemDelegateV2';
-      data: Option<Data>;
-      authorizationData: Option<AuthorizationData>;
-    }
-  | {
+    } | {
       __kind: 'AsCollectionItemDelegateV2';
+      authorizationData: Option<AuthorizationData>;
       collection: CollectionToggle;
+    } | {
+      __kind: 'AsDataDelegateV2';
       authorizationData: Option<AuthorizationData>;
-    }
-  | {
-      __kind: 'AsProgrammableConfigItemDelegateV2';
+      data: Option<Data>;
+    } | {
+      __kind: 'AsDataItemDelegateV2';
+      authorizationData: Option<AuthorizationData>;
+      data: Option<Data>;
+    } | {
+      __kind: 'AsProgrammableConfigDelegateV2';
+      authorizationData: Option<AuthorizationData>;
       ruleSet: RuleSetToggle;
+    } | {
+      __kind: 'AsProgrammableConfigItemDelegateV2';
       authorizationData: Option<AuthorizationData>;
+      ruleSet: RuleSetToggle;
+    } | {
+      __kind: 'AsUpdateAuthorityV2';
+      authorizationData: Option<AuthorizationData>;
+      collection: CollectionToggle;
+      collectionDetails: CollectionDetailsToggle;
+      data: Option<Data>;
+      isMutable: Option<boolean>;
+      newUpdateAuthority: Option<Address>;
+      primarySaleHappened: Option<boolean>;
+      ruleSet: RuleSetToggle;
+      tokenStandard: Option<TokenStandard>;
+      uses: UsesToggle;
+    } | {
+      __kind: 'V1';
+      authorizationData: Option<AuthorizationData>;
+      collection: CollectionToggle;
+      collectionDetails: CollectionDetailsToggle;
+      data: Option<Data>;
+      isMutable: Option<boolean>;
+      newUpdateAuthority: Option<Address>;
+      primarySaleHappened: Option<boolean>;
+      ruleSet: RuleSetToggle;
+      uses: UsesToggle;
     };
 
 export type UpdateArgsArgs =
-  | {
-      __kind: 'V1';
-      newUpdateAuthority: OptionOrNullable<Address>;
-      data: OptionOrNullable<DataArgs>;
-      primarySaleHappened: OptionOrNullable<boolean>;
-      isMutable: OptionOrNullable<boolean>;
-      collection: CollectionToggleArgs;
-      collectionDetails: CollectionDetailsToggleArgs;
-      uses: UsesToggleArgs;
-      ruleSet: RuleSetToggleArgs;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'AsUpdateAuthorityV2';
-      newUpdateAuthority: OptionOrNullable<Address>;
-      data: OptionOrNullable<DataArgs>;
-      primarySaleHappened: OptionOrNullable<boolean>;
-      isMutable: OptionOrNullable<boolean>;
-      collection: CollectionToggleArgs;
-      collectionDetails: CollectionDetailsToggleArgs;
-      uses: UsesToggleArgs;
-      ruleSet: RuleSetToggleArgs;
-      tokenStandard: OptionOrNullable<TokenStandardArgs>;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
+  {
       __kind: 'AsAuthorityItemDelegateV2';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+      isMutable: OptionOrNullable<boolean>;
       newUpdateAuthority: OptionOrNullable<Address>;
       primarySaleHappened: OptionOrNullable<boolean>;
-      isMutable: OptionOrNullable<boolean>;
       tokenStandard: OptionOrNullable<TokenStandardArgs>;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
+    } | {
       __kind: 'AsCollectionDelegateV2';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
       collection: CollectionToggleArgs;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'AsDataDelegateV2';
-      data: OptionOrNullable<DataArgs>;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'AsProgrammableConfigDelegateV2';
-      ruleSet: RuleSetToggleArgs;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'AsDataItemDelegateV2';
-      data: OptionOrNullable<DataArgs>;
-      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
+    } | {
       __kind: 'AsCollectionItemDelegateV2';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
       collection: CollectionToggleArgs;
+    } | {
+      __kind: 'AsDataDelegateV2';
       authorizationData: OptionOrNullable<AuthorizationDataArgs>;
-    }
-  | {
-      __kind: 'AsProgrammableConfigItemDelegateV2';
+      data: OptionOrNullable<DataArgs>;
+    } | {
+      __kind: 'AsDataItemDelegateV2';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+      data: OptionOrNullable<DataArgs>;
+    } | {
+      __kind: 'AsProgrammableConfigDelegateV2';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
       ruleSet: RuleSetToggleArgs;
+    } | {
+      __kind: 'AsProgrammableConfigItemDelegateV2';
       authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+      ruleSet: RuleSetToggleArgs;
+    } | {
+      __kind: 'AsUpdateAuthorityV2';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+      collection: CollectionToggleArgs;
+      collectionDetails: CollectionDetailsToggleArgs;
+      data: OptionOrNullable<DataArgs>;
+      isMutable: OptionOrNullable<boolean>;
+      newUpdateAuthority: OptionOrNullable<Address>;
+      primarySaleHappened: OptionOrNullable<boolean>;
+      ruleSet: RuleSetToggleArgs;
+      tokenStandard: OptionOrNullable<TokenStandardArgs>;
+      uses: UsesToggleArgs;
+    } | {
+      __kind: 'V1';
+      authorizationData: OptionOrNullable<AuthorizationDataArgs>;
+      collection: CollectionToggleArgs;
+      collectionDetails: CollectionDetailsToggleArgs;
+      data: OptionOrNullable<DataArgs>;
+      isMutable: OptionOrNullable<boolean>;
+      newUpdateAuthority: OptionOrNullable<Address>;
+      primarySaleHappened: OptionOrNullable<boolean>;
+      ruleSet: RuleSetToggleArgs;
+      uses: UsesToggleArgs;
     };
 
 export function getUpdateArgsEncoder(): Encoder<UpdateArgsArgs> {

@@ -4,7 +4,7 @@ import type { GetExplorerLinkArgs } from "../types";
  * Craft a Solana Explorer link on any cluster
  */
 export function getExplorerLink(props: GetExplorerLinkArgs = {}): string {
-  let url = new URL("https://explorer.solana.com");
+  const url = new URL("https://explorer.solana.com");
 
   // default to mainnet / mainnet-beta
   if (!props.cluster || props.cluster == "mainnet") props.cluster = "mainnet-beta";

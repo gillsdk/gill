@@ -7,17 +7,17 @@
  */
 
 import {
+  type Address,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getAddressDecoder,
   getAddressEncoder,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
-  type Address,
-  type Codec,
-  type Decoder,
-  type Encoder,
 } from '@solana/kit';
 
 export type Reservation = {
@@ -28,8 +28,8 @@ export type Reservation = {
 
 export type ReservationArgs = {
   address: Address;
-  spotsRemaining: number | bigint;
-  totalSpots: number | bigint;
+  spotsRemaining: bigint | number;
+  totalSpots: bigint | number;
 };
 
 export function getReservationEncoder(): Encoder<ReservationArgs> {

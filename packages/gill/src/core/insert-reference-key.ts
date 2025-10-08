@@ -1,5 +1,6 @@
 import type { Address, BaseTransactionMessage } from "@solana/kit";
 import { AccountRole, SOLANA_ERROR__INSTRUCTION_ERROR__GENERIC_ERROR, SolanaError } from "@solana/kit";
+
 import type { getOldestSignatureForAddress } from "./get-oldest-signature";
 
 /**
@@ -33,8 +34,8 @@ export function insertReferenceKeysToTransactionMessage<TTransaction extends Bas
 
   if (transaction.instructions.length == 0 || nonMemoIndex == -1) {
     throw new SolanaError(SOLANA_ERROR__INSTRUCTION_ERROR__GENERIC_ERROR, {
-      index: transaction.instructions.length || nonMemoIndex,
       cause: "At least one non-memo instruction is required",
+      index: transaction.instructions.length || nonMemoIndex,
     });
   }
 

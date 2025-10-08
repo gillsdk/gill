@@ -1,5 +1,3 @@
-import type { Mint, Token } from "@solana-program/token-2022";
-import { decodeToken, fetchMint } from "@solana-program/token-2022";
 import type {
   Account,
   Address,
@@ -10,13 +8,16 @@ import type {
   Rpc,
 } from "@solana/kit";
 import { none, parseBase64RpcAccount, some } from "@solana/kit";
+import type { Mint, Token } from "@solana-program/token-2022";
+import { decodeToken, fetchMint } from "@solana-program/token-2022";
+
 import { fetchTokenAccounts, FetchTokenAccountsConfig } from "../../programs";
 
 // Mock the dependencies
 jest.mock("@solana-program/token-2022", () => ({
   ...jest.requireActual("@solana-program/token-2022"),
-  fetchMint: jest.fn(),
   decodeToken: jest.fn(),
+  fetchMint: jest.fn(),
 }));
 jest.mock("@solana/kit", () => ({
   ...jest.requireActual("@solana/kit"),
@@ -24,7 +25,7 @@ jest.mock("@solana/kit", () => ({
 }));
 
 describe("fetchTokenAccounts", () => {
-  let mockRpc: jest.Mocked<Rpc<GetTokenAccountsByOwnerApi & GetAccountInfoApi>>;
+  let mockRpc: jest.Mocked<Rpc<GetAccountInfoApi & GetTokenAccountsByOwnerApi>>;
   let mockSend: jest.MockedFunction<any>;
   let mockGetTokenAccountsByOwner: jest.MockedFunction<any>;
   let mockGetAccountInfo: jest.MockedFunction<any>;
@@ -38,22 +39,22 @@ describe("fetchTokenAccounts", () => {
     address: "TokenAccount1" as Address,
     data: "parsedData" as any,
     executable: false,
-    lamports: 2039280n as Lamports,
     exists: true,
-    space: 0n,
+    lamports: 2039280n as Lamports,
     programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
+    space: 0n,
   };
 
   const mockRpcResponse = {
     value: [
       {
-        pubkey: "TokenAccount1" as Address,
         account: {
           data: "base64EncodedData",
           executable: false,
           lamports: 2039280,
           programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
         },
+        pubkey: "TokenAccount1" as Address,
       },
     ],
   };
@@ -61,12 +62,12 @@ describe("fetchTokenAccounts", () => {
   const mockMintAccount: Account<Mint> = {
     address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" as Address,
     data: {
+      decimals: 6,
+      extensions: none(),
+      freezeAuthority: none(),
+      isInitialized: true,
       mintAuthority: some("authority" as Address),
       supply: 1000000n,
-      decimals: 6,
-      isInitialized: true,
-      freezeAuthority: none(),
-      extensions: none(),
     },
     executable: false,
     lamports: 1461600n as Lamports,
@@ -77,21 +78,21 @@ describe("fetchTokenAccounts", () => {
   const mockTokenAccount: Account<Token> & { exists: true } = {
     address: "TokenAccount1" as Address,
     data: {
+      amount: 500000n,
+      closeAuthority: none(),
+      delegate: none(),
+      delegatedAmount: 0n,
+      extensions: none(),
+      isNative: none(),
       mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" as Address,
       owner: "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk" as Address,
-      amount: 500000n,
-      delegate: none(),
       state: 1,
-      isNative: none(),
-      delegatedAmount: 0n,
-      closeAuthority: none(),
-      extensions: none(),
     },
     executable: false,
+    exists: true,
     lamports: 2039280n as Lamports,
     programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
     space: 0n,
-    exists: true,
   };
 
   const ownerAddress = "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk" as Address;
@@ -103,8 +104,8 @@ describe("fetchTokenAccounts", () => {
     mockGetTokenAccountsByOwner = jest.fn().mockReturnValue({ send: mockSend });
     mockGetAccountInfo = jest.fn();
     mockRpc = {
-      getTokenAccountsByOwner: mockGetTokenAccountsByOwner,
       getAccountInfo: mockGetAccountInfo,
+      getTokenAccountsByOwner: mockGetTokenAccountsByOwner,
     } as any;
   });
 
@@ -126,9 +127,9 @@ describe("fetchTokenAccounts", () => {
       { encoding: "base64" },
     );
     expect(result).toEqual({
+      accounts: [mockTokenAccount],
       mint: mockMintAccount,
       totalBalance: 500000n,
-      accounts: [mockTokenAccount],
     });
   });
 
@@ -146,9 +147,9 @@ describe("fetchTokenAccounts", () => {
       { encoding: "base64" },
     );
     expect(result).toEqual({
+      accounts: [mockTokenAccount],
       mint: mockMintAccount,
       totalBalance: 500000n,
-      accounts: [mockTokenAccount],
     });
   });
 
@@ -162,22 +163,22 @@ describe("fetchTokenAccounts", () => {
     const mockRpcResponse = {
       value: [
         {
-          pubkey: "TokenAccount1" as Address,
           account: {
             data: "base64EncodedData1",
             executable: false,
             lamports: 2039280,
             programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
           },
+          pubkey: "TokenAccount1" as Address,
         },
         {
-          pubkey: "TokenAccount2" as Address,
           account: {
             data: "base64EncodedData2",
             executable: false,
             lamports: 2039280,
             programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
           },
+          pubkey: "TokenAccount2" as Address,
         },
       ],
     };
@@ -185,22 +186,22 @@ describe("fetchTokenAccounts", () => {
     mockSend.mockResolvedValue(mockRpcResponse);
     mockParseBase64RpcAccount
       .mockReturnValueOnce({
-        address: "TokenAccount1" as Address,
         account: {
           data: "parsedData1",
           executable: false,
           lamports: 2039280n,
           programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
         },
+        address: "TokenAccount1" as Address,
       } as any)
       .mockReturnValueOnce({
-        address: "TokenAccount2" as Address,
         account: {
           data: "parsedData2",
           executable: false,
           lamports: 2039280n,
           programAddress: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" as Address,
         },
+        address: "TokenAccount2" as Address,
       } as any);
 
     mockDecodeToken.mockReturnValueOnce(mockTokenAccount).mockReturnValueOnce(mockTokenAccount2);
@@ -226,7 +227,7 @@ describe("fetchTokenAccounts", () => {
     expect(mockRpc.getTokenAccountsByOwner).toHaveBeenCalledWith(
       ownerAddress,
       { mint: mockMintAccount.address },
-      { commitment, minContextSlot: 123456n, encoding: "base64" },
+      { commitment, encoding: "base64", minContextSlot: 123456n },
     );
   });
 
@@ -257,9 +258,9 @@ describe("fetchTokenAccounts", () => {
     const result = await fetchTokenAccounts(mockRpc, mockMintAccount, ownerAddress);
 
     expect(result).toEqual({
+      accounts: [],
       mint: mockMintAccount,
       totalBalance: 0n,
-      accounts: [],
     });
   });
 });

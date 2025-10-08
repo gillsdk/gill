@@ -7,13 +7,14 @@
  */
 
 import {
-  combineCodec,
-  getStructDecoder,
-  getStructEncoder,
   type Codec,
+  combineCodec,
   type Decoder,
   type Encoder,
+  getStructDecoder,
+  getStructEncoder,
 } from '@solana/kit';
+
 import {
   getPayloadDecoder,
   getPayloadEncoder,

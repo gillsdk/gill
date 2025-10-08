@@ -1,9 +1,10 @@
+import { type Address, generateKeyPairSigner, type KeyPairSigner } from "@solana/kit";
 import {
   getCreateAssociatedTokenIdempotentInstruction,
   getTransferInstruction,
   TOKEN_2022_PROGRAM_ADDRESS,
 } from "@solana-program/token-2022";
-import { generateKeyPairSigner, type Address, type KeyPairSigner } from "@solana/kit";
+
 import {
   getTransferTokensInstructions,
   GetTransferTokensInstructionsArgs,
@@ -54,13 +55,13 @@ describe("getTransferTokensInstructions", () => {
 
   it("should create instructions with default token program", () => {
     const args: GetTransferTokensInstructionsArgs = {
-      feePayer: mockPayer,
-      mint: mockMint.address,
       amount: mockAmount,
       authority: mockAuthority,
-      sourceAta: mockSourceAta,
       destination: mockDestination.address,
       destinationAta: mockDestinationAta,
+      feePayer: mockPayer,
+      mint: mockMint.address,
+      sourceAta: mockSourceAta,
     };
 
     const instructions = getTransferTokensInstructions(args);
@@ -68,19 +69,19 @@ describe("getTransferTokensInstructions", () => {
     expect(instructions).toHaveLength(2);
 
     expect(getCreateAssociatedTokenIdempotentInstruction).toHaveBeenCalledWith({
-      owner: mockDestination.address,
-      mint: mockMint.address,
       ata: mockDestinationAta,
+      mint: mockMint.address,
+      owner: mockDestination.address,
       payer: mockPayer,
       tokenProgram: TOKEN_PROGRAM_ADDRESS,
     });
 
     expect(getTransferInstruction).toHaveBeenCalledWith(
       {
-        authority: mockAuthority,
-        source: mockSourceAta,
         amount: mockAmount,
+        authority: mockAuthority,
         destination: mockDestinationAta,
+        source: mockSourceAta,
       },
       {
         programAddress: TOKEN_PROGRAM_ADDRESS,
@@ -90,13 +91,13 @@ describe("getTransferTokensInstructions", () => {
 
   it("should create instructions with Token-2022 program", () => {
     const args: GetTransferTokensInstructionsArgs = {
-      feePayer: mockPayer,
-      mint: mockMint.address,
-      authority: mockAuthority,
-      sourceAta: mockSourceAta,
       amount: mockAmount,
+      authority: mockAuthority,
       destination: mockDestination.address,
       destinationAta: mockDestinationAta,
+      feePayer: mockPayer,
+      mint: mockMint.address,
+      sourceAta: mockSourceAta,
       tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
     };
 
@@ -105,19 +106,19 @@ describe("getTransferTokensInstructions", () => {
     expect(instructions).toHaveLength(2);
 
     expect(getCreateAssociatedTokenIdempotentInstruction).toHaveBeenCalledWith({
-      owner: mockDestination.address,
-      mint: mockMint.address,
       ata: mockDestinationAta,
+      mint: mockMint.address,
+      owner: mockDestination.address,
       payer: mockPayer,
       tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
     });
 
     expect(getTransferInstruction).toHaveBeenCalledWith(
       {
-        authority: mockAuthority,
-        source: mockSourceAta,
         amount: mockAmount,
+        authority: mockAuthority,
         destination: mockDestinationAta,
+        source: mockSourceAta,
       },
       {
         programAddress: TOKEN_2022_PROGRAM_ADDRESS,
@@ -127,12 +128,12 @@ describe("getTransferTokensInstructions", () => {
 
   it("should accept Address type for mint, authority, and destination", () => {
     const args: GetTransferTokensInstructionsArgs = {
-      feePayer: mockPayer,
-      mint: mockMint.address,
-      authority: mockAuthority.address,
       amount: mockAmount,
+      authority: mockAuthority.address,
       destination: mockDestination.address,
       destinationAta: mockDestinationAta,
+      feePayer: mockPayer,
+      mint: mockMint.address,
       sourceAta: mockSourceAta,
     };
 
@@ -141,19 +142,19 @@ describe("getTransferTokensInstructions", () => {
     expect(instructions).toHaveLength(2);
 
     expect(getCreateAssociatedTokenIdempotentInstruction).toHaveBeenCalledWith({
-      owner: args.destination,
-      mint: args.mint,
       ata: mockDestinationAta,
+      mint: args.mint,
+      owner: args.destination,
       payer: mockPayer,
       tokenProgram: TOKEN_PROGRAM_ADDRESS,
     });
 
     expect(getTransferInstruction).toHaveBeenCalledWith(
       {
-        authority: mockAuthority.address,
-        source: mockSourceAta,
         amount: mockAmount,
+        authority: mockAuthority.address,
         destination: mockDestinationAta,
+        source: mockSourceAta,
       },
       {
         programAddress: TOKEN_PROGRAM_ADDRESS,
@@ -163,12 +164,12 @@ describe("getTransferTokensInstructions", () => {
 
   it("should accept number type for amount", () => {
     const args: GetTransferTokensInstructionsArgs = {
-      feePayer: mockPayer,
-      mint: mockMint.address,
-      authority: mockAuthority,
       amount: 1000,
+      authority: mockAuthority,
       destination: mockDestination.address,
       destinationAta: mockDestinationAta,
+      feePayer: mockPayer,
+      mint: mockMint.address,
       sourceAta: mockSourceAta,
     };
 
@@ -178,10 +179,10 @@ describe("getTransferTokensInstructions", () => {
 
     expect(getTransferInstruction).toHaveBeenCalledWith(
       {
-        authority: mockAuthority,
-        source: mockSourceAta,
         amount: 1000,
+        authority: mockAuthority,
         destination: mockDestinationAta,
+        source: mockSourceAta,
       },
       {
         programAddress: TOKEN_PROGRAM_ADDRESS,
@@ -191,14 +192,14 @@ describe("getTransferTokensInstructions", () => {
 
   it("should throw error for unsupported token program", () => {
     const args: GetTransferTokensInstructionsArgs = {
-      feePayer: mockPayer,
-      mint: mockMint.address,
-      authority: mockAuthority,
       amount: mockAmount,
-      tokenProgram: "UnsupportedProgramId" as Address,
+      authority: mockAuthority,
       destination: mockDestination.address,
       destinationAta: mockDestinationAta,
+      feePayer: mockPayer,
+      mint: mockMint.address,
       sourceAta: mockSourceAta,
+      tokenProgram: "UnsupportedProgramId" as Address,
     };
 
     expect(() => getTransferTokensInstructions(args)).toThrow(

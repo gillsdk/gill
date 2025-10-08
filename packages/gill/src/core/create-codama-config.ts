@@ -37,10 +37,10 @@ export function createCodamaConfig({
   clientRust,
   dependencyMap = GILL_EXTERNAL_MODULE_MAP,
 }: {
-  idl: string;
   clientJs: string;
   clientRust?: string;
   dependencyMap?: Record<string, string>;
+  idl: string;
 }) {
   return {
     idl,
@@ -51,7 +51,6 @@ export function createCodamaConfig({
       },
       ...(clientRust && {
         rust: {
-          from: "@codama/renderers-rust",
           args: [
             clientRust,
             {
@@ -59,6 +58,7 @@ export function createCodamaConfig({
               formatCode: true,
             },
           ],
+          from: "@codama/renderers-rust",
         },
       }),
     },

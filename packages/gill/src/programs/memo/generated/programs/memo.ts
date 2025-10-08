@@ -7,6 +7,7 @@
  */
 
 import { type Address } from "@solana/kit";
+
 import { type ParsedAddMemoInstruction } from "../instructions";
 
 export const MEMO_PROGRAM_ADDRESS =
@@ -16,6 +17,6 @@ export enum MemoInstruction {
   AddMemo,
 }
 
-export type ParsedMemoInstruction<TProgram extends string = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"> = {
+export type ParsedMemoInstruction<TProgram extends string = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"> = ParsedAddMemoInstruction<TProgram> & {
   instructionType: MemoInstruction.AddMemo;
-} & ParsedAddMemoInstruction<TProgram>;
+};

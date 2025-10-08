@@ -1,10 +1,11 @@
 import type {
   Address,
-  TransactionMessageWithFeePayer,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithFeePayer,
   TransactionSigner,
   TransactionVersion,
 } from "@solana/kit";
+
 import { checkedAddress, checkedTransactionSigner, createTransaction } from "../../../core";
 import type { FullTransaction, Simplify } from "../../../types";
 import { checkedTokenProgramAddress, getAssociatedTokenAccountAddress } from "../addresses";
@@ -12,8 +13,8 @@ import { getTransferTokensInstructions, type GetTransferTokensInstructionsArgs }
 import type { TransactionBuilderInput } from "./types";
 
 type GetTransferTokensTransactionInput = Simplify<
-  Omit<GetTransferTokensInstructionsArgs, "sourceAta" | "destinationAta"> &
-    Partial<Pick<GetTransferTokensInstructionsArgs, "sourceAta" | "destinationAta">>
+  Omit<GetTransferTokensInstructionsArgs, "destinationAta" | "sourceAta"> &
+    Partial<Pick<GetTransferTokensInstructionsArgs, "destinationAta" | "sourceAta">>
 >;
 
 /**
@@ -55,7 +56,7 @@ export async function buildTransferTokensTransaction<
   TVersion extends TransactionVersion = "legacy",
   TFeePayer extends TransactionSigner = TransactionSigner,
 >(
-  args: TransactionBuilderInput<TVersion, TFeePayer> & GetTransferTokensTransactionInput,
+  args: GetTransferTokensTransactionInput & TransactionBuilderInput<TVersion, TFeePayer>,
 ): Promise<FullTransaction<TVersion, TransactionMessageWithFeePayer>>;
 export async function buildTransferTokensTransaction<
   TVersion extends TransactionVersion = "legacy",
@@ -63,13 +64,13 @@ export async function buildTransferTokensTransaction<
   TLifetimeConstraint extends
     TransactionMessageWithBlockhashLifetime["lifetimeConstraint"] = TransactionMessageWithBlockhashLifetime["lifetimeConstraint"],
 >(
-  args: TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint> & GetTransferTokensTransactionInput,
+  args: GetTransferTokensTransactionInput & TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint>,
 ): Promise<FullTransaction<TVersion, TransactionMessageWithFeePayer, TransactionMessageWithBlockhashLifetime>>;
 export async function buildTransferTokensTransaction<
   TVersion extends TransactionVersion,
   TFeePayer extends Address | TransactionSigner,
   TLifetimeConstraint extends TransactionMessageWithBlockhashLifetime["lifetimeConstraint"],
->(args: TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint> & GetTransferTokensTransactionInput) {
+>(args: GetTransferTokensTransactionInput & TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint>) {
   args.tokenProgram = checkedTokenProgramAddress(args.tokenProgram);
   args.feePayer = checkedTransactionSigner(args.feePayer);
   args.mint = checkedAddress(args.mint);
@@ -99,11 +100,9 @@ export async function buildTransferTokensTransaction<
 
   return createTransaction(
     (({ feePayer, version, computeUnitLimit, computeUnitPrice, latestBlockhash }: typeof args) => ({
-      feePayer,
-      version: version || "legacy",
       computeUnitLimit,
       computeUnitPrice,
-      latestBlockhash,
+      feePayer,
       instructions: getTransferTokensInstructions(
         (({
           tokenProgram,
@@ -115,16 +114,18 @@ export async function buildTransferTokensTransaction<
           destinationAta,
           sourceAta,
         }: typeof args) => ({
-          tokenProgram,
-          feePayer,
-          mint,
           amount,
           authority,
           destination,
-          sourceAta: sourceAta as Address,
           destinationAta: destinationAta as Address,
+          feePayer,
+          mint,
+          sourceAta: sourceAta as Address,
+          tokenProgram,
         }))(args),
       ),
+      latestBlockhash,
+      version: version || "legacy",
     }))(args),
   );
 }

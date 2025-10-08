@@ -9,7 +9,10 @@
 import {
   addDecoderSizePrefix,
   addEncoderSizePrefix,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getMapDecoder,
   getMapEncoder,
   getStructDecoder,
@@ -18,10 +21,8 @@ import {
   getU32Encoder,
   getUtf8Decoder,
   getUtf8Encoder,
-  type Codec,
-  type Decoder,
-  type Encoder,
 } from '@solana/kit';
+
 import {
   getPayloadTypeDecoder,
   getPayloadTypeEncoder,

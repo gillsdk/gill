@@ -1,13 +1,14 @@
 import { Address, isSolanaError, Signature, SOLANA_ERROR__TRANSACTION_ERROR__UNKNOWN } from "@solana/kit";
+
 import { getOldestSignatureForAddress } from "../core";
 
 describe("getOldestSignatureForAddress", () => {
   // Sample test data
   const mockAddress = "mockAddress123" as Address;
-  const mockSignature1 = { signature: "sig1" as Signature, slot: 100, blockTime: 1000 };
-  const mockSignature2 = { signature: "sig2" as Signature, slot: 90, blockTime: 900 };
-  const mockSignature3 = { signature: "sig3" as Signature, slot: 80, blockTime: 800 };
-  const mockSignature4 = { signature: "sig4" as Signature, slot: 70, blockTime: 700 };
+  const mockSignature1 = { blockTime: 1000, signature: "sig1" as Signature, slot: 100 };
+  const mockSignature2 = { blockTime: 900, signature: "sig2" as Signature, slot: 90 };
+  const mockSignature3 = { blockTime: 800, signature: "sig3" as Signature, slot: 80 };
+  const mockSignature4 = { blockTime: 700, signature: "sig4" as Signature, slot: 70 };
 
   // Reset mocks before each test
   beforeEach(() => {
@@ -37,9 +38,9 @@ describe("getOldestSignatureForAddress", () => {
             Array(1000)
               .fill(null)
               .map((_, i) => ({
+                blockTime: 10000 - i * 10,
                 signature: `sig${i}`,
                 slot: 1000 - i,
-                blockTime: 10000 - i * 10,
               })),
           ),
         }))
@@ -90,9 +91,9 @@ describe("getOldestSignatureForAddress", () => {
             Array(1000)
               .fill(null)
               .map((_, i) => ({
+                blockTime: 10000 - i * 10,
                 signature: `sig${i}`,
                 slot: 1000 - i,
-                blockTime: 10000 - i * 10,
               })),
           ),
         }))
@@ -104,9 +105,9 @@ describe("getOldestSignatureForAddress", () => {
     const result = await getOldestSignatureForAddress(mockRpc as any, mockAddress);
 
     expect(result).toEqual({
+      blockTime: 10,
       signature: "sig999",
       slot: 1,
-      blockTime: 10,
     });
   });
 
@@ -134,10 +135,10 @@ describe("getOldestSignatureForAddress", () => {
     };
 
     const config = {
-      limit: 50,
-      before: "someSig" as Signature,
-      until: "untilSig" as Signature,
       abortSignal: new AbortController().signal,
+      before: "someSig" as Signature,
+      limit: 50,
+      until: "untilSig" as Signature,
     };
 
     await getOldestSignatureForAddress(mockRpc as any, mockAddress, config);
@@ -145,10 +146,10 @@ describe("getOldestSignatureForAddress", () => {
     expect(mockRpc.getSignaturesForAddress).toHaveBeenCalledWith(
       mockAddress,
       expect.objectContaining({
-        limit: 50,
-        before: "someSig",
-        until: "untilSig",
         abortSignal: config.abortSignal,
+        before: "someSig",
+        limit: 50,
+        until: "untilSig",
       }),
     );
   });
@@ -162,9 +163,9 @@ describe("getOldestSignatureForAddress", () => {
             Array(1000)
               .fill(null)
               .map((_, i) => ({
+                blockTime: 10000 - i * 10,
                 signature: `sig${i}`,
                 slot: 1000 - i,
-                blockTime: 10000 - i * 10,
               })),
           ),
         }))
