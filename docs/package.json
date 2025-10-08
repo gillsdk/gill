@@ -11,7 +11,9 @@
     "postinstall": "fumadocs-mdx",
     "clean": "rimraf coverage dist build node_modules .turbo .next .docs ./content/api/gill*",
     "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
-    "style:fix": "pnpm style:check --write"
+    "style:fix": "pnpm style:check --write",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src"
   },
   "engines": {
     "node": ">=20.18.0",
