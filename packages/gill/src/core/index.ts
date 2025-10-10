@@ -18,3 +18,5 @@ export * from "./send-and-confirm-transaction-with-signers";
 export * from "./simulate-transaction";
 export * from "./utils";
 export * from "./verify-signature";
+export * from "./watch-program-logs";
+
