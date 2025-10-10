@@ -127,7 +127,7 @@ export const createUnifiedWatcher = async <TRaw, TNormalized>(
 
   const closedRef = { value: false };
 
-  let pollTimer: NodeJS.Timeout | null = null;
+  let pollTimer: ReturnType<typeof setInterval> | null = null;
 
   let lastSlot: Slot = -1n;
 
