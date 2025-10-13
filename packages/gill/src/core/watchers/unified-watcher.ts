@@ -47,6 +47,29 @@ export type UnifiedWatcherOptions<TNormalized> = {
   wsConnectTimeoutMs: number;
 };
 
+/**
+ * Defines the strategy for watching a data source.
+ * This is the core logic that the unified watcher uses to subscribe to and process updates.
+ *
+ * @remarks
+ * ### Handling Solana WebSocket RPC Notifications
+ *
+ * The `subscribe` function is responsible for parsing raw WebSocket notifications and yielding
+ * data in a format the watcher can understand. For correct slot-based deduplication, the
+ * watcher expects items in the `SubscriptionItem<{ context: { slot }, value }>` format.
+ *
+ * #### 1. Directly Compatible Subscriptions
+ * The following rpc subscriptions produce a `result` payload that directly matches the `SubscriptionItem` format.
+ * The `subscribe` implementation can typically just yield `notification.params.result`.
+ * - `logsSubscribe` - `@solana/kit` `logsNotificatios`
+ * - `accountSubscribe` - `@solana/kit` `accountNotifications`
+ * - `programSubscribe` - `@solana/kit` `programNotifications`
+ * - `signatureSubscribe` - `@solana/kit` `signatureNotifications`
+ *
+ * #### 2. Adaptable Subscriptions (Requires Transformation)
+ * Non compatible subscriptions require manual transformation into the `SubscriptionItem` format.
+ *
+ */
 export type WatcherStrategy<TRaw, TNormalized> = {
   /**
    * Converts a raw WS payload into the normalized value type consumed by onUpdate.
@@ -111,6 +134,17 @@ const executePoll = async <TNormalized>(
   }
 };
 
+/**
+ * Creates a unified watcher that manages a WebSocket subscription with a polling fallback.
+ *
+ * A generic utility function that relies on the provided `WatcherStrategy` to handle the specifics
+ * of a data source. The watcher's primary role is to manage the connection lifecycle, handle
+ * retries, fall back to polling, and deduplicate updates based on an advancing slot number.
+ *
+ * @param strategy The strategy that defines how to subscribe to, poll, and normalize data.
+ * @param opts Configuration options for the watcher.
+ * @see {@link WatcherStrategy} for detailed guidance on implementation for Solana RPC subscriptions.
+ */
 export const createUnifiedWatcher = async <TRaw, TNormalized>(
   strategy: WatcherStrategy<TRaw, TNormalized>,
   opts: UnifiedWatcherOptions<TNormalized>,
