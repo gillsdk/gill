@@ -164,6 +164,37 @@ export const createUnifiedWatcher = async <TRaw, TNormalized>(
     }
   };
 
+  const handleStream = async (stream: AsyncIterable<SubscriptionItem<TRaw> | TRaw>) => {
+    for await (const item of stream) {
+      if (closedRef.value) {
+        break;
+      }
+
+      let slot: Slot;
+      let value: TRaw;
+
+      if (
+        typeof item === "object" &&
+        item !== null &&
+        "context" in item &&
+        typeof item.context === "object" &&
+        item.context !== null &&
+        "slot" in item.context
+      ) {
+        const subItem = item;
+        slot = subItem.context.slot;
+        value = subItem.value;
+      } else {
+        // No context provided by the stream; synthesize a monotonic slot.
+        lastSlot = lastSlot + 1n;
+        slot = lastSlot;
+        value = item as TRaw;
+      }
+
+      emitIfNewer(slot, strategy.normalize(value));
+    }
+  };
+
   // Main loop: attempts WS connection with retry; falls back to polling after max retries.
   const run = async () => {
     let connectAttempt = 0;
@@ -187,34 +218,7 @@ export const createUnifiedWatcher = async <TRaw, TNormalized>(
           return;
         }
 
-        for await (const item of stream) {
-          if (closedRef.value) {
-            break;
-          }
-
-          let slot: Slot;
-          let value: TRaw;
-
-          if (
-            typeof item === "object" &&
-            item !== null &&
-            "context" in item &&
-            typeof item.context === "object" &&
-            item.context !== null &&
-            "slot" in item.context
-          ) {
-            const subItem = item;
-            slot = subItem.context.slot;
-            value = subItem.value;
-          } else {
-            // No context provided by the stream; synthesize a monotonic slot.
-            lastSlot = lastSlot + 1n;
-            slot = lastSlot;
-            value = item as TRaw;
-          }
-
-          emitIfNewer(slot, strategy.normalize(value));
-        }
+        await handleStream(stream);
 
         if (closedRef.value) return;
         // If the stream ends naturally, loop to attempt reconnection again.
