@@ -31,7 +31,7 @@ type InspectTransactionResult = {
  * const txInfo = await inspectTransaction(rpc, txSignature);
  * if (txInfo?.status === "failed") { console.error(txInfo.logs); }
  */
-export default async function inspectTransaction(
+export async function inspectTransaction(
   rpc: SolanaClient["rpc"],
   transactionSignature: Signature,
 ): Promise<InspectTransactionResult | null> {

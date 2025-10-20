@@ -1,4 +1,4 @@
-import totalComputeUnits from "../txLogInspector/totalComputeUnits";
+import { totalComputeUnits } from "../txLogInspector/totalComputeUnits";
 
 describe("totalComputeUnits", () => {
   it("should return 0 for empty logs", () => {

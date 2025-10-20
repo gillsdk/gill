@@ -1,4 +1,4 @@
-import findCustomError from "../txLogInspector/findCustomError";
+import { findCustomError } from "../txLogInspector/findCustomError";
 
 describe("findCustomError", () => {
   it("should return no errors for empty logs", () => {

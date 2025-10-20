@@ -18,7 +18,7 @@ type CpiCall = {
  * const cpiCalls = listCpiCalls(tx.logs);
  * cpiCalls.forEach(call => console.log(call.programId, call.depth));
  */
-export default function listCpiCalls(logs: string[]): CpiCall[] {
+export function listCpiCalls(logs: string[]): CpiCall[] {
   if (!logs?.length) return []; // No logs -> no CPI calls
 
   const cpiCalls: CpiCall[] = [];

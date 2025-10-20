@@ -1,6 +1,6 @@
 import type { Address } from "gill";
 import type { SolanaClient } from "gill";
-import expectAccountToExist from "../matchers/expectAccountToExist";
+import { expectAccountToExist } from "../matchers/expectAccountToExist";
 
 describe("expectAccountToExist", () => {
   let mockRpc: SolanaClient["rpc"];

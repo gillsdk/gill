@@ -24,7 +24,7 @@ type AllCustomErrorsResult = {
  *   - Custom program errors: "Program xyz failed: custom program error: 0x1234"
  *   - Generic program logs: "Program log: Error: something"
  */
-export default function findCustomError(logs: string[]): AllCustomErrorsResult {
+export function findCustomError(logs: string[]): AllCustomErrorsResult {
   const errors: CustomErrorResult[] = [];
 
   if (!logs?.length) return { errors, found: false };

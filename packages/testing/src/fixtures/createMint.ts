@@ -46,22 +46,49 @@ type CreateMintResult = {
 
 /**
  * Creates a new SPL token mint.
+ *
+ * This function handles:
+ * - Generating a new mint account
+ * - Creating the mint account on-chain with the required rent-exempt balance
+ * - Initializing the mint with specified decimals, mint authority, and freeze authority
+ *
+ * @param rpc - Solana RPC client
+ * @param sendAndConfirmTransaction - Function to send and confirm signed transactions
+ * @param params - Object containing:
+ *   - payer: Optional fee payer for account creation and transaction fees. Defaults to a local keypair.
+ *   - decimals: Number of decimals for the token (default: 9)
+ *   - mintAuthority: Authority allowed to mint new tokens (defaults to payer if not provided)
+ *   - freezeAuthority: Authority allowed to freeze token accounts (defaults to payer if not provided)
+ *
+ * @returns CreateMintResult containing:
+ *   - mint: The new mint account (keypair)
+ *   - transactionSignature: Signature of the transaction that created the mint
+ *
+ * @example
+ * const { mint, transactionSignature } = await createMint(
+ *   rpc,
+ *   sendAndConfirmTransaction,
+ *   {
+ *     payer: userSigner,
+ *     decimals: 6,
+ *     mintAuthority: myMintAuthority,
+ *     freezeAuthority: myFreezeAuthority
+ *   }
+ * );
  */
-export default async function createMint(
+export async function createMint(
   rpc: SolanaClient["rpc"],
   sendAndConfirmTransaction: SendAndConfirmTransactionWithSignersFunction,
   params: CreateMintParams = {},
 ): Promise<CreateMintResult> {
   const { payer, decimals = 9, mintAuthority, freezeAuthority } = params;
 
-  // Use payer or load local keypair
   const signer = payer ?? (await loadKeypairSignerFromFile());
 
   if (decimals < 0 || decimals > 9) {
     throw new Error(`Invalid decimals value: ${decimals}. Must be between 0 and 9.`);
   }
 
-  // Use signer as default authority if not provided
   const mintAuth = mintAuthority ?? signer;
   const freezeAuth = freezeAuthority ?? signer;
 

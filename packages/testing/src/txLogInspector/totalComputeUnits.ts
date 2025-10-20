@@ -11,7 +11,7 @@
  * const totalCU = totalComputeUnits(tx.logs);
  * console.log(`Total compute units: ${totalCU}`);
  */
-export default function totalComputeUnits(logs: string[]): number {
+export function totalComputeUnits(logs: string[]): number {
   let total = 0;
 
   if (!logs?.length) return 0; // No logs, zero compute units

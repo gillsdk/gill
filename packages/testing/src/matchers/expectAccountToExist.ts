@@ -11,7 +11,7 @@ import type { SolanaClient } from "gill";
  * @example
  * await expectAccountToExist(rpc, userTokenAccount);
  */
-export default async function expectAccountToExist(rpc: SolanaClient["rpc"], address: Address): Promise<void> {
+export async function expectAccountToExist(rpc: SolanaClient["rpc"], address: Address): Promise<void> {
   const accountInfo = await rpc
     .getAccountInfo(address, {
       commitment: "confirmed",

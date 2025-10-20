@@ -1,4 +1,4 @@
-import createAndFundedKeypair from "../fixtures/createAndFundedKeypair";
+import { createAndFundedKeypair } from "../fixtures/createAndFundedKeypair";
 import { airdropFactory, generateKeyPairSigner, lamports } from "gill";
 
 jest.mock("gill", () => {

@@ -1,129 +1,251 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 import { existsSync, rmSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { createServer } from "node:net";
-import { lamports, Lamports } from "gill";
+import { join } from "node:path";
+import os, { homedir } from "node:os";
+import http from "node:http";
+import { Address, createSolanaClient, KeyPairSigner, lamports, Lamports } from "gill";
+import { loadKeypairSignerFromFile } from "gill/node";
 
-/**
- * Configuration options for starting a local Solana validator
- */
+/** ------------------ Types ------------------ */
 export interface LocalValidatorConfig {
-  /** Lamports to airdrop to the validator payer */
   airdropLamports?: Lamports;
-  /** Whether to reset local logs before starting */
   resetLogs?: boolean;
-  /** Watch for file changes and auto-restart validator */
   watch?: boolean;
+  waitTimeoutMs?: number;
+  programAddress: Address;
 }
 
-/**
- * Result object returned after starting a local validator
- */
 export interface LocalValidatorResult {
-  /** RPC endpoint URL */
-  rpc: string;
-  /** WebSocket endpoint URL */
-  ws: string;
-  /** Path to payer keypair file */
-  payer: string;
-  /** Function to stop the validator */
+  rpcUrl: string;
+  wsUrl: string;
+  payer: KeyPairSigner;
   close: () => void;
 }
 
-/**
- * Check if a TCP port is free.
- * Throws an error if port is already in use
- */
-async function checkPortFree(port: number, host = "127.0.0.1"): Promise<void> {
-  return new Promise((resolve, reject) => {
+/** ------------------ Helpers ------------------ */
+async function checkPortFree(port: number, host = "127.0.0.1") {
+  return new Promise<void>((resolve, reject) => {
     const server = createServer();
-
-    // If server fails to bind (e.g., port in use), reject
     server.once("error", (err: NodeJS.ErrnoException) => {
       if (err.code === "EADDRINUSE") {
-        reject(new Error(`❌ Port ${port} is already in use`));
-      } else {
-        reject(err);
-      }
+        reject(new Error(`❌ Port ${port} in use`));
+      } else reject(err);
     });
-
-    // If server successfully binds, close immediately and resolve
     server.once("listening", () => {
       server.close(() => resolve());
     });
-
     server.listen(port, host);
   });
 }
 
-/**
- * Starts a local Solana validator using `surfpool`.
- *
- * @param config - LocalValidatorConfig
- * @returns LocalValidatorResult
- */
-export default async function startLocalValidator({
-  airdropLamports = lamports(10_000_000_000n), // default 10 SOL
+async function isSurfpoolRunning(rpcUrl = "http://127.0.0.1:8899"): Promise<boolean> {
+  return new Promise((resolve) => {
+    const req = http.get(rpcUrl, { timeout: 1000 }, (res) => {
+      res.destroy();
+      resolve(true);
+    });
+    req.on("error", () => resolve(false));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
+}
+
+async function waitForSurfpoolReady(
+  rpcUrl: string,
+  programAddress: Address,
+  timeoutMs: number = 120_000,
+): Promise<void> {
+  const checkInterval = 5_000; // Check every 5 seconds
+  const start = Date.now();
+
+  const { rpc } = createSolanaClient({ urlOrMoniker: rpcUrl });
+
+  console.log(`⏳ Waiting for Surfpool and program ${programAddress} (timeout: ${timeoutMs}ms)...`);
+  let rpcReady = false;
+
+  while (Date.now() - start < timeoutMs) {
+    const elapsed = Date.now() - start;
+
+    try {
+      // Phase 1: Check if RPC is responding
+      if (!rpcReady) {
+        if (await isSurfpoolRunning(rpcUrl)) {
+          rpcReady = true;
+          console.log(`✓ Surfpool RPC responding (${elapsed}ms)`);
+        } else {
+          console.log(`⏳ Waiting for RPC to start... (${elapsed}ms)`);
+          await new Promise((r) => setTimeout(r, checkInterval));
+          continue;
+        }
+      }
+
+      // Phase 2: Check if program is deployed
+      const accountInfo = await rpc.getAccountInfo(programAddress).send();
+
+      if (accountInfo?.value?.executable) {
+        console.log(`✅ Program deployed and ready (took ${elapsed}ms)`);
+        return;
+      }
+      console.log(`⏳ Program deploying... (${elapsed}ms)`);
+    } catch (error) {
+      // RPC error or program doesn't exist yet
+      const msg = error instanceof Error ? error.message : "unknown error";
+      console.log(`⏳ Waiting (${elapsed}ms): ${msg}`);
+    }
+
+    await new Promise((r) => setTimeout(r, checkInterval));
+  }
+
+  throw new Error(`⏳ Timeout: Program ${programAddress} not deployed within ${timeoutMs}ms`);
+}
+
+function isWSL(): boolean {
+  if (os.platform() !== "linux") return false;
+  try {
+    const kernel = execSync("uname -r", { encoding: "utf8" });
+    return kernel.toLowerCase().includes("microsoft");
+  } catch {
+    return false;
+  }
+}
+
+function detectLinuxTerminal(): string | null {
+  const terminals = ["gnome-terminal", "konsole", "xterm", "alacritty", "kitty"];
+  for (const term of terminals) {
+    try {
+      execSync(`command -v ${term}`, { stdio: "ignore" });
+      return term;
+    } catch {}
+  }
+  return null;
+}
+
+function hasGUI(): boolean {
+  return Boolean(process.env.DISPLAY || process.env.WAYLAND_DISPLAY);
+}
+
+function detectShell(): string {
+  const shell = process.env.SHELL || process.env.ComSpec || "bash";
+  return shell.split("/").pop()?.toLowerCase() ?? "bash";
+}
+
+/** ------------------ Terminal Launcher ------------------ */
+function openCommandInNewTerminal(cmd: string) {
+  const platform = os.platform();
+  const shell = detectShell();
+  const isInWSL = isWSL();
+  const terminalApp = process.env.TERM_PROGRAM || "unknown";
+  let execCmd = "";
+
+  if (platform === "darwin") {
+    execCmd = terminalApp.includes("iTerm")
+      ? `osascript -e 'tell app "iTerm" to create window with default profile command "${cmd}"'`
+      : `osascript -e 'tell app "Terminal" to do script "${cmd}"'`;
+  } else if (isInWSL) {
+    const distro = process.env.WSL_DISTRO_NAME || "Ubuntu";
+    const cwd = process.cwd().replace(/\\/g, "/");
+    const safe = cmd.replace(/"/g, '\\"');
+    execCmd = `cmd.exe /c wt new-tab -d "${cwd}" wsl.exe -d ${distro} bash -ic "${safe}"`;
+  } else if (platform === "linux") {
+    if (hasGUI()) {
+      const term = detectLinuxTerminal();
+      if (term) execCmd = `${term} -- bash -c "${cmd}; exec ${shell}"`;
+      else {
+        console.warn("⚠️ No GUI terminal found, using tmux fallback");
+        spawn("tmux", ["new-session", "-d", `${cmd}; exec ${shell}`], {
+          detached: true,
+          stdio: "ignore",
+        }).unref();
+        return;
+      }
+    } else {
+      console.warn("⚠️ No GUI available, running in tmux/screen session");
+      try {
+        spawn("tmux", ["new-session", "-d", `${cmd}; exec ${shell}`], {
+          detached: true,
+          stdio: "ignore",
+        }).unref();
+      } catch {
+        spawn("screen", ["-dm", "bash", "-c", `${cmd}; exec ${shell}`], {
+          detached: true,
+          stdio: "ignore",
+        }).unref();
+      }
+      return;
+    }
+  } else {
+    console.error("❌ Unsupported platform:", platform);
+    return;
+  }
+
+  console.log(`🧩 Launching: ${execCmd}`);
+  spawn(execCmd, { shell: true, detached: true, stdio: "ignore" }).unref();
+}
+
+/** ------------------ Main Validator Logic ------------------ */
+export async function startLocalValidator({
+  airdropLamports = lamports(10_000_000_000n),
   resetLogs = true,
   watch = false,
+  programAddress,
 }: LocalValidatorConfig): Promise<LocalValidatorResult> {
-  if (airdropLamports <= 0n) {
-    throw new Error("airdropLamports must be > 0");
+  if (airdropLamports <= 0n) throw new Error("airdropLamports must be > 0");
+
+  const DEFAULT_KEYPAIR = join(homedir(), ".config/solana/id.json");
+  if (!existsSync(DEFAULT_KEYPAIR)) {
+    throw new Error(`Payer keypair missing: ${DEFAULT_KEYPAIR}`);
   }
 
-  // Default payer keypair location (~/.config/solana/id.json)
-  const payer = join(homedir(), ".config", "solana", "id.json");
-  if (!existsSync(payer)) {
-    throw new Error(`Default payer keypair not found at ${payer}. Run "solana-keygen new"`);
+  const rpcUrl = "http://127.0.0.1:8899";
+  const wsUrl = "ws://127.0.0.1:8900";
+
+  // ✅ Skip start if already running
+  if (await isSurfpoolRunning(rpcUrl)) {
+    console.log("⚙️ Surfpool already running — reusing existing instance.");
+    return {
+      rpcUrl,
+      wsUrl,
+      payer: await loadKeypairSignerFromFile(),
+      close: () => console.log("⚙️ Manually stop Surfpool if needed."),
+    };
   }
 
-  await checkPortFree(8899);
-  await checkPortFree(8900);
-
-  if (resetLogs && existsSync(".surfpool")) {
-    rmSync(".surfpool", { recursive: true, force: true });
+  try {
+    await checkPortFree(8899);
+    await checkPortFree(8900);
+  } catch (err) {
+    console.warn("⚠️ Ports in use, assuming Surfpool already running");
+    return {
+      rpcUrl,
+      wsUrl,
+      payer: await loadKeypairSignerFromFile(),
+      close: () => console.log("⚙️ Manually stop Surfpool if needed."),
+    };
   }
 
-  const args: string[] = ["start"];
+  if (resetLogs && existsSync(".surfpool")) rmSync(".surfpool", { recursive: true, force: true });
+
+  const payer = await loadKeypairSignerFromFile();
+
+  const args = ["start", "--airdrop-keypair-path", DEFAULT_KEYPAIR];
   if (airdropLamports) {
     args.push("--airdrop-amount", airdropLamports.toString());
   }
-  args.push("--airdrop-keypair-path", payer);
-  if (watch) {
-    args.push("--watch");
-  }
+  if (watch) args.push("--watch");
 
-  const proc: ChildProcess = spawn("surfpool", args, {
-    stdio: "inherit",
-    detached: false,
-  });
+  const cmd = `surfpool ${args.join(" ")}`;
+  openCommandInNewTerminal(cmd);
 
-  proc.on("error", (error: Error) => {
-    if (error.message.includes("ENOENT") || (error as any).code === "ENOENT") {
-      throw new Error(
-        "❌ surfpool command not found. Please install surfpool first.\n\n" +
-          "Installation options:\n" +
-          "• Visit: https://github.com/txtx/surfpool\n" +
-          "• Or check if surfpool is in your PATH",
-      );
-    }
-    throw new Error(`Failed to start surfpool: ${error.message}`);
-  });
+  console.log("🚀 Starting Surfpool...");
+  await waitForSurfpoolReady(rpcUrl, programAddress);
 
-  proc.on("close", (code) => {
-    if (code !== 0 && code !== null) {
-      console.error(`⚠️  Validator exited with code ${code}`);
-    }
-  });
   return {
-    rpc: "http://127.0.0.1:8899",
-    ws: "ws://127.0.0.1:8900",
+    rpcUrl,
+    wsUrl,
     payer,
-    close: () => {
-      if (!proc.killed) {
-        proc.kill("SIGKILL");
-      }
-    },
+    close: () => console.log("⚙️ Close manually (Ctrl+C / Cmd+C) in spawned terminal"),
   };
 }

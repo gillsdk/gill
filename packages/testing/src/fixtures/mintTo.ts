@@ -14,9 +14,15 @@ type MintToParams = {
    */
   payer?: KeyPairSigner;
   /** The mint address of the token to mint */
+  /**
+   * The mint authority that has permission to mint tokens.
+   * Defaults to the payer if not provided.
+   */
+  mintAuthority?: KeyPairSigner;
+
   mint: Address;
   /** The owner address who will receive the minted tokens */
-  toOwner: Address;
+  owner: Address;
   /** Amount of tokens to mint */
   amount: Lamports;
   /** Whether to automatically create the associated token account if it does not exist (default: true) */
@@ -37,29 +43,63 @@ type MintToResult = {
 
 /**
  * Mints tokens to a specified owner's associated token account.
+ *
+ * This function handles:
+ * - Ensuring the owner has an associated token account (ATA) for the mint
+ * - Minting the specified amount of tokens to the ATA
+ *
+ * @param rpc - Solana RPC client
+ * @param sendAndConfirmTransaction - Function to send and confirm signed transactions
+ * @param params - Object containing:
+ *   - payer: Optional fee payer for transaction and account creation. Defaults to a local keypair.
+ *   - mint: The token mint address to mint tokens from.
+ *   - mintAuthority: Authority allowed to mint tokens. Defaults to payer if not provided.
+ *   - owner: Address of the account receiving the minted tokens.
+ *   - amount: Number of tokens to mint.
+ *   - ensureAta: Whether to create the ATA if it doesn't exist (default: true).
+ *
+ * @returns MintToResult containing:
+ *   - ata: Address of the associated token account receiving the tokens
+ *   - transactionSignature: Signature of the mint transaction
+ *   - mintedAmount: Amount of tokens minted
+ *
+ * @example
+ * const { ata, transactionSignature, mintedAmount } = await mintTo(
+ *   rpc,
+ *   sendAndConfirmTransaction,
+ *   {
+ *     payer: userSigner,
+ *     mint: myMintAddress,
+ *     mintAuthority: myMintAuthority,
+ *     owner: recipientAddress,
+ *     amount: lamports(5000n),
+ *     ensureAta: true
+ *   }
+ * );
  */
-export default async function mintTo(
+export async function mintTo(
   rpc: SolanaClient["rpc"],
   sendAndConfirmTransaction: SendAndConfirmTransactionWithSignersFunction,
   params: MintToParams,
 ): Promise<MintToResult> {
-  const { mint, toOwner, amount, payer, ensureAta: shouldEnsureAta = true } = params;
+  const { mint, owner, amount, payer, mintAuthority, ensureAta: shouldEnsureAta = true } = params;
 
   if (amount <= 0n) {
     throw new Error("Amount must be greater than 0");
   }
 
   const signer = payer ?? (await loadKeypairSignerFromFile());
+  const mintAuth = mintAuthority ?? signer;
 
   let ata: Address;
   if (shouldEnsureAta) {
     const { ata: ensuredAta } = await ensureAta(rpc, sendAndConfirmTransaction, {
-      owner: toOwner,
+      owner: owner,
       mint,
     });
     ata = ensuredAta;
   } else {
-    ata = await getAssociatedTokenAccountAddress(mint, toOwner, TOKEN_PROGRAM_ADDRESS);
+    ata = await getAssociatedTokenAccountAddress(mint, owner, TOKEN_PROGRAM_ADDRESS);
   }
 
   const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
@@ -71,7 +111,7 @@ export default async function mintTo(
       getMintToInstruction(
         {
           mint,
-          mintAuthority: signer,
+          mintAuthority: mintAuth,
           token: ata,
           amount,
         },

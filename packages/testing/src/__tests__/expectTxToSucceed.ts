@@ -1,7 +1,7 @@
 import type { Signature } from "gill";
 import type { SolanaClient } from "gill";
-import expectTxToSucceed from "../matchers/expectTxToSucceed";
-import inspectTransaction from "../txLogInspector/inspectTransaction";
+import { expectTxToSucceed } from "../matchers/expectTxToSucceed";
+import { inspectTransaction } from "../txLogInspector/inspectTransaction";
 
 jest.mock("../txLogInspector/inspectTransaction");
 

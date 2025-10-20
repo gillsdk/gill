@@ -14,7 +14,7 @@ import {
   getMintSize,
   TOKEN_PROGRAM_ADDRESS,
 } from "gill/programs";
-import createMint from "../fixtures/createMint";
+import { createMint } from "../fixtures/createMint";
 
 jest.mock("gill", () => ({
   ...jest.requireActual("gill"),

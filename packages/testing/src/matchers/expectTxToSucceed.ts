@@ -1,6 +1,6 @@
 import type { Signature } from "gill";
 import type { SolanaClient } from "gill";
-import inspectTransaction from "../txLogInspector/inspectTransaction";
+import { inspectTransaction } from "../txLogInspector/inspectTransaction";
 
 /**
  * Ensures that a given transaction has succeeded.
@@ -12,10 +12,7 @@ import inspectTransaction from "../txLogInspector/inspectTransaction";
  * @example
  * await expectTxToSucceed(rpc, txSignature);
  */
-export default async function expectTxToSucceed(
-  rpc: SolanaClient["rpc"],
-  transactionSignature: Signature,
-): Promise<void> {
+export async function expectTxToSucceed(rpc: SolanaClient["rpc"], transactionSignature: Signature): Promise<void> {
   const result = await inspectTransaction(rpc, transactionSignature);
 
   if (!result) {

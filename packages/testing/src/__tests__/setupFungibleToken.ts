@@ -1,7 +1,7 @@
 import { KeyPairSigner, lamports, type Address, type SolanaClient, type Signature } from "gill";
-import createMint from "../fixtures/createMint";
-import mintTo from "../fixtures/mintTo";
-import setupFungibleToken from "../fixtures/setupFungibleToken";
+import { createMint } from "../fixtures/createMint";
+import { mintTo } from "../fixtures/mintTo";
+import { setupFungibleToken } from "../fixtures/setupFungibleToken";
 
 jest.mock("../fixtures/createMint");
 jest.mock("../fixtures/mintTo");
@@ -75,10 +75,11 @@ describe("setupFungibleToken", () => {
 
       expect(mintTo).toHaveBeenCalledWith(mockRpc, mockSendAndConfirmTransaction, {
         mint: mockMint,
-        toOwner: mockOwner,
+        owner: mockOwner,
         amount: expectedAmount,
         ensureAta: true,
         payer: mockPayer,
+        mintAuthority: mockPayer,
       });
     },
   );

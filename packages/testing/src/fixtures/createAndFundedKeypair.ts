@@ -35,7 +35,7 @@ export type FundedKeypairResult = {
  * @example
  * const { fundedKeypair, signature, balance } = await createAndFundedKeypair(rpc, rpcSubscriptions);
  */
-export default async function createAndFundedKeypair(
+export async function createAndFundedKeypair(
   rpc: SolanaClient["rpc"],
   rpcSubscriptions: SolanaClient["rpcSubscriptions"],
   lamportsAmount: Lamports = lamports(10_000_000_000n), // default = 10 SOL

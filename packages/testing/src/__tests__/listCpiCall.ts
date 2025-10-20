@@ -1,4 +1,4 @@
-import listCpiCalls from "../txLogInspector/listCpiCalls";
+import { listCpiCalls } from "../txLogInspector/listCpiCalls";
 
 describe("listCpiCalls", () => {
   it("should return empty array for empty logs", () => {

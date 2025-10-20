@@ -1,5 +1,5 @@
 import type { Address, Signature, SolanaClient } from "gill";
-import inspectTransaction from "../txLogInspector/inspectTransaction";
+import { inspectTransaction } from "../txLogInspector/inspectTransaction";
 
 describe("inspectTransaction (maintainable version)", () => {
   let mockRpc: SolanaClient["rpc"];

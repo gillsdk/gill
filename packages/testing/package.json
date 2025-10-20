@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "description": "A modern JavaScript/TypeScript testing library for Solana blockchain development",
   "scripts": {
-    "clean": "rimraf dist node_modules .turbo",
+    "clean": "rimraf coverage dist build node_modules .turbo .docs",
+    "prebuild": "rimraf dist",
     "compile:js": "tsup --config ./tsup.config.package.ts",
     "compile:typedefs": "tsc -p ./tsconfig.declarations.json",
     "prepublishOnly": "pnpm pkg delete devDependencies",
@@ -13,10 +14,11 @@
     "coverage": "pnpm test:unit:node --coverage",
     "coverage:open": "export BROWSER=brave && xdg-open ./coverage/lcov-report/index.html > /dev/null",
     "test:typecheck": "tsc --noEmit",
-    "test:unit:node": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.node.ts --rootDir . --silent",
+    "test:unit:node": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.node.ts --rootDir . ",
     "test:unit:browser": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.browser.ts --rootDir . --silent",
     "test:treeshakability:browser": "agadoo dist/index.browser.mjs",
-    "test:treeshakability:node": "agadoo dist/index.node.mjs",
+    "test:treeshakability:native": "agadoo dist/index.native.mjs",
+    "test:treeshakability:node": "agadoo dist/index.node.mjs && agadoo dist/node/index.node.mjs",
     "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
     "style:fix": "pnpm style:check --write"
   },

@@ -3,7 +3,7 @@ import { createTransaction, signTransactionMessageWithSigners, type Address, lam
 import { loadKeypairSignerFromFile } from "gill/node";
 import { getAssociatedTokenAccountAddress, getMintToInstruction, TOKEN_PROGRAM_ADDRESS } from "gill/programs";
 import { ensureAta } from "../fixtures/ensureAta";
-import mintTo from "../fixtures/mintTo";
+import { mintTo } from "../fixtures/mintTo";
 
 jest.mock("gill", () => ({
   ...jest.requireActual("gill"),
@@ -77,7 +77,7 @@ describe("mintTo", () => {
   ])("should mint tokens with payer=%p", async ({ payer, loadDefault }) => {
     const result = await mintTo(mockRpc, mockSendAndConfirmTransaction, {
       mint: mockMint,
-      toOwner: mockToOwner,
+      owner: mockToOwner,
       amount: mockAmount,
       payer,
     });
@@ -96,7 +96,7 @@ describe("mintTo", () => {
   it("should mint tokens without ensuring ATA when ensureAta is false", async () => {
     const result = await mintTo(mockRpc, mockSendAndConfirmTransaction, {
       mint: mockMint,
-      toOwner: mockToOwner,
+      owner: mockToOwner,
       amount: mockAmount,
       ensureAta: false,
     });
@@ -130,7 +130,7 @@ describe("mintTo", () => {
     await expect(
       mintTo(mockRpc, mockSendAndConfirmTransaction, {
         mint: mockMint,
-        toOwner: mockToOwner,
+        owner: mockToOwner,
         amount: mockAmount,
         ...params,
       }),
