@@ -72,15 +72,30 @@ Send data to the Solana blockchain with the gill hooks:
 
 ### Example Usage of useSendTransaction hook
 ```tsx
-const { send, signature, isPending, isError } = useSendTransaction({
-  transaction: base64EncodedTransaction,
+import { useSendTransaction } from "@gillsdk/react";
+import { createTransaction } from "gill";
+
+const { sendTransaction, isPending, data } = useSendTransaction({
   config: {
-    skipPreflight: true,
-    preflightCommitment: 'finalized'
+    encoding: "base64",
+    preflightCommitment: "confirmed",
+    skipPreflight: false,
   }
 });
-// Send the transaction
-send();
+
+async function handleClick() {
+  try {
+    // Create a new transaction
+    const transaction = createTransaction(...);
+
+    // Send the Transaction via RPC
+    const result = await sendTransaction(transaction);
+
+    console.log("Signature:", result);
+  } catch (err) {
+    console.error("❌ Error sending transaction:", err);
+  }
+}
 ````
 
 ### Wrap your React app in a context provider
