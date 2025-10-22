@@ -16,6 +16,9 @@ export * from "./const.js";
 export * from "./hooks/index.js";
 export * from "./providers.js";
 
+// Exported to resolve ambiguity between Gill and Wallet Standard.
+export { useWallets } from "./hooks/wallets.js";
+
 /**
  * Reexporting the Solana Wallet Standard functionality allows gill to
  * provide a cohesive developer experience
