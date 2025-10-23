@@ -8,6 +8,7 @@ import type {
   SolanaRpcApiMainnet,
 } from "@solana/kit";
 import { sendAndConfirmDurableNonceTransactionFactory, sendAndConfirmTransactionFactory } from "@solana/kit";
+
 import { createSolanaClient } from "../core";
 
 // [DESCRIBE] createSolanaClient
@@ -19,6 +20,7 @@ import { createSolanaClient } from "../core";
       rpcSubscriptions: mainnetRpcSubscriptions,
       simulateTransaction,
     } = createSolanaClient({
+      cluster: "mainnet",
       urlOrMoniker: "mainnet",
     });
     mainnetRpc satisfies Rpc<SolanaRpcApiMainnet>;
@@ -50,6 +52,7 @@ import { createSolanaClient } from "../core";
       rpcSubscriptions: devnetRpcSubscriptions,
       simulateTransaction,
     } = createSolanaClient({
+      cluster: "devnet",
       urlOrMoniker: "devnet",
     });
     devnetRpc satisfies Rpc<SolanaRpcApi>;
@@ -80,6 +83,7 @@ import { createSolanaClient } from "../core";
       rpcSubscriptions: testnetRpcSubscriptions,
       simulateTransaction,
     } = createSolanaClient({
+      cluster: "testnet",
       urlOrMoniker: "testnet",
     });
     testnetRpc satisfies Rpc<SolanaRpcApi>;
@@ -110,6 +114,7 @@ import { createSolanaClient } from "../core";
       rpcSubscriptions: localnetRpcSubscriptions,
       simulateTransaction,
     } = createSolanaClient({
+      cluster: "localnet",
       urlOrMoniker: "localnet",
     });
     localnetRpc satisfies Rpc<SolanaRpcApi>;
@@ -143,6 +148,7 @@ import { createSolanaClient } from "../core";
       rpcSubscriptions: genericRpcSubscriptions,
       simulateTransaction,
     } = createSolanaClient({
+      cluster: "mainnet",
       urlOrMoniker: "https://example-rpc.com",
     });
     genericRpc satisfies Rpc<SolanaRpcApi>;

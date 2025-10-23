@@ -27,9 +27,7 @@
     /* Paths */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "gill": "../../packages/gill/src",
-      "@gillsdk/react": "../../packages/react/src"
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]

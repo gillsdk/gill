@@ -9,8 +9,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      gill: path.resolve(__dirname, "../../packages/gill/src"),
-      "@gillsdk/react": path.resolve(__dirname, "../../packages/react/src"),
     },
   },
 });

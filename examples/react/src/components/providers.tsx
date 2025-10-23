@@ -2,6 +2,7 @@ import { createSolanaClient } from "gill";
 import { SolanaProvider } from "@gillsdk/react";
 
 const client = createSolanaClient({
+  cluster: "devnet",
   urlOrMoniker: "devnet",
 });
 

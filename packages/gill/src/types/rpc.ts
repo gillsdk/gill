@@ -26,6 +26,8 @@ export type ModifiedClusterUrl = DevnetUrl | GenericUrl | LocalnetUrl | MainnetU
 export type SolanaClientUrlOrMoniker = ModifiedClusterUrl | SolanaClusterMoniker | URL;
 
 export type CreateSolanaClientArgs<TClusterUrl extends SolanaClientUrlOrMoniker = GenericUrl> = {
+  /** Solana cluster moniker */
+  cluster: SolanaClusterMoniker;
   /** Configuration used to create the `rpc` client */
   rpcConfig?: Parameters<typeof createSolanaRpc>[1] & { port?: number };
   /** Configuration used to create the `rpcSubscriptions` client */
@@ -35,6 +37,8 @@ export type CreateSolanaClientArgs<TClusterUrl extends SolanaClientUrlOrMoniker 
 };
 
 export type SolanaClient<TClusterUrl extends ModifiedClusterUrl | string = string> = {
+  /** Solana cluster moniker */
+  cluster: `solana:${SolanaClusterMoniker}`;
   /** Used to make RPC calls to your RPC provider */
   rpc: RpcFromTransport<
     SolanaRpcApiFromTransport<RpcTransportFromClusterUrl<TClusterUrl>>,

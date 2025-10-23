@@ -18,6 +18,11 @@ export * from "./providers.js";
 
 // Exported to resolve ambiguity between Gill and Wallet Standard.
 export { useWallets } from "./hooks/wallets.js";
+export { useSignAndSendTransaction } from "./hooks/sign-and-send-transaction.js";
+export { useSignTransaction } from "./hooks/sign-transaction.js";
+export { useSignAllTransactions } from "./hooks/sign-all-transactions.js";
+export { useSignMessage } from "./hooks/sign-message.js";
+export { useSignIn } from "./hooks/sign-in.js";
 
 /**
  * Reexporting the Solana Wallet Standard functionality allows gill to
