@@ -11,6 +11,7 @@ export function useSolanaClient(): SolanaClient {
     // fallback data should not be reached if used within `SolanaProvider`
     // since we set the initial value. but just in case => devnet
     initialData: createSolanaClient({
+      cluster: "devnet",
       urlOrMoniker: "devnet",
     }),
     queryKey: [GILL_HOOK_CLIENT_KEY],
