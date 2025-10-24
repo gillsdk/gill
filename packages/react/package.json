@@ -20,7 +20,9 @@
     "test:treeshakability:native": "agadoo dist/index.native.mjs",
     "test:treeshakability:node": "agadoo dist/index.node.mjs",
     "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
-    "style:fix": "pnpm style:check --write"
+    "style:fix": "pnpm style:check --write",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src"
   },
   "exports": {
     "types": "./dist/index.d.ts",
@@ -66,7 +68,8 @@
   "devDependencies": {
     "@types/react": "^18",
     "@types/react-test-renderer": "^18",
-    "react": "^18"
+    "react": "^18",
+    "@gillsdk/config-eslint": "workspace:*"
   },
   "dependencies": {
     "@solana/react": "^3.0.3",

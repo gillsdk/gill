@@ -27,7 +27,9 @@
     "test:treeshakability:native": "agadoo dist/index.native.mjs",
     "test:treeshakability:node": "agadoo dist/index.node.mjs && agadoo dist/node/index.node.mjs",
     "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
-    "style:fix": "pnpm style:check --write"
+    "style:fix": "pnpm style:check --write",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src"
   },
   "exports": {
     ".": {
@@ -108,6 +110,7 @@
     "node": ">=20.18.0"
   },
   "dependencies": {
+    "@gillsdk/config-eslint": "workspace:*",
     "@solana-program/address-lookup-table": "^0.7.0",
     "@solana-program/compute-budget": "^0.8.0",
     "@solana-program/system": "^0.7.0",

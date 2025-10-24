@@ -1,0 +1,19 @@
+{
+  "name": "@gillsdk/config-eslint",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "exports": {
+    "./base": "./base.mjs"
+  },
+  "devDependencies": {
+    "@solana/eslint-config-solana": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
+    "@typescript-eslint/parser": "^8.16.0",
+    "eslint": "^9.15.0",
+    "eslint-plugin-jest": "^28.9.0"
+  },
+  "engines": {
+    "node": ">=20.18.0"
+  }
+}
