@@ -1,4 +1,4 @@
-export type Slot = bigint;
+import { Slot } from "@solana/kit";
 
 export type SubscriptionContext = { slot: Slot };
 
