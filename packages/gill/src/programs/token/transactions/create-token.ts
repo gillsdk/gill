@@ -1,11 +1,11 @@
-import { TOKEN_2022_PROGRAM_ADDRESS } from "@solana-program/token-2022";
 import type {
-  TransactionMessageWithFeePayer,
-  KeyPairSigner,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithFeePayer,
   TransactionSigner,
   TransactionVersion,
 } from "@solana/kit";
+import { TOKEN_2022_PROGRAM_ADDRESS } from "@solana-program/token-2022";
+
 import { checkedTransactionSigner, createTransaction } from "../../../core";
 import type { FullTransaction, Simplify } from "../../../types";
 import { getTokenMetadataAddress } from "../../token-metadata";
@@ -51,7 +51,7 @@ export async function buildCreateTokenTransaction<
   TVersion extends TransactionVersion = "legacy",
   TFeePayer extends TransactionSigner = TransactionSigner,
 >(
-  args: TransactionBuilderInput<TVersion, TFeePayer> & GetCreateTokenTransactionInput,
+  args: GetCreateTokenTransactionInput & TransactionBuilderInput<TVersion, TFeePayer>,
 ): Promise<FullTransaction<TVersion, TransactionMessageWithFeePayer>>;
 export async function buildCreateTokenTransaction<
   TVersion extends TransactionVersion = "legacy",
@@ -59,13 +59,13 @@ export async function buildCreateTokenTransaction<
   TLifetimeConstraint extends
     TransactionMessageWithBlockhashLifetime["lifetimeConstraint"] = TransactionMessageWithBlockhashLifetime["lifetimeConstraint"],
 >(
-  args: TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint> & GetCreateTokenTransactionInput,
+  args: GetCreateTokenTransactionInput & TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint>,
 ): Promise<FullTransaction<TVersion, TransactionMessageWithFeePayer, TransactionMessageWithBlockhashLifetime>>;
 export async function buildCreateTokenTransaction<
   TVersion extends TransactionVersion,
   TFeePayer extends TransactionSigner,
   TLifetimeConstraint extends TransactionMessageWithBlockhashLifetime["lifetimeConstraint"],
->(args: TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint> & GetCreateTokenTransactionInput) {
+>(args: GetCreateTokenTransactionInput & TransactionBuilderInput<TVersion, TFeePayer, TLifetimeConstraint>) {
   args.tokenProgram = checkedTokenProgramAddress(args.tokenProgram);
   args.feePayer = checkedTransactionSigner(args.feePayer);
 
@@ -90,11 +90,9 @@ export async function buildCreateTokenTransaction<
 
   return createTransaction(
     (({ feePayer, version, computeUnitLimit, computeUnitPrice, latestBlockhash }: typeof args) => ({
-      feePayer,
-      version: version || "legacy",
       computeUnitLimit,
       computeUnitPrice,
-      latestBlockhash,
+      feePayer,
       instructions: getCreateTokenInstructions(
         (({
           decimals,
@@ -106,17 +104,19 @@ export async function buildCreateTokenTransaction<
           tokenProgram,
           mint,
         }: typeof args) => ({
-          mint: mint as KeyPairSigner,
-          feePayer,
-          metadataAddress,
-          metadata,
           decimals,
-          mintAuthority,
+          feePayer,
           freezeAuthority,
-          updateAuthority,
+          metadata,
+          metadataAddress,
+          mint: mint,
+          mintAuthority,
           tokenProgram,
+          updateAuthority,
         }))(args),
       ),
+      latestBlockhash,
+      version: version || "legacy",
     }))(args),
   );
 }

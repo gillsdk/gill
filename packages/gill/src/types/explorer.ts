@@ -14,5 +14,5 @@ type ExplorerLinkBlock = {
  * @param cluster - Default: `mainnet`
  */
 export type GetExplorerLinkArgs = {
-  cluster?: SolanaClusterMoniker | "mainnet-beta" | "localhost";
-} & (ExplorerLinkAccount | ExplorerLinkTransaction | ExplorerLinkBlock | {});
+  cluster?: SolanaClusterMoniker | "localhost" | "mainnet-beta";
+} & (ExplorerLinkAccount | ExplorerLinkBlock | ExplorerLinkTransaction | {});

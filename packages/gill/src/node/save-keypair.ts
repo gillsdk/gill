@@ -3,6 +3,7 @@ import { homedir } from "node:os";
 import { resolve } from "node:path";
 
 import { createKeyPairSignerFromBytes, type KeyPairSigner } from "@solana/kit";
+
 import { extractBytesFromKeyPair } from "../core";
 import { loadKeypairSignerFromFile } from "./load-keypair";
 
@@ -45,7 +46,7 @@ export async function saveKeypairToFile(keypair: CryptoKeyPair, filePath: string
  * @param filePath - path to file where the keypair will be saved
  */
 export async function saveKeypairSignerToFile(keypairSigner: KeyPairSigner, filePath: string): Promise<boolean> {
-  return saveKeypairToFile(keypairSigner.keyPair, filePath);
+  return await saveKeypairToFile(keypairSigner.keyPair, filePath);
 }
 
 /**
@@ -95,5 +96,5 @@ export async function saveKeypairSignerToEnvFile(
   variableName: string,
   envFilePath: string = ".env",
 ): Promise<void> {
-  return saveKeypairToEnvFile(keypairSigner.keyPair, variableName, envFilePath);
+  return await saveKeypairToEnvFile(keypairSigner.keyPair, variableName, envFilePath);
 }

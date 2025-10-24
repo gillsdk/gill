@@ -7,20 +7,20 @@
  */
 
 import {
+  type Address,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getAddressDecoder,
   getAddressEncoder,
   getBooleanDecoder,
   getBooleanEncoder,
   getStructDecoder,
   getStructEncoder,
-  type Address,
-  type Codec,
-  type Decoder,
-  type Encoder,
 } from "@solana/kit";
 
-export type Collection = { verified: boolean; key: Address };
+export type Collection = { key: Address, verified: boolean; };
 
 export type CollectionArgs = Collection;
 

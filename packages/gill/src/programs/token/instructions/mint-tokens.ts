@@ -1,20 +1,13 @@
 import type { Address, Instruction, TransactionSigner } from "@solana/kit";
-
 import { getCreateAssociatedTokenIdempotentInstruction, getMintToInstruction } from "@solana-program/token-2022";
+
 import { checkedAddress, checkedTransactionSigner } from "../../../core";
 import { checkedTokenProgramAddress } from "../addresses";
 import type { TokenInstructionBase } from "./types";
 
 export type GetMintTokensInstructionsArgs = TokenInstructionBase & {
-  /**
-   * The authority address capable of authorizing minting of new tokens.
-   *
-   * - this should normally by a `TransactionSigner`
-   * - only for multi-sig authorities (like Squads Protocol), should you supply an `Address`
-   * */
-  mintAuthority: TransactionSigner | Address;
-  /** Wallet address to receive the tokens being minted, via their associated token account (ata) */
-  destination: TransactionSigner | Address;
+  /** Amount of tokens to mint to the `owner` via their `ata` */
+  amount: bigint | number;
   /**
    * Associated token account (ata) address for `destination` and this `mint`
    *
@@ -26,8 +19,15 @@ export type GetMintTokensInstructionsArgs = TokenInstructionBase & {
    * ```
    * */
   ata: Address;
-  /** Amount of tokens to mint to the `owner` via their `ata` */
-  amount: bigint | number;
+  /** Wallet address to receive the tokens being minted, via their associated token account (ata) */
+  destination: Address | TransactionSigner;
+  /**
+   * The authority address capable of authorizing minting of new tokens.
+   *
+   * - this should normally by a `TransactionSigner`
+   * - only for multi-sig authorities (like Squads Protocol), should you supply an `Address`
+   * */
+  mintAuthority: Address | TransactionSigner;
 };
 
 /**
@@ -63,18 +63,18 @@ export function getMintTokensInstructions(args: GetMintTokensInstructionsArgs): 
   return [
     // create idempotent will gracefully fail if the ata already exists. this is the gold standard!
     getCreateAssociatedTokenIdempotentInstruction({
-      owner: checkedAddress(args.destination),
-      mint: args.mint,
       ata: args.ata,
+      mint: args.mint,
+      owner: checkedAddress(args.destination),
       payer: args.feePayer,
       tokenProgram: args.tokenProgram,
     }),
     getMintToInstruction(
       {
+        amount: args.amount,
         mint: args.mint,
         mintAuthority: args.mintAuthority,
         token: args.ata,
-        amount: args.amount,
       },
       {
         programAddress: args.tokenProgram,

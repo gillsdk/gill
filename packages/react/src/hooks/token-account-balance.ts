@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { Address, GetTokenAccountBalanceApi, Simplify } from "gill";
+
 import { GILL_HOOK_CLIENT_KEY } from "../const.js";
 import { useSolanaClient } from "./client.js";
 import type { GillUseRpcHook } from "./types.js";

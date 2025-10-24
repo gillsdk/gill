@@ -6,11 +6,11 @@
  * @see https://github.com/codama-idl/codama
  */
 
-import { isProgramDerivedAddress, type Address, type ProgramDerivedAddress } from "@solana/kit";
-import { AccountRole, type AccountMeta, upgradeRoleToSigner } from "@solana/kit";
+import { type Address, isProgramDerivedAddress, type ProgramDerivedAddress } from "@solana/kit";
+import { type AccountMeta, AccountRole, upgradeRoleToSigner } from "@solana/kit";
 import {
-  isTransactionSigner as web3JsIsTransactionSigner,
   type AccountSignerMeta,
+  isTransactionSigner as web3JsIsTransactionSigner,
   type TransactionSigner,
 } from "@solana/kit";
 

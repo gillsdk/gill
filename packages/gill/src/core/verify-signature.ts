@@ -1,12 +1,12 @@
 import type {} from "@solana/kit";
 import {
+  type Address,
   getBase58Encoder,
   getPublicKeyFromAddress,
-  verifySignature,
-  type Address,
   type ReadonlyUint8Array,
   type Signature,
   type SignatureBytes,
+  verifySignature,
 } from "@solana/kit";
 
 /**
@@ -29,8 +29,8 @@ import {
  */
 export async function verifySignatureForAddress(
   address: Address,
-  signature: string | Signature | SignatureBytes | Uint8Array | ReadonlyUint8Array,
-  message: string | Uint8Array,
+  signature: ReadonlyUint8Array | Signature | SignatureBytes | Uint8Array | string,
+  message: Uint8Array | string,
 ): Promise<boolean> {
   const publicKey = await getPublicKeyFromAddress(address);
   if (typeof message === "string") {
@@ -40,5 +40,5 @@ export async function verifySignatureForAddress(
   if (typeof signature === "string") {
     signature = getBase58Encoder().encode(signature);
   }
-  return verifySignature(publicKey, signature as SignatureBytes, message);
+  return await verifySignature(publicKey, signature as SignatureBytes, message);
 }

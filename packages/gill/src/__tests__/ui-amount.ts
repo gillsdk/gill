@@ -2,34 +2,34 @@ import { tokenAmountToUiAmount, tokenUiAmountToAmount } from "../programs/token"
 
 describe("Token Amount Conversion Functions", () => {
   describe("tokenUiAmountToAmount", () => {
-    test("converts whole numbers correctly", () => {
+    it("converts whole numbers correctly", () => {
       expect(tokenUiAmountToAmount(1, 6)).toBe(1000000n);
       expect(tokenUiAmountToAmount(100, 9)).toBe(100000000000n);
       expect(tokenUiAmountToAmount(0, 6)).toBe(0n);
     });
 
-    test("converts decimal numbers correctly", () => {
+    it("converts decimal numbers correctly", () => {
       expect(tokenUiAmountToAmount(1.5, 6)).toBe(1500000n);
       expect(tokenUiAmountToAmount(0.05, 6)).toBe(50000n);
       expect(tokenUiAmountToAmount(0.000001, 6)).toBe(1n);
     });
 
-    test("handles more decimal places than specified", () => {
+    it("handles more decimal places than specified", () => {
       expect(tokenUiAmountToAmount(1.123456789, 6)).toBe(1123457n);
       expect(tokenUiAmountToAmount(0.0000019999, 6)).toBe(2n);
     });
 
-    test("handles fewer decimal places than specified", () => {
+    it("handles fewer decimal places than specified", () => {
       expect(tokenUiAmountToAmount(1.1, 6)).toBe(1100000n);
       expect(tokenUiAmountToAmount(1.1, 9)).toBe(1100000000n);
     });
 
-    test("handles large numbers correctly", () => {
+    it("handles large numbers correctly", () => {
       expect(tokenUiAmountToAmount(123456789, 6)).toBe(123456789000000n);
       expect(tokenUiAmountToAmount(987654321.123456, 6)).toBe(987654321123456n);
     });
 
-    test("handles very small decimals correctly", () => {
+    it("handles very small decimals correctly", () => {
       expect(tokenUiAmountToAmount(0.000000001, 9)).toBe(1n);
       // Very small number that would normally trigger scientific notation
       expect(tokenUiAmountToAmount(0.0000001, 6)).toBe(0n);
@@ -37,13 +37,13 @@ describe("Token Amount Conversion Functions", () => {
       expect(tokenUiAmountToAmount(1e-10, 6)).toBe(0n);
     });
 
-    test("handles zero decimal places", () => {
+    it("handles zero decimal places", () => {
       expect(tokenUiAmountToAmount(5, 0)).toBe(5n);
       expect(tokenUiAmountToAmount(5.9, 0)).toBe(6n);
       expect(tokenUiAmountToAmount(5.99, 1)).toBe(60n);
     });
 
-    test("handles extreme cases", () => {
+    it("handles extreme cases", () => {
       // Large number of decimals (but within reasonable limits)
       expect(tokenUiAmountToAmount(1.5, 15)).toBe(1500000000000000n);
 
@@ -53,39 +53,39 @@ describe("Token Amount Conversion Functions", () => {
   });
 
   describe("tokenAmountToUiAmount", () => {
-    test("converts whole numbers correctly", () => {
+    it("converts whole numbers correctly", () => {
       expect(tokenAmountToUiAmount(1000000n, 6)).toBe(1);
       expect(tokenAmountToUiAmount(100000000000n, 9)).toBe(100);
       expect(tokenAmountToUiAmount(0n, 6)).toBe(0);
     });
 
-    test("converts decimal amounts correctly", () => {
+    it("converts decimal amounts correctly", () => {
       expect(tokenAmountToUiAmount(1500000n, 6)).toBe(1.5);
       expect(tokenAmountToUiAmount(50000n, 6)).toBe(0.05);
       expect(tokenAmountToUiAmount(1n, 6)).toBe(0.000001);
     });
 
-    test("handles small amounts correctly", () => {
+    it("handles small amounts correctly", () => {
       expect(tokenAmountToUiAmount(1n, 9)).toBe(0.000000001);
       expect(tokenAmountToUiAmount(123n, 6)).toBe(0.000123);
     });
 
-    test("handles large amounts correctly", () => {
+    it("handles large amounts correctly", () => {
       expect(tokenAmountToUiAmount(123456789000000n, 6)).toBe(123456789);
       expect(tokenAmountToUiAmount(987654321123456n, 6)).toBe(987654321.123456);
     });
 
-    test("handles amounts with fewer digits than decimals", () => {
+    it("handles amounts with fewer digits than decimals", () => {
       expect(tokenAmountToUiAmount(5n, 6)).toBe(0.000005);
       expect(tokenAmountToUiAmount(42n, 9)).toBe(0.000000042);
     });
 
-    test("handles zero decimal places", () => {
+    it("handles zero decimal places", () => {
       expect(tokenAmountToUiAmount(5n, 0)).toBe(5);
       expect(tokenAmountToUiAmount(0n, 0)).toBe(0);
     });
 
-    test("handles extreme cases", () => {
+    it("handles extreme cases", () => {
       // Large number of decimals (but within reasonable limits)
       expect(tokenAmountToUiAmount(1500000000000000n, 15)).toBe(1.5);
 
@@ -95,8 +95,8 @@ describe("Token Amount Conversion Functions", () => {
     });
   });
 
-  describe("Round-trip conversions", () => {
-    test("UI amount -> raw amount -> UI amount preserves value", () => {
+  describe("round-trip conversions", () => {
+    it("uI amount -> raw amount -> UI amount preserves value", () => {
       const original = 1.234567;
       const decimals = 6;
 
@@ -107,7 +107,7 @@ describe("Token Amount Conversion Functions", () => {
       expect(roundTrip).toBeCloseTo(1.234567, decimals - 1);
     });
 
-    test("UI amount with excess precision gets truncated appropriately", () => {
+    it("uI amount with excess precision gets truncated appropriately", () => {
       const original = 1.2345678901;
       const decimals = 6;
 
@@ -118,7 +118,7 @@ describe("Token Amount Conversion Functions", () => {
       expect(roundTrip).toBeCloseTo(1.234567, decimals - 1);
     });
 
-    test("raw amount -> UI amount -> raw amount preserves value", () => {
+    it("raw amount -> UI amount -> raw amount preserves value", () => {
       const original = 1234567n;
       const decimals = 6;
 

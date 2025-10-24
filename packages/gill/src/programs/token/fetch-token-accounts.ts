@@ -1,7 +1,8 @@
-import type { Mint, Token } from "@solana-program/token-2022";
-import { decodeToken, fetchMint } from "@solana-program/token-2022";
 import type { Account, Address, GetAccountInfoApi, GetTokenAccountsByOwnerApi, Rpc } from "@solana/kit";
 import { isAddress, parseBase64RpcAccount } from "@solana/kit";
+import type { Mint, Token } from "@solana-program/token-2022";
+import { decodeToken, fetchMint } from "@solana-program/token-2022";
+
 import type { Simplify } from "../../types";
 import { assertIsMint } from "./assert-is-mint";
 
@@ -27,8 +28,8 @@ export type FetchTokenAccountsConfig = Simplify<
  * ```
  */
 export async function fetchTokenAccounts<TMintAddress extends string = string, TOwner extends string = string>(
-  rpc: Rpc<GetTokenAccountsByOwnerApi & GetAccountInfoApi>,
-  mint: Address<TMintAddress> | Account<Mint>,
+  rpc: Rpc<GetAccountInfoApi & GetTokenAccountsByOwnerApi>,
+  mint: Account<Mint> | Address<TMintAddress>,
   owner: Address<TOwner>,
   config: FetchTokenAccountsConfig = {},
 ): Promise<{ accounts: Account<Token>[]; mint: Account<Mint>; totalBalance: bigint }> {
@@ -45,8 +46,8 @@ export async function fetchTokenAccounts<TMintAddress extends string = string, T
     return decoded;
   });
   return {
+    accounts,
     mint,
     totalBalance,
-    accounts,
   };
 }
