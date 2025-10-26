@@ -490,8 +490,10 @@ const { balance } = useBalance({
 ```tsx
 const { account } = useAccount({
   address,
-  staleTime: 30000, // Consider data fresh for 30 seconds
-  cacheTime: 300000, // Keep in cache for 5 minutes
+  options: {
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    cacheTime: 300000, // Keep in cache for 5 minutes
+  },
 });
 ```
 
