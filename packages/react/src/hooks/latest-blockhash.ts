@@ -2,9 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { GetLatestBlockhashApi, Simplify } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import type { GillUseRpcHook } from "./types";
+
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import type { GillUseRpcHook } from "./types.js";
 
 type RpcConfig = Simplify<Parameters<GetLatestBlockhashApi["getLatestBlockhash"]>>[0];
 
@@ -23,14 +24,14 @@ export function useLatestBlockhash<TConfig extends RpcConfig = RpcConfig>({
   config,
   abortSignal,
 }: UseLatestBlockhashInput<TConfig> = {}) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
   const { data, ...rest } = useQuery({
     ...options,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getLatestBlockhash"],
     queryFn: async () => {
       const { value } = await rpc.getLatestBlockhash(config).send({ abortSignal });
       return value;
     },
+    queryKey: [GILL_HOOK_CLIENT_KEY, urlOrMoniker, "getLatestBlockhash"],
   });
   return {
     ...rest,

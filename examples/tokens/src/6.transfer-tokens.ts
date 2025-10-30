@@ -12,7 +12,7 @@ import {
   getCreateAssociatedTokenIdempotentInstruction,
   getTransferInstruction,
   TOKEN_PROGRAM_ADDRESS,
-} from "gill/programs/token";
+} from "gill/programs";
 
 const signer = await loadKeypairSignerFromFile();
 

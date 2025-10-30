@@ -1,0 +1,78 @@
+{
+  "name": "@gillsdk/solana-pay",
+  "license": "MIT",
+  "version": "0.6.0",
+  "description": "modern Solana Pay protocol client library, built on top of gill",
+  "scripts": {
+    "clean": "rimraf coverage dist build node_modules .turbo",
+    "compile:js": "tsup --config ./tsup.config.package.ts",
+    "compile:typedefs": "tsc -p ./tsconfig.declarations.json",
+    "prepublishOnly": "pnpm pkg delete devDependencies",
+    "publish-impl": "npm view $npm_package_name@$npm_package_version > /dev/null 2>&1 || (pnpm publish --tag ${PUBLISH_TAG:-canary} --access public --no-git-checks && (([ \"$PUBLISH_TAG\" != \"canary\" ] && pnpm dist-tag add $npm_package_name@$npm_package_version latest) || true))",
+    "publish-packages": "pnpm prepublishOnly && pnpm publish-impl",
+    "coverage": "pnpm test:unit:node --coverage",
+    "coverage:open": "export BROWSER=brave && xdg-open ./coverage/lcov-report/index.html > /dev/null",
+    "test:typecheck": "tsc --noEmit",
+    "test:unit:node": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.node.ts --rootDir . --silent",
+    "test:unit:browser": "TERM_OVERRIDE=\"${TURBO_HASH:+dumb}\" TERM=${TERM_OVERRIDE:-$TERM} jest -c ../../packages/test-config/jest-unit.config.browser.ts --rootDir . --silent",
+    "test:treeshakability:browser": "agadoo dist/index.browser.mjs",
+    "test:treeshakability:native": "agadoo dist/index.native.mjs",
+    "test:treeshakability:node": "agadoo dist/index.node.mjs",
+    "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,css,json,md,mdx}'",
+    "style:fix": "pnpm style:check --write"
+  },
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.node.mjs",
+    "require": "./dist/index.node.cjs",
+    "default": "./dist/index.node.cjs"
+  },
+  "browser": {
+    "./dist/index.node.cjs": "./dist/index.browser.cjs",
+    "./dist/index.node.mjs": "./dist/index.browser.mjs"
+  },
+  "main": "./dist/index.node.cjs",
+  "module": "./dist/index.node.mjs",
+  "react-native": "./dist/index.native.mjs",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "./dist/"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "blockchain",
+    "solana",
+    "web3",
+    "web3js v2",
+    "solana kit",
+    "wallet",
+    "dapps",
+    "solana helpers",
+    "solana pay",
+    "payments",
+    "@solana/web3.js",
+    "@solana/kit",
+    "@solana/pay",
+    "@solana-developers/helpers",
+    "treeshake"
+  ],
+  "author": "Nick Frostbutter <maintainers@gillsdk.com>",
+  "homepage": "https://gillsdk.com",
+  "bugs": {
+    "url": "https://github.com/gillsdk/gill/issues"
+  },
+  "browserslist": [
+    "supports bigint and not dead",
+    "maintained node versions"
+  ],
+  "engines": {
+    "node": ">=20.18.0"
+  },
+  "dependencies": {
+    "gill": "workspace:*"
+  },
+  "peerDependencies": {
+    "typescript": ">=5"
+  }
+}

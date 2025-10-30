@@ -2,9 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Address, GetSignaturesForAddressApi, Simplify } from "gill";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
-import { useSolanaClient } from "./client";
-import { GillUseRpcHook } from "./types";
+
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
+import { useSolanaClient } from "./client.js";
+import { GillUseRpcHook } from "./types.js";
 
 type RpcConfig = Simplify<Parameters<GetSignaturesForAddressApi["getSignaturesForAddress"]>[1]>;
 
@@ -29,16 +30,16 @@ export function useSignaturesForAddress<TConfig extends RpcConfig = RpcConfig>({
   abortSignal,
   address,
 }: UseSignaturesForAddressInput<TConfig>) {
-  const { rpc } = useSolanaClient();
+  const { rpc, urlOrMoniker } = useSolanaClient();
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    enabled: !!address,
-    queryKey: [GILL_HOOK_CLIENT_KEY, "getSignaturesForAddress", address],
+    enabled: (options?.enabled ?? true) && !!address,
     queryFn: async () => {
       const signatures = await rpc.getSignaturesForAddress(address as Address, config).send({ abortSignal });
       return signatures;
     },
+    queryKey: [GILL_HOOK_CLIENT_KEY, urlOrMoniker, "getSignaturesForAddress", address],
   });
   return {
     ...rest,
