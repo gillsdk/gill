@@ -1,14 +1,9 @@
-import type { Root, Code } from "mdast";
+import type { Code, Root } from "mdast";
 import type { Transformer } from "unified";
 import { visit } from "unist-util-visit";
+
 import type { RemarkPackageOptions } from "./utils.js";
 import { defaultRegistryPackageManagers, generatePackageManagerTabs, getCodeContent, isValidCommand } from "./utils.js";
-
-/**
- * Options for the package-execute plugin
- * @deprecated Use RemarkPackageOptions from utils.js instead
- */
-export interface RemarkExecuteOptions extends RemarkPackageOptions {}
 
 // Supported language aliases for the code blocks
 const SUPPORTED_ALIASES = ["package-execute"] as const;
@@ -32,7 +27,7 @@ type SupportedAlias = (typeof SUPPORTED_ALIASES)[number];
 export function remarkExecute({
   persist = false,
   packageManagers = defaultRegistryPackageManagers,
-}: RemarkExecuteOptions = {}): Transformer<Root, Root> {
+}: RemarkPackageOptions = {}): Transformer<Root, Root> {
   return (tree) => {
     visit(tree, "code", (node: Code) => {
       // Check if this is a supported code block

@@ -1,12 +1,13 @@
-import type { Root, Code } from "mdast";
+import type { Code, Root } from "mdast";
 import type { Transformer } from "unified";
 import { visit } from "unist-util-visit";
+
 import {
-  type RemarkPackageOptions,
   defaultLocalPackageManagers,
   generatePackageManagerTabs,
   getCodeContent,
   isValidCommand,
+  type RemarkPackageOptions,
 } from "./utils.js";
 
 /**

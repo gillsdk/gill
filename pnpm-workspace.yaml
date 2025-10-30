@@ -4,6 +4,3 @@ packages:
   - e2e/*
   - packages/*
   - '!docs'
-
-overrides:
-  '@gillsdk/remark-package-commands': link:packages/remark-package-commands

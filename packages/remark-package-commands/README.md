@@ -1,7 +1,7 @@
 # @gillsdk/remark-package-commands
 
 [![npm version](https://img.shields.io/npm/v/@gillsdk/remark-package-commands)](https://www.npmjs.com/package/@gillsdk/remark-package-commands)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/gillsdk/gill/blob/master/packages/remark-package-commands/LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/gillsdk/gill/blob/master/LICENSE)
 
 Remark plugins for generating package manager command tabs in Fumadocs. Supports both **registry execution** (npx/dlx)
 and **local script execution** (npm run).
@@ -11,14 +11,14 @@ for different package managers with clear distinction between registry fetching 
 
 ## Features
 
-- <� **Two Plugin Variants**: `package-execute` for registry commands, `package-run` for local scripts
-- =� **All Package Managers**: npm, pnpm, yarn, bun with correct command patterns
-- = **Correct Command Translation**:
-  - Registry: `npx` � `pnpm dlx` � `yarn dlx` � `bunx`
-  - Local: `npm run` � `pnpm run` � `yarn run` � `bun run`
-- <� **Fumadocs Integration**: Uses fumadocs-core utilities for consistent tab rendering
-- =� **Tab Persistence**: Optional persistent tab selection across page navigation
-- =' **TypeScript**: Fully typed with comprehensive interfaces
+- **Two Plugin Variants**: `package-execute` for registry commands, `package-run` for local scripts
+- **All Package Managers**: npm, pnpm, yarn, bun with correct command patterns
+- **Correct Command Translation**:
+  - Registry: `npx` → `pnpm dlx` → `yarn dlx` → `bunx`
+  - Local: `npm run` → `pnpm run` → `yarn run` → `bun run`
+- **Fumadocs Integration**: Uses fumadocs-core utilities for consistent tab rendering
+- **Tab Persistence**: Optional persistent tab selection across page navigation
+- **TypeScript**: Fully typed with comprehensive interfaces
 
 ## Installation
 
@@ -39,11 +39,11 @@ bun add @gillsdk/remark-package-commands
 For commands that download and execute packages from the registry:
 
 ```typescript
-import { remarkPackageExecute } from "@gillsdk/remark-package-commands";
+import { remarkExecute } from "@gillsdk/remark-package-commands";
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: [() => remarkPackageExecute({ persist: { id: "package-execute" } })],
+    remarkPlugins: [() => remarkExecute({ persist: { id: "package-execute" } })],
   },
 });
 ```
@@ -99,12 +99,12 @@ build:docs
 ### Using Both Plugins
 
 ```typescript
-import { remarkPackageExecute, remarkPackageRun } from '@gillsdk/remark-package-commands';
+import { remarkExecute, remarkPackageRun } from '@gillsdk/remark-package-commands';
 
 export default defineConfig({
   mdxOptions: {
     remarkPlugins: [
-      () => remarkPackageExecute({ persist: { id: "package-execute" } }),
+      () => remarkExecute({ persist: { id: "package-execute" } }),
       () => remarkPackageRun({ persist: { id: "package-run" } })
     ],
   },
@@ -146,7 +146,7 @@ interface PackageManager {
 ### Custom Package Managers
 
 ```typescript
-import { remarkPackageExecute } from "@gillsdk/remark-package-commands";
+import { remarkExecute } from "@gillsdk/remark-package-commands";
 
 const customPackageManagers = [
   { name: "npm", command: (cmd) => `npx ${cmd}` },
@@ -156,7 +156,7 @@ const customPackageManagers = [
 
 remarkPlugins: [
   () =>
-    remarkPackageExecute({
+    remarkExecute({
       packageManagers: customPackageManagers,
       persist: { id: "custom-execute" },
     }),
@@ -167,10 +167,10 @@ remarkPlugins: [
 
 ### Use `package-execute` for:
 
--  CLI tools from npm registry (`codama`, `create-react-app`, etc.)
--  One-time command execution
--  Global tool usage
--  Commands that download packages
+- CLI tools from npm registry (`codama`, `create-react-app`, etc.)
+- One-time command execution
+- Global tool usage
+- Commands that download packages
 
 **Examples:**
 
@@ -187,10 +187,10 @@ codama run js --config ./idls/token.js
 ````
 
 ### Use `package-run` for:
--  Package.json scripts
--  Local development commands
--  Build/test/dev scripts
--  Workspace commands
+- Package.json scripts
+- Local development commands
+- Build/test/dev scripts
+- Workspace commands
 
 **Examples:**
 ```markdown
@@ -240,7 +240,7 @@ This package leverages fumadocs-core utilities for consistent rendering:
 
 **Issue**: Commands showing as `npm run <cmd>` instead of `npx <cmd>`
 **Solution**: Make sure you're using the correct plugin:
-- `remarkPackageExecute` for registry execution (npx/dlx)
+- `remarkExecute` for registry execution (npx/dlx)
 - `remarkPackageRun` for local scripts (npm run)
 
 ### Tabs Not Rendering
@@ -268,7 +268,7 @@ This package is part of the [gill](https://github.com/gillsdk/gill) monorepo. Co
 
 ## License
 
-MIT � [gillsdk](https://github.com/gillsdk/gill)
+MIT → [gillsdk](https://github.com/gillsdk/gill)
 
 ## Related
 

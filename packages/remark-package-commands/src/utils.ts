@@ -1,19 +1,19 @@
-import type { MdxJsxFlowElement, MdxJsxAttribute, MdxJsxAttributeValueExpression } from "mdast-util-mdx-jsx";
 import type { Code } from "mdast";
+import type { MdxJsxAttribute, MdxJsxAttributeValueExpression, MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 
 /**
  * Configuration for package manager command conversion
  */
 export interface PackageManager {
+  /**
+   * Convert command for this package manager
+   */
+  command: (command: string) => string | undefined;
   name: string;
   /**
    * Custom value for the tab, defaults to `name`
    */
   value?: string;
-  /**
-   * Convert command for this package manager
-   */
-  command: (command: string) => string | undefined;
 }
 
 /**
@@ -21,16 +21,16 @@ export interface PackageManager {
  */
 export interface RemarkPackageOptions {
   /**
-   * Persist tab selection across page navigation (Fumadocs UI only)
-   * @defaultValue false
-   */
-  persist?: { id: string } | false;
-
-  /**
    * Package managers to generate tabs for
    * @defaultValue [npm, pnpm, yarn, bun]
    */
   packageManagers?: PackageManager[];
+
+  /**
+   * Persist tab selection across page navigation (Fumadocs UI only)
+   * @defaultValue false
+   */
+  persist?: false | { id: string };
 }
 
 /**
@@ -38,20 +38,20 @@ export interface RemarkPackageOptions {
  */
 export const defaultRegistryPackageManagers: PackageManager[] = [
   {
-    name: "npm",
     command: (cmd: string) => `npx ${cmd}`,
+    name: "npm",
   },
   {
-    name: "pnpm",
     command: (cmd: string) => `pnpm dlx ${cmd}`,
+    name: "pnpm",
   },
   {
-    name: "yarn",
     command: (cmd: string) => `yarn dlx ${cmd}`,
+    name: "yarn",
   },
   {
-    name: "bun",
     command: (cmd: string) => `bunx ${cmd}`,
+    name: "bun",
   },
 ];
 
@@ -60,20 +60,20 @@ export const defaultRegistryPackageManagers: PackageManager[] = [
  */
 export const defaultLocalPackageManagers: PackageManager[] = [
   {
-    name: "npm",
     command: (cmd: string) => `npm run ${cmd}`,
+    name: "npm",
   },
   {
-    name: "pnpm",
     command: (cmd: string) => `pnpm run ${cmd}`,
+    name: "pnpm",
   },
   {
-    name: "yarn",
     command: (cmd: string) => `yarn run ${cmd}`,
+    name: "yarn",
   },
   {
-    name: "bun",
     command: (cmd: string) => `bun run ${cmd}`,
+    name: "bun",
   },
 ];
 
@@ -100,13 +100,13 @@ function buildTabsAttributes(
   if (typeof persist === "object" && persist.id) {
     attributes.push(
       {
-        type: "mdxJsxAttribute",
         name: "groupId",
+        type: "mdxJsxAttribute",
         value: persist.id,
       },
       {
-        type: "mdxJsxAttribute",
         name: "persist",
+        type: "mdxJsxAttribute",
         value: null,
       },
     );
@@ -124,36 +124,37 @@ function buildTabsAttributes(
  */
 function createItemsAttribute(packageManagers: PackageManager[]): MdxJsxAttribute {
   const arrayExpression = {
-    type: "ArrayExpression",
     elements: packageManagers.map(({ name }) => ({
       type: "Literal",
       value: name,
     })),
+    type: "ArrayExpression",
   } as const;
 
   const program = {
-    type: "Program",
     body: [
       {
-        type: "ExpressionStatement",
         expression: arrayExpression,
+        type: "ExpressionStatement",
       },
     ],
-    sourceType: "module",
     comments: [],
+    sourceType: "module",
+    type: "Program",
   } as const;
 
   const valueExpression: MdxJsxAttributeValueExpression = {
+    data: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Type assertion to avoid estree version conflicts
+      estree: program as any,
+    },
     type: "mdxJsxAttributeValueExpression",
     value: "",
-    data: {
-      estree: program as any, // Type assertion to avoid estree version conflicts
-    },
   };
 
   return {
-    type: "mdxJsxAttribute",
     name: "items",
+    type: "mdxJsxAttribute",
     value: valueExpression,
   };
 }
@@ -161,11 +162,7 @@ function createItemsAttribute(packageManagers: PackageManager[]): MdxJsxAttribut
 /**
  * Builds the Tab child elements for each package manager
  */
-function buildTabChildren(
-  packageManagers: PackageManager[],
-  code: string,
-  meta?: string | null | undefined,
-): MdxJsxFlowElement[] {
+function buildTabChildren(packageManagers: PackageManager[], code: string, meta?: string | null): MdxJsxFlowElement[] {
   const children: MdxJsxFlowElement[] = [];
 
   for (const manager of packageManagers) {
@@ -178,23 +175,23 @@ function buildTabChildren(
     }
 
     const tabElement: MdxJsxFlowElement = {
-      type: "mdxJsxFlowElement",
-      name: "Tab",
       attributes: [
         {
-          type: "mdxJsxAttribute",
           name: "value",
+          type: "mdxJsxAttribute",
           value,
         },
       ],
       children: [
         {
-          type: "code",
           lang: "bash",
           meta: meta ?? undefined,
+          type: "code",
           value: command,
         } as Code,
       ],
+      name: "Tab",
+      type: "mdxJsxFlowElement",
     };
 
     children.push(tabElement);
@@ -216,8 +213,8 @@ function buildTabChildren(
 export function generatePackageManagerTabs(
   command: string,
   packageManagers: PackageManager[],
-  persist?: { id: string } | false,
-  meta?: string | null | undefined,
+  persist?: false | { id: string },
+  meta?: string | null,
 ): MdxJsxFlowElement {
   // Build MDX JSX attributes for the Tabs component
   const attributes = buildTabsAttributes(persist, packageManagers);
@@ -227,10 +224,10 @@ export function generatePackageManagerTabs(
 
   // Create the Tabs MDX JSX element
   const tabsElement: MdxJsxFlowElement = {
-    type: "mdxJsxFlowElement",
-    name: "Tabs",
     attributes,
     children,
+    name: "Tabs",
+    type: "mdxJsxFlowElement",
   };
 
   return tabsElement;

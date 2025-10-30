@@ -30,14 +30,10 @@
     "fumadocs-ui": "15.2.10",
     "gill": "0.11.0",
     "lucide-react": "^0.513.0",
-    "mdast": "^3.0.0",
     "next": "15.3.1",
-    "npm-to-yarn": "^3.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "twoslash": "^0.3.1",
-    "unified": "^11.0.5",
-    "unist-util-visit": "^5.0.0"
+    "twoslash": "^0.3.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.4",
@@ -48,7 +44,6 @@
     "@types/react-dom": "^19.0.4",
     "eslint": "^8",
     "eslint-config-next": "15.3.1",
-    "mdast-util-mdx-jsx": "^3.2.0",
     "postcss": "^8.5.3",
     "prettier": "^3.3",
     "tailwindcss": "^4.1.4",
