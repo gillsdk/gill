@@ -1,3 +1,4 @@
+import { LLMCopyButton, ViewOptions } from "@/components/page-actions";
 import { docsSource } from "@/lib/source";
 import { Spread } from "@/lib/Spread";
 import { getPageTreePeers } from "fumadocs-core/server";
@@ -56,6 +57,13 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-16">{page.data.description}</DocsDescription>
+      <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+        <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+        <ViewOptions
+          markdownUrl={`${page.url}.mdx`}
+          githubUrl={`https://github.com/gillsdk/gill/blob/master/docs/content/docs/${page.path}`}
+        />
+      </div>
       <DocsBody>
         <MDX
           components={{

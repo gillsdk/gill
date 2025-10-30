@@ -11,6 +11,7 @@ import { notFound } from "next/navigation";
 
 import { apiSource } from "@/lib/source";
 import { Spread } from "@/lib/Spread";
+import { LLMCopyButton } from "@/components/page-actions";
 
 export async function generateStaticParams() {
   return apiSource.generateParams();
@@ -54,6 +55,9 @@ export default async function Page(props: { params: Promise<{ slug?: string[] }>
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-16">{page.data.description}</DocsDescription>
+      <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+        <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+      </div>
       <DocsBody>
         <MDX
           components={{
