@@ -2,6 +2,7 @@ import { rehypeCodeDefaultOptions } from "fumadocs-core/mdx-plugins";
 import { remarkInstall } from "fumadocs-docgen";
 import { defineConfig, defineDocs } from "fumadocs-mdx/config";
 import { transformerTwoslash } from "fumadocs-twoslash";
+import { remarkExecute } from "@gillsdk/remark-package-commands";
 
 export default defineConfig({
   mdxOptions: {
@@ -18,7 +19,10 @@ export default defineConfig({
       },
       transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
     },
-    remarkPlugins: [() => remarkInstall({ persist: { id: "package-install" } })],
+    remarkPlugins: [
+      () => remarkInstall({ persist: { id: "package-install" } }),
+      () => remarkExecute({ persist: { id: "package-execute" } }),
+    ],
   },
 });
 

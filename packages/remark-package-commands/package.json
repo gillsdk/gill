@@ -1,0 +1,74 @@
+{
+  "name": "@gillsdk/remark-package-commands",
+  "license": "MIT",
+  "version": "1.0.0",
+  "description": "Remark plugins for generating package manager command tabs in Fumadocs - supports both registry execution (npx/dlx) and local script execution (npm run)",
+  "keywords": [
+    "remark",
+    "fumadocs",
+    "package-manager",
+    "npm",
+    "pnpm",
+    "yarn",
+    "bun",
+    "mdx",
+    "documentation",
+    "tabs"
+  ],
+  "author": "gillsdk",
+  "homepage": "https://github.com/gillsdk/gill/tree/master/packages/remark-package-commands",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gillsdk/gill.git",
+    "directory": "packages/remark-package-commands"
+  },
+  "bugs": {
+    "url": "https://github.com/gillsdk/gill/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.node.mjs",
+      "require": "./dist/index.node.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.node.cjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "clean": "rimraf dist build .turbo",
+    "prebuild": "rimraf dist",
+    "compile:js": "tsup --config ../build-scripts/tsup.config.package.ts",
+    "compile:typedefs": "tsc -p ./tsconfig.json --declaration --emitDeclarationOnly --outDir dist",
+    "build": "pnpm prebuild && pnpm compile:js && pnpm compile:typedefs",
+    "test:typecheck": "tsc --noEmit",
+    "style:check": "prettier --check '{*,**/*}.{ts,tsx,js,jsx,json,md}'",
+    "style:fix": "pnpm style:check --write"
+  },
+  "dependencies": {
+    "fumadocs-core": "^15.2.10",
+    "mdast": "^3.0.0",
+    "mdast-util-mdx-jsx": "^3.2.0",
+    "npm-to-yarn": "^3.0.1",
+    "unified": "^11.0.0",
+    "unist-util-visit": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@types/mdast": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/mdast": "^4.0.0",
+    "rimraf": "^5.0.10",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

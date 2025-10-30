@@ -84,5 +84,8 @@
       "name": "Nick Frostbutter",
       "url": "https://github.com/nickfrosty"
     }
-  ]
+  ],
+  "dependencies": {
+    "@gillsdk/remark-package-commands": "link:packages/remark-package-commands"
+  }
 }
