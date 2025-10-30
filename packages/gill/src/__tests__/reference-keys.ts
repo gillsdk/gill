@@ -1,4 +1,5 @@
 import { AccountRole, Address, BaseTransactionMessage, SolanaError } from "@solana/kit";
+
 import { insertReferenceKeysToTransactionMessage, insertReferenceKeyToTransactionMessage } from "../core";
 
 // Mock for BaseTransactionMessage
@@ -13,21 +14,21 @@ describe("insertReferenceKeyToTransactionMessage", () => {
   const referenceKey = "someReferenceAddress" as Address;
 
   const memoInstruction = {
-    programAddress: "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" as Address,
     accounts: [],
+    programAddress: "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" as Address,
   };
 
   it("should insert a single reference key into transaction message", () => {
     const nonMemoInstruction = {
-      programAddress: "SomeProgram",
       accounts: [{ address: "account1" as Address, role: AccountRole.READONLY }],
+      programAddress: "SomeProgram",
     };
     const transaction = createMockTransaction([nonMemoInstruction]);
 
     const result = insertReferenceKeyToTransactionMessage(referenceKey, transaction);
 
     expect(result).not.toBe(transaction); // Should return a new object (immutability)
-    expect(result.instructions.length).toBe(1);
+    expect(result.instructions).toHaveLength(1);
     expect(result.instructions[0].accounts).toHaveLength(2);
     expect(result.instructions[0].accounts?.[1]).toEqual({
       address: referenceKey,
@@ -53,14 +54,14 @@ describe("insertReferenceKeyToTransactionMessage", () => {
 
   it("should modify the first non-memo instruction when when memo is first", () => {
     const nonMemoInstruction = {
-      programAddress: "SomeProgram",
       accounts: [{ address: "account1" as Address, role: AccountRole.READONLY }],
+      programAddress: "SomeProgram",
     };
     const transaction = createMockTransaction([memoInstruction, nonMemoInstruction]);
 
     const result = insertReferenceKeyToTransactionMessage(referenceKey, transaction);
 
-    expect(result.instructions.length).toBe(2);
+    expect(result.instructions).toHaveLength(2);
     expect(result.instructions[0]).toEqual(memoInstruction); // First instruction unchanged
     expect(result.instructions[1].accounts).toHaveLength(2);
     expect(result.instructions[1].accounts?.[1]).toEqual({
@@ -71,14 +72,14 @@ describe("insertReferenceKeyToTransactionMessage", () => {
 
   it("should modify the first non-memo instruction when when memo is NOT first", () => {
     const nonMemoInstruction = {
-      programAddress: "SomeProgram",
       accounts: [{ address: "account1" as Address, role: AccountRole.READONLY }],
+      programAddress: "SomeProgram",
     };
     const transaction = createMockTransaction([nonMemoInstruction, memoInstruction]);
 
     const result = insertReferenceKeyToTransactionMessage(referenceKey, transaction);
 
-    expect(result.instructions.length).toBe(2);
+    expect(result.instructions).toHaveLength(2);
     expect(result.instructions[1]).toEqual(memoInstruction); // First instruction unchanged
     expect(result.instructions[0].accounts).toHaveLength(2);
     expect(result.instructions[0].accounts?.[1]).toEqual({
@@ -112,8 +113,8 @@ describe("insertReferenceKeysToTransactionMessage", () => {
       "referenceAddress3" as Address,
     ];
     const nonMemoInstruction = {
-      programAddress: "SomeProgram",
       accounts: [{ address: "account1" as Address, role: AccountRole.READONLY }],
+      programAddress: "SomeProgram",
     };
     const transaction = createMockTransaction([nonMemoInstruction]);
 
@@ -138,8 +139,8 @@ describe("insertReferenceKeysToTransactionMessage", () => {
   it("should handle empty reference keys array", () => {
     const referenceKeys: Address[] = [];
     const nonMemoInstruction = {
-      programAddress: "SomeProgram",
       accounts: [{ address: "account1" as Address, role: AccountRole.READONLY }],
+      programAddress: "SomeProgram",
     };
     const transaction = createMockTransaction([nonMemoInstruction]);
 
@@ -161,8 +162,8 @@ describe("insertReferenceKeysToTransactionMessage", () => {
   it("should preserve transaction immutability", () => {
     const referenceKeys = ["referenceAddress1" as Address];
     const originalInstruction = {
-      programAddress: "SomeProgram",
       accounts: [{ address: "account1" as Address, role: AccountRole.READONLY }],
+      programAddress: "SomeProgram",
     };
     const transaction = createMockTransaction([originalInstruction]);
     const originalInstructionsLength = transaction.instructions.length;
@@ -170,7 +171,7 @@ describe("insertReferenceKeysToTransactionMessage", () => {
 
     const result = insertReferenceKeysToTransactionMessage(referenceKeys, transaction);
 
-    expect(transaction.instructions.length).toBe(originalInstructionsLength);
+    expect(transaction.instructions).toHaveLength(originalInstructionsLength);
     expect(transaction.instructions[0].accounts?.length).toBe(originalAccountsLength);
     expect(result.instructions[0].accounts?.length).toBe(originalAccountsLength + 1);
   });
@@ -178,13 +179,13 @@ describe("insertReferenceKeysToTransactionMessage", () => {
   it("should handle instruction with different account roles", () => {
     const referenceKeys = ["referenceAddress1" as Address];
     const nonMemoInstruction = {
-      programAddress: "SomeProgram",
       accounts: [
         { address: "account1" as Address, role: AccountRole.READONLY },
         { address: "account2" as Address, role: AccountRole.WRITABLE },
         { address: "account3" as Address, role: AccountRole.READONLY_SIGNER },
         { address: "account4" as Address, role: AccountRole.WRITABLE_SIGNER },
       ],
+      programAddress: "SomeProgram",
     };
     const transaction = createMockTransaction([nonMemoInstruction]);
 

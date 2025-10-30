@@ -24,18 +24,19 @@ import {
   signTransactionMessageWithSigners,
 } from "@solana/kit";
 import { type waitForRecentTransactionConfirmation } from "@solana/transaction-confirmation";
+
 import { debug } from "./debug";
 import { getExplorerLink } from "./explorer";
 
 interface SendAndConfirmTransactionWithBlockhashLifetimeConfig extends SendTransactionConfigWithoutEncoding {
+  abortSignal?: AbortSignal;
+  commitment: Commitment;
   confirmRecentTransaction: (
     config: Omit<
       Parameters<typeof waitForRecentTransactionConfirmation>[0],
       "getBlockHeightExceedencePromise" | "getRecentSignatureConfirmationPromise"
     >,
   ) => Promise<void>;
-  abortSignal?: AbortSignal;
-  commitment: Commitment;
 }
 
 type SendTransactionConfigWithoutEncoding = Omit<
@@ -44,9 +45,7 @@ type SendTransactionConfigWithoutEncoding = Omit<
 >;
 
 type SendableTransaction =
-  | CompilableTransactionMessage
-  | (FullySignedTransaction & TransactionWithBlockhashLifetime)
-  | (BaseTransactionMessage & TransactionMessageWithFeePayer);
+  CompilableTransactionMessage | BaseTransactionMessage & TransactionMessageWithFeePayer | FullySignedTransaction & TransactionWithBlockhashLifetime;
 
 export type SendAndConfirmTransactionWithSignersFunction = (
   transaction: SendableTransaction,
@@ -57,7 +56,7 @@ export type SendAndConfirmTransactionWithSignersFunction = (
 ) => Promise<Signature>;
 
 type SendAndConfirmTransactionWithSignersFactoryConfig<TCluster> = {
-  rpc: Rpc<GetEpochInfoApi & GetSignatureStatusesApi & SendTransactionApi & GetLatestBlockhashApi> & {
+  rpc: Rpc<GetEpochInfoApi & GetLatestBlockhashApi & GetSignatureStatusesApi & SendTransactionApi> & {
     "~cluster"?: TCluster;
   };
   rpcSubscriptions: RpcSubscriptions<SignatureNotificationsApi & SlotNotificationsApi> & {
@@ -82,7 +81,7 @@ export function sendAndConfirmTransactionWithSignersFactory({
   rpcSubscriptions,
 }: SendAndConfirmTransactionWithSignersFactoryConfig<"localnet">): SendAndConfirmTransactionWithSignersFunction;
 export function sendAndConfirmTransactionWithSignersFactory<
-  TCluster extends "devnet" | "mainnet" | "testnet" | "localnet" | undefined = undefined,
+  TCluster extends "devnet" | "localnet" | "mainnet" | "testnet" | undefined = undefined,
 >({
   rpc,
   rpcSubscriptions,

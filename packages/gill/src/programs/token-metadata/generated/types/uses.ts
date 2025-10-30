@@ -7,15 +7,16 @@
  */
 
 import {
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
-  type Codec,
-  type Decoder,
-  type Encoder,
 } from '@solana/kit';
+
 import {
   getUseMethodDecoder,
   getUseMethodEncoder,
@@ -23,12 +24,12 @@ import {
   type UseMethodArgs,
 } from '.';
 
-export type Uses = { useMethod: UseMethod; remaining: bigint; total: bigint };
+export type Uses = { remaining: bigint; total: bigint, useMethod: UseMethod; };
 
 export type UsesArgs = {
+  remaining: bigint | number;
+  total: bigint | number;
   useMethod: UseMethodArgs;
-  remaining: number | bigint;
-  total: number | bigint;
 };
 
 export function getUsesEncoder(): Encoder<UsesArgs> {

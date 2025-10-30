@@ -1,10 +1,11 @@
-import type { Mint } from "@solana-program/token-2022";
 import type { Account, Address, Lamports } from "@solana/kit";
 import {
   SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND,
   SOLANA_ERROR__ACCOUNTS__FAILED_TO_DECODE_ACCOUNT,
   SolanaError,
 } from "@solana/kit";
+import type { Mint } from "@solana-program/token-2022";
+
 import { assertIsMint } from "../../programs";
 
 describe("assertIsMint", () => {
@@ -55,12 +56,12 @@ describe("assertIsMint", () => {
     const validMintAccount: Account<Mint> = {
       address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" as Address,
       data: {
+        decimals: 6,
+        extensions: [] as any,
+        freezeAuthority: null as any,
+        isInitialized: true,
         mintAuthority: "authority" as any,
         supply: 1000000n,
-        decimals: 6,
-        isInitialized: true,
-        freezeAuthority: null as any,
-        extensions: [] as any,
       },
       executable: false,
       lamports: 1461600n as Lamports,

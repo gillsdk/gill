@@ -1,30 +1,21 @@
 import type { Address, Instruction, TransactionSigner } from "@solana/kit";
-
 import { getCreateAssociatedTokenIdempotentInstruction, getTransferInstruction } from "@solana-program/token-2022";
+
 import { checkedAddress, checkedTransactionSigner } from "../../../core";
 import { checkedTokenProgramAddress } from "../addresses";
 import type { TokenInstructionBase } from "./types";
 
 export type GetTransferTokensInstructionsArgs = TokenInstructionBase & {
+  /** Amount of tokens to be transferred to the `destination` via their `destinationAta` */
+  amount: bigint | number;
   /**
    * The source account's owner/delegate or its multi-signature account:
    * - this should normally by a `TransactionSigner`
    * - only for multi-sig authorities (like Squads Protocol), should you supply an `Address`
    * */
-  authority: TransactionSigner | Address;
-  /**
-   * Associated token account (ata) address for `authority` and this `mint`
-   *
-   * See {@link getAssociatedTokenAccountAddress}
-   *
-   * @example
-   * ```
-   * getAssociatedTokenAccountAddress(mint, authority, tokenProgram);
-   * ```
-   * */
-  sourceAta: Address;
+  authority: Address | TransactionSigner;
   /** Wallet address to receive the tokens, via their associated token account: `destinationAta` */
-  destination: TransactionSigner | Address;
+  destination: Address | TransactionSigner;
   /**
    * Associated token account (ata) address for `destination` and this `mint`
    *
@@ -36,8 +27,17 @@ export type GetTransferTokensInstructionsArgs = TokenInstructionBase & {
    * ```
    * */
   destinationAta: Address;
-  /** Amount of tokens to be transferred to the `destination` via their `destinationAta` */
-  amount: bigint | number;
+  /**
+   * Associated token account (ata) address for `authority` and this `mint`
+   *
+   * See {@link getAssociatedTokenAccountAddress}
+   *
+   * @example
+   * ```
+   * getAssociatedTokenAccountAddress(mint, authority, tokenProgram);
+   * ```
+   * */
+  sourceAta: Address;
 };
 
 /**
@@ -72,18 +72,18 @@ export function getTransferTokensInstructions(args: GetTransferTokensInstruction
   return [
     // create idempotent will gracefully fail if the ata already exists. this is the gold standard!
     getCreateAssociatedTokenIdempotentInstruction({
-      owner: checkedAddress(args.destination),
-      mint: args.mint,
       ata: args.destinationAta,
+      mint: args.mint,
+      owner: checkedAddress(args.destination),
       payer: args.feePayer,
       tokenProgram: args.tokenProgram,
     }),
     getTransferInstruction(
       {
-        authority: args.authority,
-        source: args.sourceAta,
-        destination: args.destinationAta,
         amount: args.amount,
+        authority: args.authority,
+        destination: args.destinationAta,
+        source: args.sourceAta,
       },
       {
         programAddress: args.tokenProgram,

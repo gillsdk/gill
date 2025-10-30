@@ -1,5 +1,5 @@
 import { assertKeyExporterIsAvailable, assertKeyGenerationIsAvailable } from "@solana/assertions";
-import type { KeyPairSigner, createKeyPairFromBytes, createKeyPairSignerFromBytes } from "@solana/kit";
+import type { createKeyPairFromBytes, createKeyPairSignerFromBytes,KeyPairSigner } from "@solana/kit";
 import { createSignerFromKeyPair } from "@solana/kit";
 
 export function assertKeyPairIsExtractable(keyPair: CryptoKeyPair): asserts keyPair is ExtractableCryptoKeyPair {
@@ -21,25 +21,25 @@ export function assertKeyPairIsExtractable(keyPair: CryptoKeyPair): asserts keyP
 type Extractable = { "~extractable": true };
 
 type ExtractableCryptoKeyPair = CryptoKeyPair & Extractable;
-type ExtractableKeyPairSigner = KeyPairSigner & Extractable;
+type ExtractableKeyPairSigner = Extractable & KeyPairSigner;
 
 /**
  * Generates an extractable Ed25519 `CryptoKeyPair` capable of signing messages and transactions
  * */
 export async function generateExtractableKeyPair(): Promise<ExtractableCryptoKeyPair> {
   await assertKeyGenerationIsAvailable();
-  return crypto.subtle.generateKey(
+  return await (crypto.subtle.generateKey(
     /* algorithm */ "Ed25519", // Native implementation status: https://github.com/WICG/webcrypto-secure-curves/issues/20
     /* extractable */ true,
     /* allowed uses */ ["sign", "verify"],
-  ) as Promise<ExtractableCryptoKeyPair>;
+  ) as Promise<ExtractableCryptoKeyPair>);
 }
 
 /**
  * Generates an extractable signer capable of signing messages and transactions using a Crypto KeyPair.
  * */
 export async function generateExtractableKeyPairSigner(): Promise<ExtractableKeyPairSigner> {
-  return createSignerFromKeyPair(await generateExtractableKeyPair()) as Promise<ExtractableKeyPairSigner>;
+  return await (createSignerFromKeyPair(await generateExtractableKeyPair()) as Promise<ExtractableKeyPairSigner>);
 }
 
 /**
@@ -52,7 +52,7 @@ export async function generateExtractableKeyPairSigner(): Promise<ExtractableKey
  * @param keypair An extractable Ed25519 `CryptoKeyPair`
  * @returns Raw key bytes as `Uint8Array`
  */
-export async function extractBytesFromKeyPair(keypair: ExtractableCryptoKeyPair | CryptoKeyPair): Promise<Uint8Array> {
+export async function extractBytesFromKeyPair(keypair: CryptoKeyPair | ExtractableCryptoKeyPair): Promise<Uint8Array> {
   assertKeyPairIsExtractable(keypair);
 
   const [publicKeyBytes, privateKeyJwk] = await Promise.all([
@@ -78,5 +78,5 @@ export async function extractBytesFromKeyPair(keypair: ExtractableCryptoKeyPair 
 export async function extractBytesFromKeyPairSigner(
   keypairSigner: ExtractableKeyPairSigner | KeyPairSigner,
 ): Promise<Uint8Array> {
-  return extractBytesFromKeyPair(keypairSigner.keyPair);
+  return await extractBytesFromKeyPair(keypairSigner.keyPair);
 }

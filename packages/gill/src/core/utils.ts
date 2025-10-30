@@ -1,10 +1,11 @@
 import {
+  type Address,
   assertIsTransactionSigner,
   createNoopSigner,
   isTransactionSigner,
-  type Address,
   type TransactionSigner,
 } from "@solana/kit";
+
 import type { SolanaClusterMoniker } from "../types";
 import { GENESIS_HASH } from "./const";
 

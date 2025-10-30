@@ -1,4 +1,5 @@
 import { Address, GetRecentPrioritizationFeesApi } from "gill";
+
 import { useRecentPrioritizationFees } from "../hooks/recent-prioritization-fees.js";
 
 // [DESCRIBE] useRecentPrioritizationFees
@@ -27,8 +28,8 @@ import { useRecentPrioritizationFees } from "../hooks/recent-prioritization-fees
 
   {
     const { fees } = useRecentPrioritizationFees({
-      addresses: ["123" as Address],
       abortSignal: new AbortController().signal,
+      addresses: ["123" as Address],
     });
     fees satisfies ReturnType<GetRecentPrioritizationFeesApi["getRecentPrioritizationFees"]>;
   }

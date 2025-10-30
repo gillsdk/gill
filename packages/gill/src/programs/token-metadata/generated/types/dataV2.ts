@@ -9,7 +9,10 @@
 import {
   addDecoderSizePrefix,
   addEncoderSizePrefix,
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getArrayDecoder,
   getArrayEncoder,
   getOptionDecoder,
@@ -22,44 +25,42 @@ import {
   getU32Encoder,
   getUtf8Decoder,
   getUtf8Encoder,
-  type Codec,
-  type Decoder,
-  type Encoder,
   type Option,
   type OptionOrNullable,
 } from '@solana/kit';
+
 import {
+  type Collection,
+  type CollectionArgs,
+  type Creator,
+  type CreatorArgs,
   getCollectionDecoder,
   getCollectionEncoder,
   getCreatorDecoder,
   getCreatorEncoder,
   getUsesDecoder,
   getUsesEncoder,
-  type Collection,
-  type CollectionArgs,
-  type Creator,
-  type CreatorArgs,
   type Uses,
   type UsesArgs,
 } from '.';
 
 export type DataV2 = {
+  collection: Option<Collection>;
+  creators: Option<Array<Creator>>;
   name: string;
+  sellerFeeBasisPoints: number;
   symbol: string;
   uri: string;
-  sellerFeeBasisPoints: number;
-  creators: Option<Array<Creator>>;
-  collection: Option<Collection>;
   uses: Option<Uses>;
 };
 
 export type DataV2Args = {
+  collection: OptionOrNullable<CollectionArgs>;
+  creators: OptionOrNullable<Array<CreatorArgs>>;
   name: string;
+  sellerFeeBasisPoints: number;
   symbol: string;
   uri: string;
-  sellerFeeBasisPoints: number;
-  creators: OptionOrNullable<Array<CreatorArgs>>;
-  collection: OptionOrNullable<CollectionArgs>;
   uses: OptionOrNullable<UsesArgs>;
 };
 

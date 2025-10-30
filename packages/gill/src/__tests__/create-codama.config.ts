@@ -43,9 +43,9 @@ describe("createCodamaConfig", () => {
 
   it("should return accept rust client", () => {
     const config = createCodamaConfig({
-      idl,
       clientJs,
       clientRust,
+      idl,
     });
 
     expect(config).toMatchObject({
@@ -74,7 +74,6 @@ describe("createCodamaConfig", () => {
           from: "@codama/renderers-js",
         },
         rust: {
-          from: "@codama/renderers-rust",
           args: [
             clientRust,
             {
@@ -82,6 +81,7 @@ describe("createCodamaConfig", () => {
               formatCode: true,
             },
           ],
+          from: "@codama/renderers-rust",
         },
       },
     });

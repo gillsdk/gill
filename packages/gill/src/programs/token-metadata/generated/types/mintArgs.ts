@@ -7,28 +7,29 @@
  */
 
 import {
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
+  type GetDiscriminatedUnionVariant,
+  type GetDiscriminatedUnionVariantContent,
   getOptionDecoder,
   getOptionEncoder,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
-  type Codec,
-  type Decoder,
-  type Encoder,
-  type GetDiscriminatedUnionVariant,
-  type GetDiscriminatedUnionVariantContent,
   type Option,
   type OptionOrNullable,
 } from "@solana/kit";
+
 import {
-  getAuthorizationDataDecoder,
-  getAuthorizationDataEncoder,
   type AuthorizationData,
   type AuthorizationDataArgs,
+  getAuthorizationDataDecoder,
+  getAuthorizationDataEncoder,
 } from ".";
 
 export type MetadataMintArgs = {
@@ -39,7 +40,7 @@ export type MetadataMintArgs = {
 
 export type MintArgsArgs = {
   __kind: "V1";
-  amount: number | bigint;
+  amount: bigint | number;
   authorizationData: OptionOrNullable<AuthorizationDataArgs>;
 };
 

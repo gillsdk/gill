@@ -7,37 +7,34 @@
  */
 
 import {
+  type Codec,
   combineCodec,
+  type Decoder,
+  type Encoder,
   getDiscriminatedUnionDecoder,
   getDiscriminatedUnionEncoder,
+  type GetDiscriminatedUnionVariant,
+  type GetDiscriminatedUnionVariantContent,
   getStructDecoder,
   getStructEncoder,
   getTupleDecoder,
   getTupleEncoder,
   getUnitDecoder,
   getUnitEncoder,
-  type Codec,
-  type Decoder,
-  type Encoder,
-  type GetDiscriminatedUnionVariant,
-  type GetDiscriminatedUnionVariantContent,
 } from '@solana/kit';
+
 import {
-  getCollectionDecoder,
-  getCollectionEncoder,
   type Collection,
   type CollectionArgs,
+  getCollectionDecoder,
+  getCollectionEncoder,
 } from '.';
 
 export type CollectionToggle =
-  | { __kind: 'None' }
-  | { __kind: 'Clear' }
-  | { __kind: 'Set'; fields: readonly [Collection] };
+  { __kind: 'Clear' } | { __kind: 'None' } | { __kind: 'Set'; fields: readonly [Collection] };
 
 export type CollectionToggleArgs =
-  | { __kind: 'None' }
-  | { __kind: 'Clear' }
-  | { __kind: 'Set'; fields: readonly [CollectionArgs] };
+  { __kind: 'Clear' } | { __kind: 'None' } | { __kind: 'Set'; fields: readonly [CollectionArgs] };
 
 export function getCollectionToggleEncoder(): Encoder<CollectionToggleArgs> {
   return getDiscriminatedUnionEncoder([
