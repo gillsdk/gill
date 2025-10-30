@@ -49,7 +49,7 @@ export function remarkPackageRun({
       }
 
       // Generate the tabs element using our utility function
-      const tabsElement = generatePackageManagerTabs(command, packageManagers, persist);
+      const tabsElement = generatePackageManagerTabs(command, packageManagers, persist, node.meta);
 
       // Replace the code node with the tabs element
       Object.assign(node, tabsElement);

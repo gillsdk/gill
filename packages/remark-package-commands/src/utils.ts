@@ -210,18 +210,20 @@ function buildTabChildren(
  * @param command - The base command to convert for each package manager
  * @param packageManagers - Array of package managers with conversion functions
  * @param persist - Optional persistence configuration for tab state across navigation
+ * @param meta - Optional metadata string from the original code block
  * @returns MDX JSX flow element representing the generated tabs
  */
 export function generatePackageManagerTabs(
   command: string,
   packageManagers: PackageManager[],
   persist?: { id: string } | false,
+  meta?: string | null | undefined,
 ): MdxJsxFlowElement {
   // Build MDX JSX attributes for the Tabs component
   const attributes = buildTabsAttributes(persist, packageManagers);
 
   // Build Tab children elements
-  const children = buildTabChildren(packageManagers, command);
+  const children = buildTabChildren(packageManagers, command, meta);
 
   // Create the Tabs MDX JSX element
   const tabsElement: MdxJsxFlowElement = {
@@ -235,8 +237,48 @@ export function generatePackageManagerTabs(
 }
 
 /**
+ * Parse command string into arguments, handling quotes and escaping similar to npm-to-yarn.
+ * This is used for validation to ensure we can properly parse the command.
+ *
+ * @param command - The command string to parse
+ * @returns Array of parsed arguments
+ */
+function parseCommand(command: string): string[] {
+  const args: string[] = [];
+  let lastQuote: string | false = false;
+  let escaped = false;
+  let part = "";
+
+  for (let i = 0; i < command.length; ++i) {
+    const char = command.charAt(i);
+    if (char === "\\") {
+      part += char;
+      escaped = true;
+    } else {
+      if (char === " " && !lastQuote) {
+        args.push(part);
+        part = "";
+      } else if (!escaped && (char === '"' || char === "'")) {
+        part += char;
+        if (char === lastQuote) {
+          lastQuote = false;
+        } else if (!lastQuote) {
+          lastQuote = char;
+        }
+      } else {
+        part += char;
+      }
+      escaped = false;
+    }
+  }
+  args.push(part);
+  return args.filter((arg) => arg.length > 0);
+}
+
+/**
  * Validate if a command string is safe and non-empty
  * Prevents command injection and DoS attacks through input sanitization
+ * Uses parsing approach similar to npm-to-yarn for proper quote handling
  *
  * @param command - The command string to validate
  * @returns True if the command is safe to process, false otherwise
@@ -254,11 +296,31 @@ export function isValidCommand(command: string): boolean {
     return false;
   }
 
-  // Prevent shell injection patterns (conservative approach for security)
-  // While commands aren't executed directly, this prevents malicious MDX generation
-  const dangerousPatterns = /[;&|`$(){}[\]<>]/;
-  if (dangerousPatterns.test(trimmed)) {
+  // Parse the command to properly handle quoted strings (like npm-to-yarn)
+  // This allows us to validate the actual command parts, not just the raw string
+  let parsedArgs: string[];
+  try {
+    parsedArgs = parseCommand(trimmed);
+  } catch {
+    // If parsing fails, reject the command
     return false;
+  }
+
+  // Ensure we have at least one argument
+  if (parsedArgs.length === 0) {
+    return false;
+  }
+
+  // Validate each parsed argument for dangerous patterns
+  // This approach is more accurate than checking the raw string since it handles quotes properly
+  const dangerousPatterns = /[;&|`$(){}[\]<>]/;
+  for (const arg of parsedArgs) {
+    // Remove quotes from the argument for validation (quotes are valid in commands)
+    const unquoted = arg.replace(/^["']|["']$/g, "");
+    // Check if unquoted content contains dangerous patterns
+    if (dangerousPatterns.test(unquoted)) {
+      return false;
+    }
   }
 
   return true;

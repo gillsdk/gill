@@ -55,7 +55,6 @@
     "fumadocs-core": "^15.2.10",
     "mdast": "^3.0.0",
     "mdast-util-mdx-jsx": "^3.2.0",
-    "npm-to-yarn": "^3.0.1",
     "unified": "^11.0.0",
     "unist-util-visit": "^5.0.0"
   },

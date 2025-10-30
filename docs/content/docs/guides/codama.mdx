@@ -43,10 +43,10 @@ To get started, you first need to install the
   code base (should breaking changes happen in the future).
 </Callout>
 
-This will allow you to execute the Codama CLI via your package manager's "run" command:
+This will allow you to execute the Codama CLI via your package manager's registry execution command:
 
-```shell
-npx codama --version
+```package-execute
+codama --version
 # output: 1.1.1
 ```
 
@@ -153,8 +153,8 @@ case, use the `codama.json` file and manually configure it to your needs.
 
 Run the Codama `init` command and follow the prompts to scaffold your `codama.json` config file:
 
-```shell
-npx codama init
+```package-execute
+codama init
 ```
 
 You will be asked a few questions in order to generate the config file for your IDL:
