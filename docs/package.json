@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@gillsdk/react": "^0.5.1",
+    "@gillsdk/remark-package-commands": "file:../packages/remark-package-commands",
     "fathom-client": "^3.7.2",
     "fumadocs-core": "15.2.10",
     "fumadocs-docgen": "^2.0.0",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.4",
+    "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "22.13.8",
     "@types/react": "^19.0.10",
