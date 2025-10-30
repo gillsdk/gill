@@ -1,10 +1,17 @@
 import { type GetExplorerLinkArgs } from "../types";
 
+export const EXPLORER_SOLANA_BASE_URL = "https://explorer.solana.com/";
+export const EXPLORER_ORB_BASE_URL = "https://orb.helius.dev/";
+export const EXPLORER_SOLSCAN_BASE_URL = "https://solscan.io/";
+export const EXPLORER_SOLANAFM_BASE_URL = "https://solana.fm/";
+const LOCALHOST_RPC_URL = "http://localhost:8899";
+
 /**
  * Craft a Solana Explorer link on any cluster
+ * @param {GetExplorerLinkArgs} props - Configuration object for the explorer link. Defaults to `{}`.
  */
 export function getExplorerLink(props: GetExplorerLinkArgs = {}): string {
-  let url = new URL("https://explorer.solana.com/");
+  const url = new URL(EXPLORER_SOLANA_BASE_URL);
 
   // default to mainnet / mainnet-beta
   if (!props.cluster || props.cluster == "mainnet") props.cluster = "mainnet-beta";
@@ -21,7 +28,7 @@ export function getExplorerLink(props: GetExplorerLinkArgs = {}): string {
     if (props.cluster === "localnet" || props.cluster === "localhost") {
       // localnet technically isn't a cluster, so requires special handling
       url.searchParams.set("cluster", "custom");
-      url.searchParams.set("customUrl", "http://localhost:8899");
+      url.searchParams.set("customUrl", LOCALHOST_RPC_URL);
     } else {
       url.searchParams.set("cluster", props.cluster);
     }
@@ -32,9 +39,10 @@ export function getExplorerLink(props: GetExplorerLinkArgs = {}): string {
 
 /**
  * Craft an Orb Explorer link on any cluster
+ * @param {GetExplorerLinkArgs} props - Configuration object for the explorer link. Defaults to `{}`.
  */
 export function getExplorerLinkOrb(props: GetExplorerLinkArgs = {}): string {
-  let url = new URL("https://orb.helius.dev/");
+  const url = new URL(EXPLORER_ORB_BASE_URL);
 
   // default to mainnet / mainnet-beta
   if (!props.cluster || props.cluster == "mainnet") props.cluster = "mainnet-beta";
@@ -59,9 +67,10 @@ export function getExplorerLinkOrb(props: GetExplorerLinkArgs = {}): string {
 
 /**
  * Craft a Solscan Explorer link on any cluster
+ * @param {GetExplorerLinkArgs} props - Configuration object for the explorer link. Defaults to `{}`.
  */
 export function getExplorerLinkSolscan(props: GetExplorerLinkArgs = {}): string {
-  let url = new URL("https://solscan.io/");
+  const url = new URL(EXPLORER_SOLSCAN_BASE_URL);
 
   // default to mainnet / mainnet-beta
   if (!props.cluster || props.cluster == "mainnet") props.cluster = "mainnet-beta";
@@ -78,7 +87,7 @@ export function getExplorerLinkSolscan(props: GetExplorerLinkArgs = {}): string 
     if (props.cluster === "localnet" || props.cluster === "localhost") {
       // localnet technically isn't a cluster, so requires special handling
       url.searchParams.set("cluster", "custom");
-      url.searchParams.set("customUrl", "http://localhost:8899");
+      url.searchParams.set("customUrl", LOCALHOST_RPC_URL);
     } else {
       url.searchParams.set("cluster", props.cluster);
     }
@@ -90,9 +99,10 @@ export function getExplorerLinkSolscan(props: GetExplorerLinkArgs = {}): string 
 /**
  * Craft a SolanaFM Explorer link on any cluster
  * Note: SolanaFM uses different cluster naming conventions
+ * @param {GetExplorerLinkArgs} props - Configuration object for the explorer link. Defaults to `{}`.
  */
 export function getExplorerLinkSolanafm(props: GetExplorerLinkArgs = {}): string {
-  let url = new URL("https://solana.fm/");
+  const url = new URL(EXPLORER_SOLANAFM_BASE_URL);
 
   // default to mainnet / mainnet-beta
   if (!props.cluster || props.cluster == "mainnet") props.cluster = "mainnet-beta";
