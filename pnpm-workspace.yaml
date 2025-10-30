@@ -1,6 +1,6 @@
 packages:
-  - examples/*
-  - scripts
-  - e2e/*
-  - packages/*
-  - '!docs'
+  - "examples/*"
+  - "scripts"
+  - "e2e/*"
+  - "packages/*"
+  - "!docs"
