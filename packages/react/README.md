@@ -66,6 +66,37 @@ Fetch data from the Solana blockchain with the gill hooks:
 - [`useTokenMint`](#get-token-mint-account) - get a decoded token's Mint account
 - [`useTokenAccount`](#get-token-account) - get the token account for a given mint and owner (or ATA)
 
+Send data to the Solana blockchain with the gill hooks:
+
+- [`useSendTransaction`](#send-transaction) - send a serialized solana transaction (Base64 encoded) to the Solana blockchain
+
+### Example Usage of useSendTransaction hook
+```tsx
+import { useSendTransaction } from "@gillsdk/react";
+
+const { sendTransaction, isPending, data } = useSendTransaction({
+  config: {
+    encoding: "base64",
+    preflightCommitment: "confirmed",
+    skipPreflight: false,
+  }
+});
+
+async function handleClick() {
+  try {
+    // Create a new transaction
+    const transaction = createTransaction(...);
+
+    // Send the Transaction via RPC
+    const result = await sendTransaction(transaction);
+
+    console.log("Signature:", result);
+  } catch (err) {
+    console.error("❌ Error sending transaction:", err);
+  }
+}
+````
+
 ### Wrap your React app in a context provider
 
 Wrap your app with the `SolanaProvider` React context provider and pass your Solana client to it:
