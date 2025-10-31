@@ -73,7 +73,6 @@ Send data to the Solana blockchain with the gill hooks:
 ### Example Usage of useSendTransaction hook
 ```tsx
 import { useSendTransaction } from "@gillsdk/react";
-import { createTransaction } from "gill";
 
 const { sendTransaction, isPending, data } = useSendTransaction({
   config: {

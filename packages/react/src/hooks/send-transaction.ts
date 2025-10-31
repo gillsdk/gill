@@ -1,14 +1,12 @@
 "use client";
 
-import { useSolanaClient } from "./client";
-import { GILL_HOOK_CLIENT_KEY } from "../const";
+import { useSolanaClient } from "./client.js";
+import { GILL_HOOK_CLIENT_KEY } from "../const.js";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { Base64EncodedWireTransaction, SendTransactionApi, Simplify } from "gill";
 
-// Define the configuration type for the RPC method
 type RpcConfig = Simplify<Parameters<SendTransactionApi["sendTransaction"]>[1]>;
 
-// Define the response type for the hook
 type UseSendTransactionResponse = ReturnType<SendTransactionApi["sendTransaction"]>;
 
 type UseSendTransactionInput<TConfig extends RpcConfig = RpcConfig> = {
@@ -56,10 +54,9 @@ export function useSendTransaction<TConfig extends RpcConfig = RpcConfig>({
           encoding: "base64",
           preflightCommitment: "confirmed",
           skipPreflight: false,
-          ...(config),
+          ...config,
         })
         .send({ abortSignal });
-      // Returns a transaction Signature
       return response;
     },
     mutationKey: [GILL_HOOK_CLIENT_KEY, "sendTransaction"],
@@ -70,6 +67,7 @@ export function useSendTransaction<TConfig extends RpcConfig = RpcConfig>({
 
   return {
     ...mutation,
+    send: mutation.mutate,
     sendTransaction: mutation.mutateAsync,
   };
 }
