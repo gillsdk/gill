@@ -117,7 +117,7 @@
     "@solana-program/token-2022": "^0.4.2",
     "@solana/assertions": "^2.1.1",
     "@solana/codecs": "^2.1.1",
-    "@solana/kit": "^2.3.0",
+    "@solana/kit": "^4.0.0",
     "@solana/transaction-confirmation": "^2.1.1"
   },
   "peerDependencies": {
