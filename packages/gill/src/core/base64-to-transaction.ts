@@ -1,4 +1,4 @@
-import type { Base64EncodedWireTransaction, CompilableTransactionMessage, Transaction } from "@solana/kit";
+import type { Base64EncodedWireTransaction, TransactionMessage, TransactionMessageWithFeePayer, Transaction } from "@solana/kit";
 import {
   compileTransaction,
   getBase64EncodedWireTransaction,
@@ -14,7 +14,7 @@ import {
  *
  * Use {@link transactionToBase64WithSignatures} sign and base64 encode
  */
-export function transactionToBase64(tx: CompilableTransactionMessage | Transaction): Base64EncodedWireTransaction {
+export function transactionToBase64(tx: (TransactionMessage & TransactionMessageWithFeePayer) | Transaction): Base64EncodedWireTransaction {
   if ("messageBytes" in tx) return pipe(tx, getBase64EncodedWireTransaction);
   else return pipe(tx, compileTransaction, getBase64EncodedWireTransaction);
 }
@@ -25,7 +25,7 @@ export function transactionToBase64(tx: CompilableTransactionMessage | Transacti
  * See also {@link partiallySignTransactionMessageWithSigners}
  */
 export async function transactionToBase64WithSigners(
-  tx: CompilableTransactionMessage | Transaction,
+  tx: (TransactionMessage & TransactionMessageWithFeePayer) | Transaction,
 ): Promise<Base64EncodedWireTransaction> {
   if ("messageBytes" in tx) return transactionToBase64(tx);
   else return transactionToBase64(await partiallySignTransactionMessageWithSigners(tx));

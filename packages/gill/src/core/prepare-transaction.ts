@@ -1,6 +1,5 @@
 import { COMPUTE_BUDGET_PROGRAM_ADDRESS, getSetComputeUnitLimitInstruction } from "@solana-program/compute-budget";
 import type {
-  CompilableTransactionMessage,
   GetLatestBlockhashApi,
   Rpc,
   SimulateTransactionApi,
@@ -18,9 +17,7 @@ import { isSetComputeLimitInstruction } from "../programs/compute-budget";
 import { transactionToBase64WithSigners } from "./base64-to-transaction";
 import { debug, isDebugEnabled } from "./debug";
 
-type PrepareCompilableTransactionMessage =
-  | CompilableTransactionMessage
-  | (TransactionMessageWithFeePayer & TransactionMessage);
+type PrepareCompilableTransactionMessage = (TransactionMessageWithFeePayer & TransactionMessage);
 
 export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransactionMessage> = {
   /**

@@ -1,6 +1,6 @@
 import type {
   BaseTransactionMessage,
-  CompilableTransactionMessage,
+  TransactionMessage, 
   FullySignedTransaction,
   GetEpochInfoApi,
   GetLatestBlockhashApi,
@@ -44,7 +44,7 @@ type SendTransactionConfigWithoutEncoding = Omit<
 >;
 
 type SendableTransaction =
-  | CompilableTransactionMessage
+  | (TransactionMessage & TransactionMessageWithFeePayer)
   | (FullySignedTransaction & TransactionWithBlockhashLifetime)
   | (BaseTransactionMessage & TransactionMessageWithFeePayer);
 
