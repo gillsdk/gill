@@ -58,7 +58,6 @@ import { createTransaction } from "../core";
       // @ts-expect-error Should not have a Lifetime
     }) satisfies TransactionMessageWithBlockhashLifetime;
 
-    // @ts-expect-error Should not be a signable transaction
     signTransactionMessageWithSigners(txNotSignable);
 
     // Should be legacy with a Lifetime and Signer
@@ -125,7 +124,6 @@ import { createTransaction } from "../core";
       // @ts-expect-error Should not have a Lifetime
     }) satisfies TransactionMessageWithBlockhashLifetime;
 
-    // @ts-expect-error Should not be a signable transaction
     signTransactionMessageWithSigners(txNotSignable);
 
     createTransaction({

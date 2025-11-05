@@ -34,7 +34,6 @@ async () => {
       // @ts-expect-error Should not have a Lifetime
     })) satisfies TransactionMessageWithBlockhashLifetime;
 
-    // @ts-expect-error Should not be a signable transaction
     signTransactionMessageWithSigners(txNotSignable);
 
     const txSignable = (await buildCreateTokenTransaction({
@@ -66,7 +65,6 @@ async () => {
       // @ts-expect-error Should not have a Lifetime
     })) satisfies TransactionMessageWithBlockhashLifetime;
 
-    // @ts-expect-error Should not be a signable transaction
     signTransactionMessageWithSigners(txNotSignable);
 
     const txSignable = (await buildCreateTokenTransaction({

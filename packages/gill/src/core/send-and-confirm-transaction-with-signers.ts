@@ -1,6 +1,5 @@
 import type {
   BaseTransactionMessage,
-  TransactionMessage, 
   FullySignedTransaction,
   GetEpochInfoApi,
   GetLatestBlockhashApi,
@@ -11,7 +10,9 @@ import type {
   Signature,
   SignatureNotificationsApi,
   SlotNotificationsApi,
+  TransactionMessage,
   TransactionMessageWithFeePayer,
+  TransactionMessageWithSigners,
   TransactionWithBlockhashLifetime,
 } from "@solana/kit";
 import {
@@ -42,6 +43,10 @@ type SendTransactionConfigWithoutEncoding = Omit<
   NonNullable<Parameters<SendTransactionApi["sendTransaction"]>[1]>,
   "encoding"
 >;
+
+import type { SignaturesMap, TransactionMessageBytes, TransactionWithinSizeLimit } from "@solana/kit";
+
+
 
 type SendableTransaction =
   | (TransactionMessage & TransactionMessageWithFeePayer)
@@ -90,19 +95,37 @@ export function sendAndConfirmTransactionWithSignersFactory<
   // @ts-ignore - TODO(FIXME)
   const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
   return async function sendAndConfirmTransactionWithSigners(transaction, config = { commitment: "confirmed" }) {
-    if ("messageBytes" in transaction == false) {
-      if ("lifetimeConstraint" in transaction === false) {
+    let signedTx = transaction;
+    
+    // If the transaction is not already serialized
+    if (!("messageBytes" in signedTx)) {
+      // If it doesn't have a blockhash, add it
+      if (!("lifetimeConstraint" in signedTx)) {
         const { value: latestBlockhash } = await rpc.getLatestBlockhash().send({ abortSignal: config.abortSignal });
-        transaction = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, transaction);
-        assertIsTransactionMessageWithBlockhashLifetime(transaction);
+        signedTx = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, signedTx);
+        assertIsTransactionMessageWithBlockhashLifetime(signedTx);
       }
-      transaction = (await signTransactionMessageWithSigners(transaction)) as Readonly<
-        FullySignedTransaction & TransactionWithBlockhashLifetime
-      >;
+
+      // Ensure the transaction has fee payer
+      if (!("feePayer" in signedTx)) {
+        throw new Error("Transaction must have a fee payer");
+      }
+
+      // Sign the transaction and ensure it has all required properties
+      const tempTx = await signTransactionMessageWithSigners(signedTx as TransactionMessage & TransactionMessageWithFeePayer & TransactionMessageWithSigners);
+      signedTx = tempTx as FullySignedTransaction & TransactionWithBlockhashLifetime & TransactionWithinSizeLimit;
     }
-    debug(`Sending transaction: ${getExplorerLink({ transaction: getSignatureFromTransaction(transaction) })}`);
-    debug(`Transaction as base64: ${getBase64EncodedWireTransaction(transaction)}`, "debug");
-    await sendAndConfirmTransaction(transaction, config);
-    return getSignatureFromTransaction(transaction);
+
+    // Assert that we have a fully signed transaction with all required properties
+    const finalTransaction = signedTx as unknown as FullySignedTransaction & 
+      TransactionWithBlockhashLifetime & 
+      TransactionWithinSizeLimit & 
+      Readonly<{ messageBytes: TransactionMessageBytes; signatures: SignaturesMap }>;
+
+    debug(`Sending transaction: ${getExplorerLink({ transaction: getSignatureFromTransaction(finalTransaction) })}`);
+    debug(`Transaction as base64: ${getBase64EncodedWireTransaction(finalTransaction)}`, "debug");
+    
+    await sendAndConfirmTransaction(finalTransaction, config);
+    return getSignatureFromTransaction(finalTransaction);
   };
 }

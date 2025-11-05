@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { type FullySignedTransaction, getSignatureFromTransaction } from "@solana/kit";
+import { getSignatureFromTransaction, ReadonlyUint8Array, SignaturesMap, TransactionMessageBytes } from "@solana/kit";
 
 import { getExplorerLink } from "../core";
 
@@ -104,8 +104,9 @@ describe("getExplorerLink", () => {
           63, 124, 101, 224, 127, 147, 238, 138, 252, 144, 23, 49, 97, 73, 118, 118, 94, 32, 147, 76, 228, 241, 244,
           182, 223, 244, 135, 175, 158, 129, 227, 23, 49, 177, 159, 227, 46, 23, 10,
         ],
-      },
-    } as unknown as FullySignedTransaction;
+      } as SignaturesMap,
+      messageBytes: new Uint8Array() as ReadonlyUint8Array as TransactionMessageBytes
+    };
 
     const signature = getSignatureFromTransaction(signedTx);
     assert.equal(signature, "2YhzivV92fw9oT6RjTBWSdqR8Sc9FTWxzPMwAzeqiWutXfEgiwhXz3iCnayt9P8nmKwwGn2wDYsGRCSdeoxTJCDX");
