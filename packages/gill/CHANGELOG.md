@@ -1,5 +1,13 @@
 # gill
 
+## 0.13.0
+
+### Minor Changes
+
+- [#328](https://github.com/gillsdk/gill/pull/328)
+  [`157dc22`](https://github.com/gillsdk/gill/commit/157dc221655d5fa56fc035d9fbaad58caa48af19) Thanks
+  [@datasalaryman](https://github.com/datasalaryman)! - update solana kit to v5
+
 ## 0.12.0
 
 ### Minor Changes

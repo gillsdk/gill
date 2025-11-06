@@ -1,7 +1,7 @@
 {
   "name": "@gillsdk/react",
   "license": "MIT",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "type": "module",
   "description": "a Solana hooks library for React, built on top of gill - the modern JavaScript/TypeScript library for Solana",
   "scripts": {
