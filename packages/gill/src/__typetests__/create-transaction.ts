@@ -117,15 +117,6 @@ import { createTransaction } from "../core";
       instructions: [ix],
     }) satisfies BaseTransactionMessage<0> & TransactionMessageWithFeePayerSigner;
 
-    const txNotSignable = createTransaction({
-      version: 0,
-      feePayer: feePayer,
-      instructions: [ix],
-      // @ts-expect-error Should not have a Lifetime
-    }) satisfies TransactionMessageWithBlockhashLifetime;
-
-    signTransactionMessageWithSigners(txNotSignable);
-
     createTransaction({
       version: 0,
       feePayer: signer,

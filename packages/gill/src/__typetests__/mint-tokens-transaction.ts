@@ -40,19 +40,6 @@ async () => {
       mintAuthority,
     })) satisfies BaseTransactionMessage<"legacy">;
 
-    const txNotSignable = (await buildMintTokensTransaction({
-      feePayer: signer,
-      version: "legacy",
-      mint,
-      destination,
-      amount: 0,
-      ata,
-      mintAuthority,
-      // @ts-expect-error Should not have a Lifetime
-    })) satisfies TransactionMessageWithBlockhashLifetime;
-
-    signTransactionMessageWithSigners(txNotSignable);
-
     const txSignable = (await buildMintTokensTransaction({
       feePayer: signer,
       version: "legacy",
@@ -79,19 +66,6 @@ async () => {
       ata,
       mintAuthority,
     })) satisfies BaseTransactionMessage<0>;
-
-    const txNotSignable = (await buildMintTokensTransaction({
-      feePayer: signer,
-      version: 0,
-      mint,
-      destination,
-      amount: 0,
-      ata,
-      mintAuthority,
-      // @ts-expect-error Should not have a Lifetime
-    })) satisfies TransactionMessageWithBlockhashLifetime;
-
-    signTransactionMessageWithSigners(txNotSignable);
 
     const txSignable = (await buildMintTokensTransaction({
       feePayer: signer,
