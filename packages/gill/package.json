@@ -115,10 +115,10 @@
     "@solana-program/compute-budget": "^0.10.0",
     "@solana-program/system": "^0.9.0",
     "@solana-program/token-2022": "^0.6.0",
-    "@solana/assertions": "^2.1.1",
-    "@solana/codecs": "^2.1.1",
+    "@solana/assertions": "^5.0.0",
+    "@solana/codecs": "^5.0.0",
     "@solana/kit": "^5.0.0",
-    "@solana/transaction-confirmation": "^2.1.1"
+    "@solana/transaction-confirmation": "^5.0.0"
   },
   "peerDependencies": {
     "typescript": ">=5"
