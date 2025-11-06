@@ -3,10 +3,8 @@
 import type { Rpc, RpcDevnet, RpcMainnet, RpcTestnet, SimulateTransactionApi } from "@solana/kit";
 import {
   FullySignedTransaction,
-  SignaturesMap,
   Transaction,
   TransactionMessage,
-  TransactionMessageBytes,
   TransactionMessageWithFeePayer
 } from "@solana/kit";
 import { simulateTransactionFactory } from "../core/simulate-transaction";
@@ -18,10 +16,7 @@ const rpcMainnet = null as unknown as RpcMainnet<SimulateTransactionApi>;
 
 const baseTransaction = null as unknown as Transaction;
 const compilableTransaction = null as unknown as (TransactionMessage & TransactionMessageWithFeePayer);
-const signedTransaction = null as unknown as (FullySignedTransaction & Readonly<{
-  messageBytes: TransactionMessageBytes;
-  signatures: SignaturesMap;
-}>);
+const signedTransaction = null as unknown as Transaction & FullySignedTransaction;
 
 // [DESCRIBE] simulateTransactionFactory
 {
