@@ -10,20 +10,23 @@ import type {
   Signature,
   SignatureNotificationsApi,
   SlotNotificationsApi,
+  Transaction,
   TransactionMessage,
   TransactionMessageWithFeePayer,
-  TransactionMessageWithSigners,
-  TransactionWithBlockhashLifetime,
+  TransactionWithLifetime
 } from "@solana/kit";
 import {
+  assertIsFullySignedTransaction,
+  assertIsSendableTransaction,
   assertIsTransactionMessageWithBlockhashLifetime,
   assertIsTransactionWithBlockhashLifetime,
+  assertIsTransactionWithinSizeLimit,
   Commitment,
   getBase64EncodedWireTransaction,
   getSignatureFromTransaction,
   sendAndConfirmTransactionFactory,
   setTransactionMessageLifetimeUsingBlockhash,
-  signTransactionMessageWithSigners,
+  signTransactionMessageWithSigners
 } from "@solana/kit";
 import { type waitForRecentTransactionConfirmation } from "@solana/transaction-confirmation";
 import { debug } from "./debug";
@@ -45,13 +48,12 @@ type SendTransactionConfigWithoutEncoding = Omit<
   "encoding"
 >;
 
-import type { SignaturesMap, TransactionMessageBytes, TransactionWithinSizeLimit } from "@solana/kit";
 
 
 
 type SendableTransaction =
   | (TransactionMessage & TransactionMessageWithFeePayer)
-  | (FullySignedTransaction & TransactionWithBlockhashLifetime)
+  | (FullySignedTransaction & TransactionWithLifetime)
   | (BaseTransactionMessage & TransactionMessageWithFeePayer);
 
 export type SendAndConfirmTransactionWithSignersFunction = (
@@ -96,37 +98,45 @@ export function sendAndConfirmTransactionWithSignersFactory<
   // @ts-ignore - TODO(FIXME)
   const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
   return async function sendAndConfirmTransactionWithSigners(transaction, config = { commitment: "confirmed" }) {
-    let signedTx = transaction;
+  let signedTransaction: (Transaction & FullySignedTransaction) | undefined;
     
     // If the transaction is not already serialized
-    if (!("messageBytes" in signedTx)) {
+    if (!("messageBytes" in transaction)) {
       // If it doesn't have a blockhash, add it
-      if (!("lifetimeConstraint" in signedTx)) {
+      if (!("lifetimeConstraint" in transaction)) {
         const { value: latestBlockhash } = await rpc.getLatestBlockhash().send({ abortSignal: config.abortSignal });
-        signedTx = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, signedTx);
-        assertIsTransactionMessageWithBlockhashLifetime(signedTx);
+        transaction = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, transaction);
+        assertIsTransactionMessageWithBlockhashLifetime(transaction);
       }
 
       // Ensure the transaction has fee payer
-      if (!("feePayer" in signedTx)) {
+      if (!("feePayer" in transaction)) {
         throw new Error("Transaction must have a fee payer");
-      }
+      } 
 
       // Sign the transaction and ensure it has all required properties
-      const tempTx = await signTransactionMessageWithSigners(signedTx as TransactionMessage & TransactionMessageWithFeePayer & TransactionMessageWithSigners);
-      assertIsTransactionWithBlockhashLifetime(tempTx); 
+      signedTransaction = await signTransactionMessageWithSigners(transaction);
     }
-
-    // Assert that we have a fully signed transaction with all required properties
-    const finalTransaction = signedTx as unknown as FullySignedTransaction & 
-      TransactionWithBlockhashLifetime & 
-      TransactionWithinSizeLimit & 
-      Readonly<{ messageBytes: TransactionMessageBytes; signatures: SignaturesMap }>;
-
-    debug(`Sending transaction: ${getExplorerLink({ transaction: getSignatureFromTransaction(finalTransaction) })}`);
-    debug(`Transaction as base64: ${getBase64EncodedWireTransaction(finalTransaction)}`, "debug");
     
-    await sendAndConfirmTransaction(finalTransaction, config);
-    return getSignatureFromTransaction(finalTransaction);
+    // If the signing branch didn't run above, `signedTx` will be undefined.
+    // Use an explicit undefined check (instead of a truthy check) to avoid
+    // accidental falsy value edge-cases and then assign the provided
+    // `transaction` as a fully-signed transaction.
+    if (!signedTransaction) {
+      // Cast via unknown to acknowledge the developer intent: if the
+      // caller passed a fully-signed transaction, treat it as such.
+      signedTransaction = transaction as unknown as Transaction & FullySignedTransaction;
+    }
+    
+    assertIsTransactionWithBlockhashLifetime(signedTransaction);
+    assertIsTransactionWithinSizeLimit(signedTransaction);
+    assertIsFullySignedTransaction(signedTransaction);
+    assertIsSendableTransaction(signedTransaction);
+
+    debug(`Sending transaction: ${getExplorerLink({ transaction: getSignatureFromTransaction(signedTransaction) })}`);
+    debug(`Transaction as base64: ${getBase64EncodedWireTransaction(signedTransaction)}`, "debug");
+    
+    await sendAndConfirmTransaction(signedTransaction, config);
+    return getSignatureFromTransaction(signedTransaction);
   };
 }
