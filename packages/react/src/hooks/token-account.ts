@@ -83,9 +83,11 @@ export function useTokenAccount<TConfig extends RpcConfig = RpcConfig, TAddress 
   const { data, ...rest } = useQuery({
     networkMode: "offlineFirst",
     ...options,
-    enabled: (options?.enabled ?? true) && (hasDeclaredAta(tokenAccountOptions)
-      ? !!tokenAccountOptions.ata
-      : Boolean(tokenAccountOptions.mint && tokenAccountOptions.owner)),
+    enabled:
+      (options?.enabled ?? true) &&
+      (hasDeclaredAta(tokenAccountOptions)
+        ? !!tokenAccountOptions.ata
+        : Boolean(tokenAccountOptions.mint && tokenAccountOptions.owner)),
     queryFn: async () => {
       let ata: Address;
 

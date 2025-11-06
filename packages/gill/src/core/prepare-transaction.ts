@@ -16,7 +16,7 @@ import { isSetComputeLimitInstruction, estimateComputeUnitLimitFactory } from ".
 import { transactionToBase64WithSigners } from "./base64-to-transaction";
 import { debug, isDebugEnabled } from "./debug";
 
-type PrepareCompilableTransactionMessage = (TransactionMessageWithFeePayer & TransactionMessage);
+type PrepareCompilableTransactionMessage = TransactionMessageWithFeePayer & TransactionMessage;
 
 export type PrepareTransactionConfig<TMessage extends PrepareCompilableTransactionMessage> = {
   /**

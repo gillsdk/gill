@@ -105,7 +105,7 @@ describe("getExplorerLink", () => {
           182, 223, 244, 135, 175, 158, 129, 227, 23, 49, 177, 159, 227, 46, 23, 10,
         ],
       } as SignaturesMap,
-      messageBytes: new Uint8Array() as ReadonlyUint8Array as TransactionMessageBytes
+      messageBytes: new Uint8Array() as ReadonlyUint8Array as TransactionMessageBytes,
     };
 
     const signature = getSignatureFromTransaction(signedTx);

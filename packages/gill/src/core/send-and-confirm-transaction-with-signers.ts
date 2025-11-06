@@ -13,7 +13,7 @@ import type {
   Transaction,
   TransactionMessage,
   TransactionMessageWithFeePayer,
-  TransactionWithLifetime
+  TransactionWithLifetime,
 } from "@solana/kit";
 import {
   assertIsFullySignedTransaction,
@@ -26,7 +26,7 @@ import {
   getSignatureFromTransaction,
   sendAndConfirmTransactionFactory,
   setTransactionMessageLifetimeUsingBlockhash,
-  signTransactionMessageWithSigners
+  signTransactionMessageWithSigners,
 } from "@solana/kit";
 import { type waitForRecentTransactionConfirmation } from "@solana/transaction-confirmation";
 import { debug } from "./debug";
@@ -47,9 +47,6 @@ type SendTransactionConfigWithoutEncoding = Omit<
   NonNullable<Parameters<SendTransactionApi["sendTransaction"]>[1]>,
   "encoding"
 >;
-
-
-
 
 type SendableTransaction =
   | (TransactionMessage & TransactionMessageWithFeePayer)
@@ -98,26 +95,24 @@ export function sendAndConfirmTransactionWithSignersFactory<
   // @ts-ignore - TODO(FIXME)
   const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
   return async function sendAndConfirmTransactionWithSigners(transaction, config = { commitment: "confirmed" }) {
-  let signedTransaction: (Transaction & FullySignedTransaction) | undefined;
-    
-    // If the transaction is not already serialized
-    if (!("messageBytes" in transaction)) {
-      // If it doesn't have a blockhash, add it
-      if (!("lifetimeConstraint" in transaction)) {
+    let signedTransaction: (Transaction & FullySignedTransaction) | undefined;
+
+    if ("messageBytes" in transaction === false) {
+      if ("lifetimeConstraint" in transaction === false) {
         const { value: latestBlockhash } = await rpc.getLatestBlockhash().send({ abortSignal: config.abortSignal });
         transaction = setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, transaction);
         assertIsTransactionMessageWithBlockhashLifetime(transaction);
       }
 
       // Ensure the transaction has fee payer
-      if (!("feePayer" in transaction)) {
+      if ("feePayer" in transaction === false) {
         throw new Error("Transaction must have a fee payer");
-      } 
+      }
 
       // Sign the transaction and ensure it has all required properties
       signedTransaction = await signTransactionMessageWithSigners(transaction);
     }
-    
+
     // If the signing branch didn't run above, `signedTx` will be undefined.
     // Use an explicit undefined check (instead of a truthy check) to avoid
     // accidental falsy value edge-cases and then assign the provided
@@ -127,7 +122,7 @@ export function sendAndConfirmTransactionWithSignersFactory<
       // caller passed a fully-signed transaction, treat it as such.
       signedTransaction = transaction as unknown as Transaction & FullySignedTransaction;
     }
-    
+
     assertIsTransactionWithBlockhashLifetime(signedTransaction);
     assertIsTransactionWithinSizeLimit(signedTransaction);
     assertIsFullySignedTransaction(signedTransaction);
@@ -135,7 +130,7 @@ export function sendAndConfirmTransactionWithSignersFactory<
 
     debug(`Sending transaction: ${getExplorerLink({ transaction: getSignatureFromTransaction(signedTransaction) })}`);
     debug(`Transaction as base64: ${getBase64EncodedWireTransaction(signedTransaction)}`, "debug");
-    
+
     await sendAndConfirmTransaction(signedTransaction, config);
     return getSignatureFromTransaction(signedTransaction);
   };
