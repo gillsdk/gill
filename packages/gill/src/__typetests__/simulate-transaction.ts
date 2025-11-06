@@ -1,7 +1,16 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import type { Rpc, RpcDevnet, RpcMainnet, RpcTestnet, SimulateTransactionApi } from "@solana/kit";
-import { CompilableTransactionMessage, FullySignedTransaction, Transaction } from "@solana/kit";
+import type {
+  FullySignedTransaction,
+  Rpc,
+  RpcDevnet,
+  RpcMainnet,
+  RpcTestnet,
+  SimulateTransactionApi,
+  Transaction,
+  TransactionMessage,
+  TransactionMessageWithFeePayer,
+} from "@solana/kit";
 import { simulateTransactionFactory } from "../core/simulate-transaction";
 
 const rpc = null as unknown as Rpc<SimulateTransactionApi>;
@@ -10,8 +19,8 @@ const rpcTestnet = null as unknown as RpcTestnet<SimulateTransactionApi>;
 const rpcMainnet = null as unknown as RpcMainnet<SimulateTransactionApi>;
 
 const baseTransaction = null as unknown as Transaction;
-const compilableTransaction = null as unknown as CompilableTransactionMessage;
-const signedTransaction = null as unknown as FullySignedTransaction;
+const compilableTransaction = null as unknown as TransactionMessage & TransactionMessageWithFeePayer;
+const signedTransaction = null as unknown as Transaction & FullySignedTransaction;
 
 // [DESCRIBE] simulateTransactionFactory
 {

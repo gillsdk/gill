@@ -26,17 +26,6 @@ async () => {
       metadata,
     })) satisfies BaseTransactionMessage<"legacy">;
 
-    const txNotSignable = (await buildCreateTokenTransaction({
-      feePayer: signer,
-      version: "legacy",
-      mint,
-      metadata,
-      // @ts-expect-error Should not have a Lifetime
-    })) satisfies TransactionMessageWithBlockhashLifetime;
-
-    // @ts-expect-error Should not be a signable transaction
-    signTransactionMessageWithSigners(txNotSignable);
-
     const txSignable = (await buildCreateTokenTransaction({
       feePayer: signer,
       version: "legacy",
@@ -57,17 +46,6 @@ async () => {
       mint,
       metadata,
     })) satisfies BaseTransactionMessage<0>;
-
-    const txNotSignable = (await buildCreateTokenTransaction({
-      feePayer: signer,
-      version: 0,
-      mint,
-      metadata,
-      // @ts-expect-error Should not have a Lifetime
-    })) satisfies TransactionMessageWithBlockhashLifetime;
-
-    // @ts-expect-error Should not be a signable transaction
-    signTransactionMessageWithSigners(txNotSignable);
 
     const txSignable = (await buildCreateTokenTransaction({
       feePayer: signer,

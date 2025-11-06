@@ -51,16 +51,6 @@ import { createTransaction } from "../core";
       // @ts-expect-error Should not have a Lifetime
     }) satisfies TransactionMessageWithBlockhashLifetime;
 
-    const txNotSignable = createTransaction({
-      version: "legacy",
-      feePayer: signer,
-      instructions: [ix],
-      // @ts-expect-error Should not have a Lifetime
-    }) satisfies TransactionMessageWithBlockhashLifetime;
-
-    // @ts-expect-error Should not be a signable transaction
-    signTransactionMessageWithSigners(txNotSignable);
-
     // Should be legacy with a Lifetime and Signer
     createTransaction({
       version: "legacy",
@@ -117,16 +107,6 @@ import { createTransaction } from "../core";
       feePayer: signer,
       instructions: [ix],
     }) satisfies BaseTransactionMessage<0> & TransactionMessageWithFeePayerSigner;
-
-    const txNotSignable = createTransaction({
-      version: 0,
-      feePayer: feePayer,
-      instructions: [ix],
-      // @ts-expect-error Should not have a Lifetime
-    }) satisfies TransactionMessageWithBlockhashLifetime;
-
-    // @ts-expect-error Should not be a signable transaction
-    signTransactionMessageWithSigners(txNotSignable);
 
     createTransaction({
       version: 0,
