@@ -99,6 +99,8 @@ const latestBlockhash = "" as unknown as ReturnType<GetLatestBlockhashApi["getLa
     > &
       TransactionWithDurableNonceLifetime;
 
+    // @ts-expect-error - durable nonce transactions are not currently supported
+    // todo: add support for nonce based transactions
     sendAndConfirmTransaction(signedTransactionWithNonceLifetime);
 
     // Should accept a legacy transaction, with or without a latest blockhash
