@@ -17,6 +17,7 @@ import type {
 } from "@solana/kit";
 import {
   assertIsTransactionMessageWithBlockhashLifetime,
+  assertIsTransactionWithBlockhashLifetime,
   Commitment,
   getBase64EncodedWireTransaction,
   getSignatureFromTransaction,
@@ -113,7 +114,7 @@ export function sendAndConfirmTransactionWithSignersFactory<
 
       // Sign the transaction and ensure it has all required properties
       const tempTx = await signTransactionMessageWithSigners(signedTx as TransactionMessage & TransactionMessageWithFeePayer & TransactionMessageWithSigners);
-      signedTx = tempTx as FullySignedTransaction & TransactionWithBlockhashLifetime & TransactionWithinSizeLimit;
+      assertIsTransactionWithBlockhashLifetime(tempTx); 
     }
 
     // Assert that we have a fully signed transaction with all required properties
