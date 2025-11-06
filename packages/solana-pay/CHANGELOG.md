@@ -1,5 +1,12 @@
 # @gillsdk/solana-pay
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [[`157dc22`](https://github.com/gillsdk/gill/commit/157dc221655d5fa56fc035d9fbaad58caa48af19)]:
+  - gill@0.13.0
+
 ## 0.6.0
 
 ### Minor Changes
