@@ -1,5 +1,17 @@
 # gill
 
+## 0.14.0
+
+### Minor Changes
+
+- [#334](https://github.com/gillsdk/gill/pull/334)
+  [`e345aa9`](https://github.com/gillsdk/gill/commit/e345aa9977513ce9f8635543bad3d5ed392365d5) Thanks
+  [@beeman](https://github.com/beeman)! - move @gillsdk/config-eslint to devDependencies
+
+- [#335](https://github.com/gillsdk/gill/pull/335)
+  [`0ea4c93`](https://github.com/gillsdk/gill/commit/0ea4c93d0f2a812b2fcceb2b467f8c9bb8b3afb8) Thanks
+  [@beeman](https://github.com/beeman)! - update @solana-program dependencies
+
 ## 0.13.0
 
 ### Minor Changes
