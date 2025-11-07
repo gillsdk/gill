@@ -110,7 +110,6 @@
     "node": ">=20.18.0"
   },
   "dependencies": {
-    "@gillsdk/config-eslint": "workspace:*",
     "@solana-program/address-lookup-table": "^0.10.0",
     "@solana-program/compute-budget": "^0.11.0",
     "@solana-program/system": "^0.10.0",
@@ -119,6 +118,9 @@
     "@solana/codecs": "^5.0.0",
     "@solana/kit": "^5.0.0",
     "@solana/transaction-confirmation": "^5.0.0"
+  },
+  "devDependencies": {
+    "@gillsdk/config-eslint": "workspace:*"
   },
   "peerDependencies": {
     "typescript": ">=5"
