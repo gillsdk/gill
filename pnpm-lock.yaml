@@ -188,9 +188,6 @@ importers:
 
   packages/gill:
     dependencies:
-      '@gillsdk/config-eslint':
-        specifier: workspace:*
-        version: link:../config-eslint
       '@solana-program/address-lookup-table':
         specifier: ^0.9.0
         version: 0.9.0(@solana/kit@5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)))
@@ -218,6 +215,10 @@ importers:
       typescript:
         specifier: '>=5'
         version: 5.9.2
+    devDependencies:
+      '@gillsdk/config-eslint':
+        specifier: workspace:*
+        version: link:../config-eslint
 
   packages/react:
     dependencies:
