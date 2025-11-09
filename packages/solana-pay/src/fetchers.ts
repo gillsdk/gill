@@ -89,14 +89,14 @@ export async function fetchSolanaPayRequest<TResponse = unknown>(
  *
  * @example
  * ```typescript
- * const { label, icon } = await getTransactionRequest(
+ * const { label, icon } = await fetchSolanaPayGetRequest(
  *   new URL('https://merchant.example.com/api')
  * );
  * console.log(label); // "Example Merchant"
  * console.log(icon);  // "https://merchant.example.com/icon.svg"
  * ```
  */
-export async function getTransactionRequest(
+export async function fetchSolanaPayGetRequest(
   url: URL,
   options?: RequestInit,
 ): Promise<SolanaPayTransactionRequestGetResponse> {
@@ -121,7 +121,7 @@ export async function getTransactionRequest(
  *
  * @example
  * ```typescript
- * const { transaction, message } = await postTransactionRequest(
+ * const { transaction, message } = await fetchSolanaPayPostRequest(
  *   new URL('https://merchant.example.com/api'),
  *   { account: address("user123...") }
  * );
@@ -129,7 +129,7 @@ export async function getTransactionRequest(
  * // message is an optional string to display to the user
  * ```
  */
-export async function postTransactionRequest(
+export async function fetchSolanaPayPostRequest(
   url: URL,
   body: SolanaPayTransactionRequestPostRequest,
   options?: RequestInit,
@@ -155,6 +155,6 @@ export async function postTransactionRequest(
  * ```
  */
 export const solanaPayTransactionRequest = {
-  get: getTransactionRequest,
-  post: postTransactionRequest,
+  get: fetchSolanaPayGetRequest,
+  post: fetchSolanaPayPostRequest,
 };
