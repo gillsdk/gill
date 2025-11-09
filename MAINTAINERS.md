@@ -78,6 +78,50 @@ to
 
 will break developer experience by removing all the types from the different paths.
 
+# Docs
+
+When building the docs for production, the `build-api-docs.sh` script is run which will run the `compile:docs` script
+for each of the configured submodule packages. This includes building the submodule itself, generating typedocs for it,
+and moving those typedocs into the `docs/content/api` directory in a sub-directory for each submodule.
+
+This process utilizes the `typedoc-data.mjs` to know where specifically to put each submodule's docs and what to insert
+into its respective `index.mdx` to ensure we have nice looking docs.
+
+## Submodule API references
+
+To include any submodule in the gill docs' [API references section](https://www.gillsdk.com/api), each submodules must
+be properly configured.
+
+steps to update include a submodule package in the api docs:
+
+In the `docs` directory:
+
+1. install the submodule into the docs themselves (required for use by `twoslash` to get prettier code blocks)
+
+```shell
+pnpm add @gillsdk/react@latest --ignore-workspace
+```
+
+2. update the docs' `update:gill` script to include the new package (allow maintainers to update all packages at once)
+3. update the `typedoc-data.mjs` to include the key and frontmatter details for the submodules, following existing
+   patterns
+
+In the respective submodule's source code directory:
+
+1. Setup the submodule's typedoc configuration via a `typedoc.json` file in the submodules's directory (along side it's
+   `package.json`)
+1. Create a `compile:docs` script command that will compile the typedocs
+   - See `@gillsdk/react` [here](/packages/react/package.json) for an example of a submodule with a single import path
+   - See `gill` [here](/packages/gill/package.json) for an example of a submodule with a multiple import paths
+1. Create a `move:docs` script command that will relocate the compiled typedocs from its submodule specific build
+   location to the actual gill docs content directory
+1. Create a `clean:docs` script command that can purge the existing submodule docs (ensures the docs build is fresh)
+
+> Note: The `docs/content/api` subdirectories are intentionally git ignored to ensure they are built fresh on docs
+> deployments. This also allows the docs site to load much faster when running locally (by removing the submodule api
+> references directory) since we rarely need to view these locally. But you can still build the api references and view
+> them if you need too. Flexibility :)
+
 # Token Metadata program client
 
 The included Token Metadata program client was generated using [Codama](https://github.com/codama-idl/codama).
