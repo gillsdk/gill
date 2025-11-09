@@ -62,5 +62,5 @@ export async function postTransactionRequest(
  */
 export const solanaPayTransactionRequest = {
   get: getTransactionRequest,
-  post: getTransactionRequest,
+  post: postTransactionRequest,
 };
