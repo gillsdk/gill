@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "update:gill": "pnpm add gill@latest @gillsdk/react@latest @gillsdk/solana-pay@latest",
+    "update:gill": "pnpm add --ignore-workspace gill@latest @gillsdk/react@latest @gillsdk/solana-pay@latest",
     "prebuild": "./build-api-docs.sh",
     "build": "next build",
     "dev": "next dev --turbo",
@@ -22,7 +22,7 @@
     "yarn": "please-use-pnpm"
   },
   "dependencies": {
-    "@gillsdk/react": "^0.5.1",
+    "@gillsdk/react": "^0.6.2",
     "@gillsdk/solana-pay": "^0.6.2",
     "fathom-client": "^3.7.2",
     "fumadocs-core": "15.2.10",
@@ -30,7 +30,7 @@
     "fumadocs-mdx": "11.6.1",
     "fumadocs-twoslash": "^3.1.1",
     "fumadocs-ui": "15.2.10",
-    "gill": "0.11.0",
+    "gill": "0.14.0",
     "lucide-react": "^0.513.0",
     "next": "15.3.1",
     "react": "^19.0.0",
