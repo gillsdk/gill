@@ -1,0 +1,357 @@
+---
+title: Solana Pay
+description: "Guide on how to utilize the Solana Pay protocol using the gill sdk."
+---
+
+Solana Pay is a standardized protocol for encoding transaction requests within URLs, enabling
+payments and other blockchain interactions across the Solana ecosystem. The protocol supports both
+simple transfer requests for direct payments and interactive "transaction requests" for more complex
+use cases like merchant checkouts or scenarios where you need a non-user controlled keypair to
+pre-sign a transaction.
+
+The gill SDK provides a complete, type-safe implementation of the
+[Solana Pay specification](https://github.com/solana-foundation/solana-pay/blob/master/SPEC.md) with
+comprehensive validation and error handling. This guide covers how to create, parse, and validate
+Solana Pay URLs using [`@gillsdk/solana-pay`](https://www.npmjs.com/package/@gillsdk/solana-pay).
+
+## Request Types
+
+Solana Pay supports two distinct request types, each suited for different use cases:
+
+**Transfer Requests:**
+
+- Non-interactive request for SOL or SPL token transfer
+- All payment details encoded directly in the URL
+- Wallet constructs and submits transaction immediately
+- Best for simple payments, invoices, and QR code payments
+- No server infrastructure required
+
+```text
+solana:nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5?amount=1.5&label=Coffee+Shop
+```
+
+**Transaction Requests:**
+
+- Interactive, multi-step checkout flow
+- URL points to an HTTPS endpoint that provides transaction details
+- Requires GET request for merchant info, then POST request for transaction
+- Best for complex transactions, server signers, dynamic pricing, and merchant integrations
+- Requires server-side implementation and HTTPS
+
+```
+solana:https://checkout.usedecal.com/api/solana-pay-transaction
+```
+
+## Install the Solana Pay SDK
+
+This guide requires both the `gill` SDK and the
+[`@gillsdk/solana-pay`](https://www.npmjs.com/package/@gillsdk/solana-pay) package.
+
+```package-install
+gill @gillsdk/solana-pay
+```
+
+## Transfer Requests
+
+Transfer requests are non-interactive URLs that encode all SOL or SPL token transfer details
+directly in the URL parameters. When a wallet app scans or receives a transfer request URL, it can
+construct and submit the transaction without any additional network requests.
+
+<Callout>
+  
+The Solana Pay Transfer Request's `amount` parameter is used to denote how many tokens are
+requested in the transfer transaction. Crucially, this `amount` is the UI amount (aka
+human-readable amount), not the raw blockchain amount.
+
+- For SOL, this means SOL (not lamports)
+- For SPL tokens, this means the token's display amount (not the raw token amount)
+
+</Callout>
+
+### Basic SOL Transfer
+
+The simplest transfer request specifies only a recipient address:
+
+```ts twoslash
+import { encodeSolanaPayURL } from "@gillsdk/solana-pay";
+import { address } from "gill";
+
+const recipient = address("nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5");
+
+const url = encodeSolanaPayURL({ recipient });
+// → "solana:nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5"
+```
+
+To specify a specific amount of tokens to be transferred by the user, add the `amount` parameter.
+The `amount` field is the UI amount (human-readable amount), not the raw blockchain amount. For SOL,
+this means SOL (not lamports). For SPL tokens, this means the token's display amount (not the raw
+token amount).
+
+```ts twoslash
+import { encodeSolanaPayURL } from "@gillsdk/solana-pay";
+import { address } from "gill";
+
+const recipient = address("nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5");
+
+// Request 1.5 SOL
+const url = encodeSolanaPayURL({
+  recipient,
+  amount: 1.5,
+});
+// → "solana:nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5?amount=1.5"
+```
+
+### SPL Token Transfers
+
+To request a token transfer instead of SOL, specify the `splToken` parameter with the token mint
+address. The `amount` is still the UI amount based on the token's decimals (not the raw token
+amount).
+
+```ts twoslash
+import { encodeSolanaPayURL } from "@gillsdk/solana-pay";
+import { address } from "gill";
+
+const recipient = address("nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5");
+const usdcMint = address("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+
+// Request 100 USDC
+const url = encodeSolanaPayURL({
+  recipient,
+  amount: 100,
+  splToken: usdcMint,
+});
+```
+
+When `splToken` is specified, the wallet will create a token transfer instruction using the
+Associated Token Account convention.
+
+### Reference Keys
+
+Reference keys enable transaction tracking by including one or more public keys as read-only keys in
+the transaction. This allows you to query for specific transactions using the
+`getSignaturesForAddress` RPC method.
+
+```ts twoslash
+import { encodeSolanaPayURL } from "@gillsdk/solana-pay";
+import { address } from "gill";
+
+const recipient = address("nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5");
+const referenceKey = address("Href9m18T7a9TKgS21e9Y9Aa1yce1Sw3TjXbRJ9Exm5P");
+
+const url = encodeSolanaPayURL({
+  recipient,
+  amount: 1,
+  reference: referenceKey,
+});
+```
+
+You can include multiple reference keys by passing an array:
+
+```ts twoslash
+import { encodeSolanaPayURL } from "@gillsdk/solana-pay";
+import { address } from "gill";
+
+const recipient = address("nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5");
+const ref1 = address("Href9m18T7a9TKgS21e9Y9Aa1yce1Sw3TjXbRJ9Exm5P");
+const ref2 = address("2nT8kNX7YvTBMekVWKqpRdDKQ7z9r8FVq4VNSS3bH4Qo");
+
+const url = encodeSolanaPayURL({
+  recipient,
+  amount: 1,
+  reference: [ref1, ref2],
+});
+```
+
+For more details on generating and using reference keys, see the
+[Reference Keys guide](/docs/guides/reference-keys).
+
+### Labels, Messages, and Memos
+
+Solana Pay Transfer requests support additional metadata to provide context:
+
+- **label**: Describes the source of the request (e.g., merchant name)
+- **message**: Describes the nature of the transfer (e.g., what's being purchased)
+- **memo**: Text included in an SPL Memo instruction in the transaction
+
+```ts twoslash
+import { encodeSolanaPayURL } from "@gillsdk/solana-pay";
+import { address } from "gill";
+
+const recipient = address("nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5");
+const usdcMint = address("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+
+const url = encodeSolanaPayURL({
+  recipient,
+  amount: 9.67,
+  label: "Coffee Shop",
+  message: "Payment for espresso and croissant",
+  memo: "Order #12345",
+  splToken: usdcMint,
+});
+```
+
+<Callout type="warn">
+  Memo data is recorded publicly onchain and should not contain sensitive information.
+</Callout>
+
+## Transaction Requests
+
+Transaction requests are interactive URLs that point to an HTTPS endpoint. Unlike transfer requests,
+transaction requests require the wallet app to make HTTP requests to fetch transaction details from
+a server.
+
+### Creating Transaction Request URLs
+
+Transaction requests require an HTTPS URL and optionally include `label` and `message` metadata:
+
+```ts twoslash
+import { encodeSolanaPayURL } from "@gillsdk/solana-pay";
+
+const url = encodeSolanaPayURL({
+  link: new URL("https://merchant.example.com/checkout"),
+  label: "Example Merchant",
+  message: "Purchase item #42",
+});
+// → "solana:https%3A%2F%2Fmerchant.example.com%2Fcheckout?label=Example+Merchant&message=Purchase+item+%2342"
+```
+
+<Callout type="error">
+  Transaction request links MUST use HTTPS. The `@gillsdk/solana-pay` SDK validates this requirement
+  and will throw an error for non-HTTPS URLs.
+</Callout>
+
+If your link includes query parameters, they will be properly URL-encoded:
+
+```ts twoslash
+import { encodeSolanaPayURL } from "@gillsdk/solana-pay";
+
+const url = encodeSolanaPayURL({
+  link: new URL("https://merchant.example.com/api?item=123&quantity=2"),
+});
+```
+
+### Fetching Merchant Information (GET Request)
+
+When a wallet receives a transaction request URL, it first makes a GET request to fetch the
+merchant's label and icon:
+
+```ts twoslash
+import { solanaPayTransactionRequest } from "@gillsdk/solana-pay";
+
+const response = await solanaPayTransactionRequest.get(new URL("https://merchant.example.com/api"));
+
+console.log(response.label); // "Example Merchant"
+console.log(response.icon); // "https://merchant.example.com/icon.svg"
+```
+
+The icon URL must point to an SVG, PNG, WebP, JPG, or JPEG file.
+
+### Requesting a Transaction (POST Request)
+
+After displaying the merchant information to the user, the wallet makes a POST request with the
+user's account to receive the transaction to sign:
+
+```ts twoslash
+import { solanaPayTransactionRequest } from "@gillsdk/solana-pay";
+import { address } from "gill";
+
+const userAccount = address("nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5");
+
+const response = await solanaPayTransactionRequest.post(
+  new URL("https://merchant.example.com/api"),
+  { account: userAccount },
+);
+
+const transaction = response.transaction;
+const message = response.message; // Optional message to display
+```
+
+The underlying response contains a base64-encoded transaction that the wallet will present to the
+user for signing. The `@gillsdk/solana-pay` sdk will automatically decode and deserialize this
+transaction from a `string` to a ready to sign `Transaction`.
+
+## Parsing Solana Pay URLs
+
+The `parseSolanaPayURL` function parses any Solana Pay URL and returns the appropriate typed
+structure:
+
+```ts twoslash
+import { parseSolanaPayURL } from "@gillsdk/solana-pay";
+
+const url = "solana:nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5?amount=1";
+const parsed = parseSolanaPayURL(url);
+
+// Use a type guard to determine the request type
+if ("link" in parsed) {
+  // Transaction request
+  const { link, label, message } = parsed;
+  console.log("Transaction request to:", link.href);
+} else {
+  // Transfer request
+  const { recipient, amount, splToken, reference, label, message, memo } = parsed;
+  console.log("Transfer request for:", amount, "to", recipient);
+}
+```
+
+The parser automatically validates the URL format and throws a `SolanaPayParseURLError` if the URL
+is invalid.
+
+## Response Validation
+
+For advanced use cases where you need to manually validate API responses, the SDK provides
+validation functions:
+
+### Validating GET Responses
+
+```ts twoslash
+import { parseSolanaPayGetResponse } from "@gillsdk/solana-pay";
+
+const data = await fetch("https://merchant.example.com/api").then((r) => r.json());
+const validated = parseSolanaPayGetResponse(data);
+// Ensures data has required 'label' and 'icon' fields with correct formats
+```
+
+### Validating POST Responses
+
+```ts twoslash
+import { parseSolanaPayPostResponse } from "@gillsdk/solana-pay";
+
+const data = await fetch("https://merchant.example.com/api", {
+  method: "POST",
+  body: JSON.stringify({ account: "nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5" }),
+}).then((r) => r.json());
+
+const validated = parseSolanaPayPostResponse(data);
+// Ensures data has required 'transaction' field and optional 'message'
+```
+
+Both functions throw a `SolanaPayResponseError` if validation fails.
+
+<Callout title="Security Considerations">
+The gill SDK enforces several security measures:
+
+- **HTTPS Requirement**: Transaction request links must use HTTPS to prevent man-in-the-middle
+  attacks
+- **URL Length Validation**: URLs are limited to 2048 characters
+- **Comprehensive Input Validation**: All addresses, amounts, and other parameters are validated
+  before encoding
+- **Transaction Validation**: Wallets should validate all transaction details before prompting the
+  user to sign
+
+Always validate transactions received from untrusted sources and never sign transactions without
+user review.
+
+</Callout>
+
+## Summary
+
+The `@gillsdk/solana-pay` package provides everything needed to implement Solana Pay in your
+application:
+
+- **Transfer Requests**: Create payment URLs for SOL and SPL tokens with optional reference tracking
+- **Transaction Requests**: Build interactive checkout flows with HTTPS endpoints
+- **URL Parsing**: Parse and validate any Solana Pay URL with full type safety
+- **Response Handling**: Fetch and validate merchant information and transactions
+
+For more information on the Solana Pay protocol, refer to the
+[official specification](https://github.com/solana-foundation/solana-pay/blob/master/SPEC.md).
