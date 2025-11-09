@@ -1,5 +1,24 @@
 # @gillsdk/solana-pay
 
+## 0.7.0
+
+### Minor Changes
+
+- [#342](https://github.com/gillsdk/gill/pull/342)
+  [`a4477bd`](https://github.com/gillsdk/gill/commit/a4477bde6744f9e2b06b7992548e9f0d61fbb6b3) Thanks
+  [@nickfrosty](https://github.com/nickfrosty)! - renamed existing fetchers for clarity and added a new generic fetcher
+
+### Patch Changes
+
+- [#339](https://github.com/gillsdk/gill/pull/339)
+  [`52e07ae`](https://github.com/gillsdk/gill/commit/52e07ae6458990b64a2814286188e7a0fb0057e8) Thanks
+  [@nickfrosty](https://github.com/nickfrosty)! - comprehensive readme
+
+- [#341](https://github.com/gillsdk/gill/pull/341)
+  [`8014797`](https://github.com/gillsdk/gill/commit/8014797e0e49d65b33e9f096b9b767aba87169a7) Thanks
+  [@nickfrosty](https://github.com/nickfrosty)! - fix `solanaPayTransactionRequest.post` to actually make post request
+  (not a GET request)
+
 ## 0.6.2
 
 ### Patch Changes
