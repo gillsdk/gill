@@ -33,4 +33,11 @@ export const typedocPageIndexData = {
         "A React hooks library for easily interacting with the Solana blockchain. Built on top of gill and TanStack Query.",
     },
   },
+  "solana-pay": {
+    frontmatter: {
+      title: "@gillsdk/solana-pay",
+      description:
+        "A complete, type-safe implementation of the Solana Pay specification for creating, parsing, and validating transfer and transaction request URLs.",
+    },
+  },
 };
