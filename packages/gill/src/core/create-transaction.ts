@@ -2,6 +2,7 @@ import { getSetComputeUnitLimitInstruction, getSetComputeUnitPriceInstruction } 
 import type {
   Address,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithDurableNonceLifetime,
   TransactionMessageWithFeePayer,
   TransactionMessageWithFeePayerSigner,
   TransactionSigner,
@@ -16,6 +17,7 @@ import {
   setTransactionMessageFeePayer,
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
+  setTransactionMessageLifetimeUsingDurableNonce,
 } from "@solana/kit";
 import type { Simplify } from "../types";
 import type { CreateTransactionInput, FullTransaction } from "../types/transactions";
@@ -44,6 +46,19 @@ export function createTransaction<
 >;
 export function createTransaction<
   TVersion extends TransactionVersion | "auto",
+  TFeePayer extends TransactionSigner,
+  TLifetimeConstraint extends TransactionMessageWithDurableNonceLifetime["lifetimeConstraint"],
+>(
+  props: CreateTransactionInput<TVersion, TFeePayer, TLifetimeConstraint>,
+): Simplify<
+  FullTransaction<
+    TVersion extends "auto" ? TransactionVersion : TVersion,
+    TransactionMessageWithFeePayerSigner,
+    TransactionMessageWithDurableNonceLifetime
+  >
+>;
+export function createTransaction<
+  TVersion extends TransactionVersion | "auto",
   TFeePayer extends Address,
   TLifetimeConstraint extends TransactionMessageWithBlockhashLifetime["lifetimeConstraint"],
 >(
@@ -57,6 +72,19 @@ export function createTransaction<
 >;
 export function createTransaction<
   TVersion extends TransactionVersion | "auto",
+  TFeePayer extends Address,
+  TLifetimeConstraint extends TransactionMessageWithDurableNonceLifetime["lifetimeConstraint"],
+>(
+  props: CreateTransactionInput<TVersion, TFeePayer, TLifetimeConstraint>,
+): Simplify<
+  FullTransaction<
+    TVersion extends "auto" ? TransactionVersion : TVersion,
+    TransactionMessageWithFeePayer,
+    TransactionMessageWithDurableNonceLifetime
+  >
+>;
+export function createTransaction<
+  TVersion extends TransactionVersion | "auto",
   TFeePayer extends Address | TransactionSigner,
   TLifetimeConstraint extends TransactionMessageWithBlockhashLifetime["lifetimeConstraint"],
 >(
@@ -71,11 +99,25 @@ export function createTransaction<
 export function createTransaction<
   TVersion extends TransactionVersion | "auto",
   TFeePayer extends Address | TransactionSigner,
+  TLifetimeConstraint extends TransactionMessageWithDurableNonceLifetime["lifetimeConstraint"],
+>(
+  props: CreateTransactionInput<TVersion, TFeePayer, TLifetimeConstraint>,
+): Simplify<
+  FullTransaction<
+    TVersion extends "auto" ? TransactionVersion : TVersion,
+    TransactionMessageWithFeePayer,
+    TransactionMessageWithDurableNonceLifetime
+  >
+>;
+export function createTransaction<
+  TVersion extends TransactionVersion | "auto",
+  TFeePayer extends Address | TransactionSigner,
 >({
   version,
   feePayer,
   instructions,
   latestBlockhash,
+  durableNonce,
   computeUnitLimit,
   computeUnitPrice,
 }: CreateTransactionInput<TVersion, TFeePayer>): FullTransaction<
@@ -103,7 +145,11 @@ export function createTransaction<
       return createTransactionMessage({ version: selectedVersion });
     })(),
     (tx) => {
-      const withLifetime = latestBlockhash ? setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx) : tx;
+      const withLifetime = latestBlockhash ? 
+        setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx) : 
+        durableNonce ? 
+          setTransactionMessageLifetimeUsingDurableNonce(durableNonce, tx) : 
+          tx;
       if (typeof feePayer !== "string" && "address" in feePayer && isTransactionSigner(feePayer)) {
         return setTransactionMessageFeePayerSigner(feePayer, withLifetime);
       } else return setTransactionMessageFeePayer(feePayer, withLifetime);
