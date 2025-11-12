@@ -62,12 +62,11 @@ configuration.
 
 ### JSON Array Format
 
-The most common format for storing keypairs in environment variables is the JSON array format - a
-stringified array of 64 numbers representing the keypair bytes (the same format as the keypairs
-generated and used by the Solana CLI):
+The most common format for storing keypairs in environment variables is the JSON array format (a
+stringified array of 64 numbers representing the keypair bytes). This is the same format as the
+keypairs generated and used by the Solana CLI.
 
 ```ts twoslash
-// @noErrors
 import { loadKeypairSignerFromEnvironment } from "gill/node";
 
 // Expects process.env.MY_KEYPAIR to contain: [123,45,67,89,...]
@@ -93,7 +92,6 @@ to copy and paste, and is commonly used in certain wallet applications.
 Use `loadKeypairSignerFromEnvironmentBase58()` when your keypair is stored in this format:
 
 ```ts twoslash
-// @noErrors
 import { loadKeypairSignerFromEnvironmentBase58 } from "gill/node";
 
 // Expects process.env.MY_KEYPAIR to contain a base58 string
@@ -141,7 +139,6 @@ This is particularly useful for:
 Here's how to generate and save a keypair to a `.env` file:
 
 ```ts twoslash
-// @noErrors
 import { generateExtractableKeyPairSigner } from "gill";
 import { saveKeypairSignerToEnvFile } from "gill/node";
 
@@ -166,7 +163,6 @@ MY_KEYPAIR=[123,45,67,89,...]
 You can specify a custom path for the environment file:
 
 ```ts twoslash
-// @noErrors
 import { generateExtractableKeyPairSigner } from "gill";
 import { saveKeypairSignerToEnvFile } from "gill/node";
 
@@ -204,7 +200,6 @@ By default, `loadKeypairSignerFromFile()` loads the keypair from the default Sol
 (`~/.config/solana/id.json`):
 
 ```ts twoslash
-// @noErrors
 import { loadKeypairSignerFromFile } from "gill/node";
 
 const signer = await loadKeypairSignerFromFile();
@@ -217,7 +212,6 @@ console.log("Loaded signer:", signer.address);
 You can also specify a custom path to load keypairs from other locations:
 
 ```ts twoslash
-// @noErrors
 import { loadKeypairSignerFromFile } from "gill/node";
 
 const signer = await loadKeypairSignerFromFile("./my-keypair.json");
@@ -263,7 +257,6 @@ Common use cases for saving keypairs to files include:
 ### Generating and Saving an Extractable Keypair
 
 ```ts twoslash
-// @noErrors
 import { generateExtractableKeyPairSigner } from "gill";
 import { saveKeypairSignerToFile } from "gill/node";
 
@@ -327,7 +320,6 @@ Here are some security best practices:
 Here's a typical pattern for a backend service that works in both development and production:
 
 ```ts twoslash
-// @noErrors
 import { loadKeypairSignerFromFile, loadKeypairSignerFromEnvironment } from "gill/node";
 
 // Load keypair based on environment
