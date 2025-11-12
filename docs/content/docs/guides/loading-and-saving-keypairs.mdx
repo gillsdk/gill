@@ -1,0 +1,354 @@
+---
+title: Loading and Saving Keypairs
+description:
+  Guide on loading and saving keypairs from files and environment variables in server-side
+  environments.
+---
+
+When building server-side applications, backend services, or CLI tools, you'll often need to manage
+keypairs for signing transactions. The `gill/node` package provides utilities for loading keypairs
+from the filesystem or environment variables, and even simplifies saving them for later use.
+
+This guide covers the essential functions for keypair management in JavaScript server environments
+including Node.js, Bun, and others.
+
+## Installation
+
+To get started, install the `gill` package:
+
+```package-install
+gill
+```
+
+The server-side keypair utilities are available under the `gill/node` export path:
+
+```ts
+import { loadKeypairSignerFromFile, saveKeypairSignerToFile } from "gill/node";
+```
+
+## Available Functions
+
+The `gill/node` package provides the following keypair management functions:
+
+**Loading functions:**
+
+- `loadKeypairSignerFromFile()` - Load a keypair signer from a filesystem JSON file (defaults to
+  Solana CLI path)
+- `loadKeypairSignerFromEnvironment()` - Load a keypair signer from an environment variable (JSON
+  array format)
+- `loadKeypairSignerFromEnvironmentBase58()` - Load a keypair signer from an environment variable
+  (base58 format)
+
+**Saving functions:**
+
+- `saveKeypairSignerToFile()` - Save an extractable keypair signer to a filesystem JSON file
+- `saveKeypairSignerToEnvFile()` - Save an extractable keypair signer to a `.env` file
+
+All functions also have non-`Signer` variants (e.g., `loadKeypairFromFile`) that work with raw
+`CryptoKeyPair` objects instead of `KeyPairSigner` objects. See the
+[Related Functions](#related-functions) section for more details.
+
+## Loading Keypairs from Environment Variables
+
+Environment variables are the recommended approach for loading Solana keypairs in production
+environments, serverless functions, and CI/CD pipelines. This method provides better security and
+portability compared to storing private keys in files on disk.
+
+When you load a keypair from an environment variable, the keypair data is stored as a string value
+in your system's environment (like `process.env` in Node.js). This approach is particularly useful
+in cloud deployments, containerized applications, GitHub Actions, and other automated workflows
+where file system access may be limited or where secrets are managed through environment
+configuration.
+
+### JSON Array Format
+
+The most common format for storing keypairs in environment variables is the JSON array format - a
+stringified array of 64 numbers representing the keypair bytes (the same format as the keypairs
+generated and used by the Solana CLI):
+
+```ts twoslash
+// @noErrors
+import { loadKeypairSignerFromEnvironment } from "gill/node";
+
+// Expects process.env.MY_KEYPAIR to contain: [123,45,67,89,...]
+const signer = await loadKeypairSignerFromEnvironment("MY_KEYPAIR");
+
+console.log("Loaded signer:", signer.address);
+```
+
+Your `.env` file would look like this:
+
+```bash
+MY_KEYPAIR=[123,45,67,89,...]
+# or
+MY_KEYPAIR="[123,45,67,89,...]"
+```
+
+### Base58 Format
+
+Some Solana wallets, browser extensions, and third-party tools export keypairs as base58-encoded
+strings instead of JSON arrays. The base58 format is a compact string representation that's easier
+to copy and paste, and is commonly used in certain wallet applications.
+
+Use `loadKeypairSignerFromEnvironmentBase58()` when your keypair is stored in this format:
+
+```ts twoslash
+// @noErrors
+import { loadKeypairSignerFromEnvironmentBase58 } from "gill/node";
+
+// Expects process.env.MY_KEYPAIR to contain a base58 string
+const signer = await loadKeypairSignerFromEnvironmentBase58("MY_KEYPAIR");
+
+console.log("Loaded signer:", signer.address);
+```
+
+Your `.env` file with base58 format would look like this:
+
+```bash
+MY_KEYPAIR=5J7WTMRm9FG6TvmzJkKp3qQ...
+# or
+MY_KEYPAIR="5J7WTMRm9FG6TvmzJkKp3qQ..."
+```
+
+<Callout type="warn">
+  Both environment variable loading functions will throw an error if the specified environment
+  variable is not set. Make sure your environment variables are properly configured before running
+  your application.
+</Callout>
+
+## Saving Keypairs to Environment Files
+
+When setting up a server-side application or preparing configuration for deployment, you may need to
+generate new keypairs and save them to environment files for later use. The
+`saveKeypairSignerToEnvFile()` function generates a `.env` file entry that you can use in
+development or copy to your production environment's secret management system.
+
+This is particularly useful for:
+
+- Initial project setup when you need to create a new Solana wallet for your backend
+- Local development configurations
+- Generating keypairs that will be deployed to cloud platforms (AWS, Google Cloud, Vercel, etc.)
+- CI/CD pipeline configuration
+
+<Callout type="error">
+  **Security Warning**: Only [**extractable**
+  keypairs](/docs/getting-started/signers#generating-extractable-keypairs-and-signers) can be saved
+  to environment files. You must generate keypairs using `generateExtractableKeyPairSigner()`
+  instead of the regular `generateKeyPairSigner()`. This is a deliberate security feature - regular
+  keypairs keep the private key material locked in memory and cannot be exported.
+</Callout>
+
+Here's how to generate and save a keypair to a `.env` file:
+
+```ts twoslash
+// @noErrors
+import { generateExtractableKeyPairSigner } from "gill";
+import { saveKeypairSignerToEnvFile } from "gill/node";
+
+// Generate an extractable keypair
+const signer = await generateExtractableKeyPairSigner();
+
+// Save to .env file (defaults to ./.env)
+await saveKeypairSignerToEnvFile(signer, "MY_KEYPAIR");
+
+console.log("Keypair saved to .env file");
+```
+
+This will append to your `.env` file with a helpful comment showing the public address:
+
+```bash
+# Solana Address: 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
+MY_KEYPAIR=[123,45,67,89,...]
+```
+
+### Custom .env File Path
+
+You can specify a custom path for the environment file:
+
+```ts twoslash
+// @noErrors
+import { generateExtractableKeyPairSigner } from "gill";
+import { saveKeypairSignerToEnvFile } from "gill/node";
+
+const signer = await generateExtractableKeyPairSigner();
+
+// Save to a custom .env file
+await saveKeypairSignerToEnvFile(signer, "MY_KEYPAIR", "./config/.env.production");
+```
+
+<Callout type="warn">
+  The function will throw an error if the environment variable name already exists in `process.env`.
+  This prevents accidentally overwriting existing configuration.
+</Callout>
+
+## Loading Keypairs from Files
+
+For local development, testing, and CLI tools, loading Solana keypairs from JSON files on your
+filesystem is often the most convenient approach. The Solana CLI (Command Line Interface) stores
+keypairs as JSON files by default, making this method seamlessly compatible with existing Solana
+tooling.
+
+File-based keypair loading is ideal for:
+
+- **Local development** - Working on your laptop or development machine
+- **Solana CLI integration** - Using keypairs generated with `solana-keygen`
+- **CLI tools and scripts** - Node.js or Bun scripts that interact with Solana
+- **Testing and debugging** - Quick iteration without managing environment variables
+
+The keypair files contain a JSON array of 64 bytes (numbers from 0-255) representing the full
+keypair.
+
+### Using the Default Solana CLI Path
+
+By default, `loadKeypairSignerFromFile()` loads the keypair from the default Solana CLI keypair path
+(`~/.config/solana/id.json`):
+
+```ts twoslash
+// @noErrors
+import { loadKeypairSignerFromFile } from "gill/node";
+
+const signer = await loadKeypairSignerFromFile();
+
+console.log("Loaded signer:", signer.address);
+```
+
+### Using a Custom File Path
+
+You can also specify a custom path to load keypairs from other locations:
+
+```ts twoslash
+// @noErrors
+import { loadKeypairSignerFromFile } from "gill/node";
+
+const signer = await loadKeypairSignerFromFile("./my-keypair.json");
+
+console.log("Loaded signer:", signer.address);
+```
+
+The file should contain a JSON array of 64 numbers (the standard Solana CLI format):
+
+```json
+[123, 45, 67, 89, ...]
+```
+
+<Callout type="info">
+  The `loadKeypairSignerFromFile()` function supports tilde (`~`) expansion in file paths, so you
+  can use paths like `~/wallets/my-keypair.json`.
+</Callout>
+
+## Saving Keypairs to Files
+
+When building CLI tools, development scripts, or testing utilities, you may need to generate new
+Solana keypairs and save them as JSON files on your local filesystem. The
+`saveKeypairSignerToFile()` function makes this easy by creating Solana CLI-compatible keypair files
+that can be used across your development workflow.
+
+Common use cases for saving keypairs to files include:
+
+- **Generating test wallets** - Creating throwaway keypairs for development and testing on
+  devnet/testnet
+- **CLI tool development** - Building tools that need to create and manage multiple wallets
+- **Development automation** - Scripts that set up local development environments
+- **Backup and portability** - Creating keypair files that can be easily copied or backed up
+
+<Callout type="error">
+  **Important Security Consideration**: Only [**extractable**
+  keypairs](/docs/getting-started/signers#generating-extractable-keypairs-and-signers) can be saved
+  to files or environment variables. Regular keypairs generated with `generateKeyPairSigner()` are
+  **non-extractable** by design for security reasons - the private key material is locked in memory
+  and cannot be exported. To save a keypair, you must use `generateExtractableKeyPairSigner()`
+  instead.
+</Callout>
+
+### Generating and Saving an Extractable Keypair
+
+```ts twoslash
+// @noErrors
+import { generateExtractableKeyPairSigner } from "gill";
+import { saveKeypairSignerToFile } from "gill/node";
+
+// Generate an extractable keypair
+const signer = await generateExtractableKeyPairSigner();
+
+console.log("Generated signer:", signer.address);
+
+// Save to a JSON file
+const saved = await saveKeypairSignerToFile(signer, "./my-new-keypair.json");
+
+if (saved) {
+  console.log("Keypair saved successfully!");
+}
+```
+
+The function validates the save by attempting to reload the file, returning `true` if successful.
+
+<Callout type="info">
+  The file path must end with `.json` extension. The function will create the file if it doesn't
+  exist, or overwrite it if it does.
+</Callout>
+
+## Best Practices
+
+### Development vs Production
+
+- **Development**: Use `loadKeypairSignerFromFile()` to load from the Solana CLI default path or
+  project-specific files
+- **Production**: Use `loadKeypairSignerFromEnvironment()` or
+  `loadKeypairSignerFromEnvironmentBase58()` to load from environment variables
+
+### Security Considerations
+
+<Callout type="error">
+  Never commit keypair files or `.env` files containing private keys to version control. Add them to
+  your `.gitignore` file immediately.
+</Callout>
+
+Here are some security best practices:
+
+1. **Use extractable keypairs only when necessary**: Regular (non-extractable) keypairs are more
+   secure because the private key material cannot be extracted from memory. Only use extractable
+   keypairs when you actually need to save or export them.
+
+2. **Protect your files**: If you must store keypairs in files, ensure they have appropriate file
+   permissions (e.g., `chmod 600` on Unix systems).
+
+3. **Use environment variables in production**: Environment variables are generally more secure than
+   files for production deployments, as they don't persist on disk and can be managed by secret
+   management systems.
+
+4. **Rotate keys regularly**: Implement a key rotation strategy, especially for production systems.
+
+5. **Use secret management services**: For production environments, consider using dedicated secret
+   management services like AWS Secrets Manager, Google Secret Manager, or HashiCorp Vault instead
+   of plain environment variables.
+
+### Common Patterns
+
+Here's a typical pattern for a backend service that works in both development and production:
+
+```ts twoslash
+// @noErrors
+import { loadKeypairSignerFromFile, loadKeypairSignerFromEnvironment } from "gill/node";
+
+// Load keypair based on environment
+const signer =
+  process.env.NODE_ENV === "production"
+    ? await loadKeypairSignerFromEnvironment("KEYPAIR")
+    : await loadKeypairSignerFromFile(); // Uses Solana CLI default
+
+console.log("Loaded signer for", process.env.NODE_ENV, ":", signer.address);
+```
+
+## Related Functions
+
+If you need to work with raw `CryptoKeyPair` objects instead of `KeyPairSigner` objects, the
+following functions are also available:
+
+- `loadKeypairFromFile()` - Returns `CryptoKeyPair`
+- `loadKeypairFromEnvironment()` - Returns `CryptoKeyPair`
+- `loadKeypairFromEnvironmentBase58()` - Returns `CryptoKeyPair`
+- `saveKeypairToFile()` - Accepts `CryptoKeyPair`
+- `saveKeypairToEnvFile()` - Accepts `CryptoKeyPair`
+
+The `*Signer` variants are recommended for most use cases as they return ready-to-use signers for
+transactions.
