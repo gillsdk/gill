@@ -1,7 +1,7 @@
 import assert from "node:assert";
 
 import { transactionFromBase64, type Address } from "gill";
-import { fetchSolanaPayRequest, fetchSolanaPayGetRequest, fetchSolanaPayPostRequest } from "../fetchers.js";
+import { fetchSolanaPayGetRequest, fetchSolanaPayPostRequest, fetchSolanaPayRequest } from "../fetchers.js";
 
 // Mock fetch for testing
 const originalFetch = globalThis.fetch;
@@ -46,7 +46,8 @@ describe("HTTP Integration Tests", () => {
     const url = new URL("https://example.com/pay");
     const result = await fetchSolanaPayGetRequest(url);
 
-    assert.deepEqual(result, mockResponse);
+    assert.equal(result.label, mockResponse.label);
+    assert.equal(result.icon.href, mockResponse.icon);
   });
 
   it("should successfully complete POST transaction request flow (with unsigned transaction)", async () => {

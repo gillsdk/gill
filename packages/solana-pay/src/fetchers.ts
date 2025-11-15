@@ -2,8 +2,8 @@ import { SolanaPayTransactionRequestPostRequest, validateSolanaPayRequestUrl } f
 import {
   parseSolanaPayGetResponse,
   parseSolanaPayPostResponse,
-  SolanaPayTransactionRequestGetResponse,
-  SolanaPayTransactionRequestPostResponse,
+  SolanaPayTransactionRequestGetResponseParsed,
+  SolanaPayTransactionRequestPostResponseParsed,
 } from "./response.js";
 
 /**
@@ -93,13 +93,13 @@ export async function fetchSolanaPayRequest<TResponse = unknown>(
  *   new URL('https://merchant.example.com/api')
  * );
  * console.log(label); // "Example Merchant"
- * console.log(icon);  // "https://merchant.example.com/icon.svg"
+ * console.log(icon);  // URL object: https://merchant.example.com/icon.svg
  * ```
  */
 export async function fetchSolanaPayGetRequest(
   url: URL,
   options?: RequestInit,
-): Promise<SolanaPayTransactionRequestGetResponse> {
+): Promise<SolanaPayTransactionRequestGetResponseParsed> {
   return fetchSolanaPayRequest(url, {
     method: "GET",
     parser: parseSolanaPayGetResponse,
@@ -133,7 +133,7 @@ export async function fetchSolanaPayPostRequest(
   url: URL,
   body: SolanaPayTransactionRequestPostRequest,
   options?: RequestInit,
-): Promise<SolanaPayTransactionRequestPostResponse> {
+): Promise<SolanaPayTransactionRequestPostResponseParsed> {
   return fetchSolanaPayRequest(url, {
     method: "POST",
     body,

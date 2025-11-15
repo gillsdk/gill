@@ -10,6 +10,16 @@ export interface SolanaPayTransactionRequestGetResponse {
 }
 
 export interface SolanaPayTransactionRequestPostResponse {
+  transaction: string;
+  message?: string;
+}
+
+export interface SolanaPayTransactionRequestGetResponseParsed {
+  label: string;
+  icon: URL;
+}
+
+export interface SolanaPayTransactionRequestPostResponseParsed {
   transaction: Transaction;
   message?: string;
 }
@@ -19,7 +29,7 @@ export interface SolanaPayTransactionRequestPostResponse {
  * [GET response](https://github.com/solana-foundation/solana-pay/blob/master/SPEC.md#get-response)
  * per the spec
  */
-export function parseSolanaPayGetResponse(data: any): SolanaPayTransactionRequestGetResponse {
+export function parseSolanaPayGetResponse(data: any): SolanaPayTransactionRequestGetResponseParsed {
   if (!data.label || typeof data.label !== "string") {
     throw new SolanaPayResponseError("Invalid response: missing or invalid label");
   }
@@ -49,7 +59,7 @@ export function parseSolanaPayGetResponse(data: any): SolanaPayTransactionReques
 
   return {
     label: data.label,
-    icon: data.icon,
+    icon: iconUrl,
   };
 }
 
@@ -58,7 +68,7 @@ export function parseSolanaPayGetResponse(data: any): SolanaPayTransactionReques
  * [POST response](https://github.com/solana-foundation/solana-pay/blob/master/SPEC.md#post-response)
  * per the spec
  */
-export function parseSolanaPayPostResponse(data: any): SolanaPayTransactionRequestPostResponse {
+export function parseSolanaPayPostResponse(data: any): SolanaPayTransactionRequestPostResponseParsed {
   if (!data.transaction || typeof data.transaction !== "string") {
     throw new SolanaPayResponseError("Invalid response: missing or invalid transaction");
   }
