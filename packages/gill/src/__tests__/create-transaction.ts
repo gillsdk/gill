@@ -1,6 +1,6 @@
 import assert from "node:assert";
 
-import { type Address, blockhash, generateKeyPairSigner, isKeyPairSigner, type KeyPairSigner } from "@solana/kit";
+import { type Address, type Nonce,  blockhash, generateKeyPairSigner, isKeyPairSigner, type KeyPairSigner } from "@solana/kit";
 
 import { createTransaction } from "../core";
 import { hasSetComputeLimitInstruction, hasSetComputeUnitPriceInstruction } from "../programs";
@@ -108,7 +108,7 @@ describe("createTransaction", () => {
     assert.equal(hasSetComputeUnitPriceInstruction(tx), true);
   });
 
-  it("create a version 0 transaction with an `Address` as the feePayer", () => {
+  it("create a version 0 transaction with an `Address` as the feePayer with a blockhash lifetime", () => {
     const tx = createTransaction({
       feePayer: signer.address,
       instructions: [],
@@ -125,6 +125,28 @@ describe("createTransaction", () => {
     assert.equal(tx.instructions.length, 0);
     assert.equal(Object.hasOwn(tx, "lifetimeConstraint"), true);
     assert.equal(tx.lifetimeConstraint.blockhash, "GK1nopeF3P8J46dGqq4KfaEWopZU7K65F6CKQXuUdr3z");
+    assert.equal(hasSetComputeUnitPriceInstruction(tx), false);
+    assert.equal(hasSetComputeLimitInstruction(tx), false);
+  });
+
+  it("create a version 0 transaction with an `Address` as the feePayer with a durable nonce lifetime", () => {
+    const tx = createTransaction({
+      feePayer: signer.address,
+      instructions: [],
+      durableNonce: {
+        nonce: '123' as Nonce,
+        nonceAccountAddress: '123' as Address,
+        nonceAuthorityAddress: '123' as Address,
+      },
+      version: 0,
+    });
+
+    assert.equal(tx.version, 0);
+    assert.equal(tx.feePayer.address, signer.address);
+    assert.equal(isKeyPairSigner(tx.feePayer), false);
+    assert.equal(tx.instructions.length, 1); // Nonce advance instruction
+    assert.equal(Object.hasOwn(tx, "lifetimeConstraint"), true);
+    assert.equal(tx.lifetimeConstraint.nonce, '123' as Nonce);
     assert.equal(hasSetComputeUnitPriceInstruction(tx), false);
     assert.equal(hasSetComputeLimitInstruction(tx), false);
   });
