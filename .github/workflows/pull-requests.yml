@@ -3,7 +3,7 @@ name: Pull requests
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
 
 env:
   # Among other things, opts out of Turborepo telemetry
@@ -26,7 +26,8 @@ jobs:
     strategy:
       matrix:
         node:
-          - "current"
+          # !stopping builds on current since node v25.2.0 breaks things with `localStorage`
+          # - "current"
           - "lts/*"
 
     name: Build & Test on Node ${{ matrix.node }}
@@ -44,4 +45,3 @@ jobs:
 
       - name: Test
         run: pnpm test # Don't add --concurrency here; it's already baked in
-        
