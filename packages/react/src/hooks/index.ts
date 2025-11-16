@@ -1,4 +1,5 @@
 export * from "./account.js";
+export * from "./accounts-by-owner.js";
 export * from "./balance.js";
 export * from "./client.js";
 export * from "./latest-blockhash.js";
