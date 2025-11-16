@@ -11,7 +11,8 @@ describe("parseSolanaPayGetResponse", () => {
     };
 
     const result = parseSolanaPayGetResponse(data);
-    assert.deepEqual(result, data);
+    assert.equal(result.label, data.label);
+    assert.equal(result.icon.href, data.icon);
   });
 
   it("should throw error for missing label", () => {
@@ -118,7 +119,7 @@ describe("parseSolanaPayGetResponse", () => {
       };
 
       const result = parseSolanaPayGetResponse(data);
-      assert.equal(result.icon, data.icon);
+      assert.equal(result.icon.href, data.icon);
     }
   });
 
@@ -129,7 +130,7 @@ describe("parseSolanaPayGetResponse", () => {
     };
 
     const result = parseSolanaPayGetResponse(data);
-    assert.equal(result.icon, data.icon);
+    assert.equal(result.icon.href, data.icon);
   });
 });
 

@@ -1,6 +1,6 @@
 import { type Address } from "gill";
 import assert from "node:assert";
-import { parseSolanaPayURL, SolanaPayTransactionRequestURL, type SolanaPayTransferRequestURL } from "../parse-url.ts";
+import { parseSolanaPayURL, SolanaPayTransactionRequestURL, type SolanaPayTransferRequestURL } from "../parse-url.js";
 
 describe("parseSolanaPayURL", () => {
   const pubkey = "nick6zJc6HpW3kfBm4xS2dmbuVRyb5F3AnUvj5ymzR5" as Address;
