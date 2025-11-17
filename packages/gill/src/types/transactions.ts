@@ -3,6 +3,7 @@ import type {
   BaseTransactionMessage,
   Instruction,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithDurableNonceLifetime,
   TransactionMessageWithFeePayer,
   TransactionMessageWithFeePayerSigner,
   TransactionSigner,
@@ -14,7 +15,10 @@ import type { Simplify } from ".";
 export type CreateTransactionInput<
   TVersion extends TransactionVersion | "auto",
   TFeePayer extends Address | TransactionSigner = TransactionSigner,
-  TLifetimeConstraint extends TransactionMessageWithBlockhashLifetime["lifetimeConstraint"] | undefined = undefined,
+  TLifetimeConstraint extends
+    | TransactionMessageWithBlockhashLifetime["lifetimeConstraint"] 
+    | TransactionMessageWithDurableNonceLifetime["lifetimeConstraint"]
+    | undefined = undefined,
 > = {
   /** Compute unit limit value to set on this transaction */
   computeUnitLimit?: bigint | number;
@@ -30,6 +34,11 @@ export type CreateTransactionInput<
    * */
   latestBlockhash?: TLifetimeConstraint;
   /**
+   * Durable nonce lifetime for this transaction to
+   * accepted for execution on the Solana network
+   * */
+  durableNonce?: TLifetimeConstraint;
+  /**
    * Transaction version
    * - `auto` automatically selects based on instruction content (default)
    * - `legacy` for traditional transactions
@@ -43,11 +52,16 @@ export type CreateTransactionInput<
 export type FullTransaction<
   TVersion extends TransactionVersion,
   TFeePayer extends TransactionMessageWithFeePayer | TransactionMessageWithFeePayerSigner,
-  TBlockhashLifetime extends TransactionMessageWithBlockhashLifetime | undefined = undefined,
+  TLifetime extends 
+    | TransactionMessageWithBlockhashLifetime 
+    | TransactionMessageWithDurableNonceLifetime 
+    | undefined = undefined,
 > = Simplify<
   BaseTransactionMessage<TVersion> &
     TFeePayer &
-    (TBlockhashLifetime extends TransactionMessageWithBlockhashLifetime
+    (TLifetime extends TransactionMessageWithBlockhashLifetime
       ? TransactionMessageWithBlockhashLifetime
-      : object)
+      : TLifetime extends TransactionMessageWithDurableNonceLifetime
+        ? TransactionMessageWithDurableNonceLifetime
+        : object)
 >;

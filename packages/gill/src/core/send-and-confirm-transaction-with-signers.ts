@@ -24,6 +24,7 @@ import {
   Commitment,
   getBase64EncodedWireTransaction,
   getSignatureFromTransaction,
+  sendAndConfirmDurableNonceTransactionFactory,
   sendAndConfirmTransactionFactory,
   setTransactionMessageLifetimeUsingBlockhash,
   signTransactionMessageWithSigners,
@@ -94,6 +95,9 @@ export function sendAndConfirmTransactionWithSignersFactory<
 }: SendAndConfirmTransactionWithSignersFactoryConfig<TCluster>): SendAndConfirmTransactionWithSignersFunction {
   // @ts-ignore - TODO(FIXME)
   const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+  // @ts-ignore - TODO(FIXME)
+  const sendAndConfirmDurableNonceTransaction = sendAndConfirmDurableNonceTransactionFactory({ rpc, rpcSubscriptions });
+  
   return async function sendAndConfirmTransactionWithSigners(transaction, config = { commitment: "confirmed" }) {
     let signedTransaction: (Transaction & FullySignedTransaction) | undefined;
 
@@ -123,7 +127,6 @@ export function sendAndConfirmTransactionWithSignersFactory<
       signedTransaction = transaction as unknown as Transaction & FullySignedTransaction;
     }
 
-    assertIsTransactionWithBlockhashLifetime(signedTransaction);
     assertIsTransactionWithinSizeLimit(signedTransaction);
     assertIsFullySignedTransaction(signedTransaction);
     assertIsSendableTransaction(signedTransaction);
@@ -131,7 +134,21 @@ export function sendAndConfirmTransactionWithSignersFactory<
     debug(`Sending transaction: ${getExplorerLink({ transaction: getSignatureFromTransaction(signedTransaction) })}`);
     debug(`Transaction as base64: ${getBase64EncodedWireTransaction(signedTransaction)}`, "debug");
 
-    await sendAndConfirmTransaction(signedTransaction, config);
+    // Check if the transaction has a durable nonce lifetime or blockhash lifetime
+    if (
+      "lifetimeConstraint" in signedTransaction &&
+      signedTransaction.lifetimeConstraint &&
+      typeof signedTransaction.lifetimeConstraint === "object" &&
+      "nonce" in signedTransaction.lifetimeConstraint
+    ) {
+      // Durable nonce transaction
+      await sendAndConfirmDurableNonceTransaction(signedTransaction as any, config);
+    } else {
+      // Blockhash-based transaction
+      assertIsTransactionWithBlockhashLifetime(signedTransaction);
+      await sendAndConfirmTransaction(signedTransaction, config);
+    }
+
     return getSignatureFromTransaction(signedTransaction);
   };
 }

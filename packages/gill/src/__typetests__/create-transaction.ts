@@ -5,6 +5,7 @@ import type {
   Instruction,
   KeyPairSigner,
   TransactionMessageWithBlockhashLifetime,
+  TransactionMessageWithDurableNonceLifetime,
   TransactionMessageWithFeePayer,
   TransactionMessageWithFeePayerSigner,
 } from "@solana/kit";
@@ -17,6 +18,7 @@ import { createTransaction } from "../core";
   const feePayer = null as unknown as Address;
   const signer = null as unknown as KeyPairSigner;
   const latestBlockhash = null as unknown as TransactionMessageWithBlockhashLifetime["lifetimeConstraint"];
+  const durableNonce = null as unknown as TransactionMessageWithDurableNonceLifetime["lifetimeConstraint"];
 
   const ix = null as unknown as Instruction;
 
@@ -143,5 +145,38 @@ import { createTransaction } from "../core";
 
     // Should be a signable transaction
     signTransactionMessageWithSigners(txSignable);
+
+    // Should be version 0 with a Durable Nonce Lifetime and Signer
+    createTransaction({
+      version: 0,
+      feePayer: signer,
+      instructions: [ix],
+      durableNonce,
+    }) satisfies BaseTransactionMessage<0> &
+      TransactionMessageWithDurableNonceLifetime &
+      TransactionMessageWithFeePayerSigner;
+
+    // Should be version 0 with a Durable Nonce Lifetime and address (aka non Signer)
+    const txDurableNonceSignable = createTransaction({
+      version: 0,
+      feePayer: feePayer,
+      instructions: [ix],
+      durableNonce,
+    }) satisfies BaseTransactionMessage<0> &
+      TransactionMessageWithDurableNonceLifetime &
+      TransactionMessageWithFeePayer;
+
+    createTransaction({
+      version: 0,
+      feePayer: feePayer,
+      instructions: [ix],
+      durableNonce,
+      // @ts-expect-error Should not be a "fee payer signer"
+    }) satisfies TransactionMessageWithFeePayerSigner;
+
+    // Should be a signable transaction
+    signTransactionMessageWithSigners(txDurableNonceSignable);
+
+    
   }
 }
