@@ -304,6 +304,15 @@ importers:
         specifier: ^3.6.20
         version: 3.6.20
 
+  packages/testing:
+    dependencies:
+      gill:
+        specifier: workspace:*
+        version: link:../gill
+      typescript:
+        specifier: '>=5'
+        version: 5.9.2
+
   packages/tsconfig: {}
 
   packages/vue:
