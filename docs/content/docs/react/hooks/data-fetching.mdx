@@ -492,7 +492,7 @@ const { account } = useAccount({
   address,
   options: {
     staleTime: 30000, // Consider data fresh for 30 seconds
-    cacheTime: 300000, // Keep in cache for 5 minutes
+    gcTime: 300000, // Time to garbage-collect unused queries (5 minutes)
   },
 });
 ```
