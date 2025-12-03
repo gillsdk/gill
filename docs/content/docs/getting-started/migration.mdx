@@ -1,0 +1,312 @@
+---
+title: Migration Guide
+
+description: The Complete Guide to Migrating from @solana/kit to Gill
+---
+
+This guide provides a comprehensive walkthrough for migrating your Solana application from
+`@solana/kit` to `gill`. Since **gill** is built directly on top of **@solana/kit**, it's fully
+compatible, making the switch seamless and highly beneficial.
+
+By the end of this guide, you will have replaced the old packages, refactored your code to take
+advantage of Gill's powerful abstractions, and learned how to build a modern, reactive frontend with
+`@gillsdk/react`.
+
+## Why Migrate to Gill?
+
+Before diving in, it's helpful to understand the benefits. Migrating to Gill allows you to:
+
+- **Reduce Boilerplate**: Gill provides higher-level abstractions for common tasks, significantly
+  cutting down on verbose code.
+- **Simplify Dependencies**: Gill bundles clients for the most common Solana Program Library (SPL)
+  programs, so you can remove multiple `@solana-program/*` packages from your project.
+- **Maintain Flexibility**: While offering simple abstractions, Gill still exposes the same
+  low-level primitives as `@solana/kit`, giving you granular control.
+- **Improve Code Readability**: With simplified functions, your application's business logic becomes
+  clearer and easier to maintain.
+
+## Part 1: Core Migration Steps
+
+The migration involves four main steps: installing `gill`, understanding its import structure,
+replacing your existing imports, and then uninstalling the old packages.
+
+### 1. Install Gill
+
+First, add the `gill` package to your project using your preferred package manager.
+
+```package-install
+gill
+```
+
+### 2. Understanding Gill's Import Paths
+
+Before you start replacing imports, it's important to know that Gill organizes its functionality
+into distinct paths. This improves code organization and ensures you only bundle what you need for a
+specific environment.
+
+- `import { ... } from "gill"`: This is the **main entry point** for all core functionalities that
+  work in any JavaScript environment. You'll use this for functions like `createSolanaClient`,
+  `createTransaction`, and `generateKeyPairSigner`.
+- `import { ... } from "gill/programs"`: This path is dedicated to **Solana Program clients**. When
+  you need instructions or constants related to the System Program, Token Program (Token-2022), Memo
+  Program, etc., you'll import them from here.
+- `import { ... } from "gill/node"`: This path contains **server-only utilities** designed for
+  runtimes like Node.js and Bun. These functions often interact with the file system or environment
+  variables, such as `loadKeypairSignerFromFile`.
+
+### 3. Replace `@solana/kit` and SPL Program Imports
+
+Now, with an understanding of the import paths, you can update your code.
+
+**Step A: Replace Core Imports**  
+Find all instances where you import from `@solana/kit` and change the path to `gill`.
+
+**Before:**
+
+```ts
+import { createSolanaRpc, createTransactionMessage } from "@solana/kit";
+```
+
+**After:**
+
+```ts
+import { createSolanaRpc, createTransactionMessage } from "gill";
+```
+
+**Step B: Replace Program Imports**  
+Next, consolidate your SPL program imports to use the `gill/programs` path. This replaces individual
+Solana Program Library (SPL) packages like `@solana-program/compute-budget` or
+`@solana-program/memo`.
+
+**Before:**
+
+```ts
+import { getSetComputeUnitLimitInstruction } from "@solana-program/compute-budget";
+import { getAddMemoInstruction } from "@solana-program/memo";
+```
+
+**After:**
+
+```ts
+import { getSetComputeUnitLimitInstruction, getAddMemoInstruction } from "gill/programs";
+```
+
+### 4. Uninstall Old Packages
+
+Finally, clean up your `package.json` by uninstalling `@solana/kit` and the individual
+`@solana-program/*` packages that you've replaced.
+
+```bash
+npm uninstall @solana/kit @solana-program/compute-budget @solana-program/memo
+# and any other SPL packages you replaced
+```
+
+Your application is now fully migrated to use Gill's core library!
+
+## Part 2: Upgrading Your Solana Workflow
+
+Migrating to Gill is more than a syntax change; it's a shift in how you approach common Solana
+development tasks. Instead of manual, multi-step processes, you'll adopt a more direct and
+declarative workflow. Here’s a practical breakdown of how your approach will change for specific
+tasks.
+
+### For Managing Dependencies:
+
+- **@solana/kit**: Your `package.json` would typically include `@solana/kit` plus numerous
+  individual `@solana-program/*` packages for SPL functionality (like Token, Memo, etc.).
+- **gill**: Your dependencies become unified. You primarily rely on the single `gill` package,
+  accessing core functionality and common SPL program clients through its distinct entry points
+  (`gill`, `gill/programs`).
+
+### For Debugging:
+
+- **@solana/kit**: Debugging often involved manual `console.log` statements, inspecting raw
+  transaction objects, and manually constructing explorer links to check on failed transactions.
+- **gill**: Debugging is now an integrated feature. You can enable **Debug Mode** to get automatic,
+  context-rich logs, including pre-formatted Solana Explorer links that are printed to the console
+  the moment you send a transaction.
+
+### From Manual Orchestration to High-Level Abstractions:
+
+- **@solana/kit**: Manually handling each step of a workflow—writing boilerplate to load keypairs,
+  setting up separate RPC clients, chaining functions with `pipe()` to build transactions, and
+  crafting individual SPL token instructions.
+
+- **gill**: Using single, high-level functions that abstract entire workflows. One-line helpers load
+  keypairs, `createSolanaClient` instantly provides a full connection, and "Transaction Builders"
+  assemble complex, multi-instruction transactions (like token transfers with automatic ATA
+  creation) in one go.
+
+### For On-Chain Data Calculation:
+
+- **@solana/kit**: It was common to rely on RPC network calls to fetch data that is technically
+  calculable on the client-side, such as the minimum balance required for rent exemption
+  (`rpc.getMinimumBalanceForRentExemption()`), which introduces network latency.
+- **gill**: The workflow shifts to using synchronous, offline utility functions provided by Gill
+  whenever possible. You can now instantly compute the rent exemption amount locally, leading to
+  faster application logic and reduced reliance on RPC calls.
+
+## Part 3: Refactoring with Gill's Abstractions
+
+After completing the core migration, you can refactor your code to leverage Gill's simplifications.
+
+### Creating a Solana RPC Connection
+
+**@solana/kit:**
+
+```ts
+import {
+  devnet,
+  createSolanaRpc,
+  createSolanaRpcSubscriptions,
+  sendAndConfirmTransactionFactory,
+} from "@solana/kit";
+
+const rpc = createSolanaRpc(devnet("https://api.devnet.solana.com"));
+```
+
+**gill:**
+
+```ts
+import { createSolanaClient } from "gill";
+
+const { rpc, rpcSubscriptions, sendAndConfirmTransaction } = createSolanaClient({
+  urlOrMoniker: "devnet",
+});
+```
+
+**Note**: Ensure the `createSolanaClient` call is robust by handling potential network errors.
+Consider using a try-catch or a fallback URL if the `devnet` connection fails.
+
+For more, refer to this section: [gill vs @solana/kit](https://www.gillsdk.com/docs/compare/kit)
+
+## Part 4: Building a Reactive Frontend with @gillsdk/react
+
+Now that your core logic is migrated, the next step is to build a reactive user interface.
+`@gillsdk/react` is a companion package to `gill`, providing React hooks for interacting with Solana
+on-chain data. It requires `gill` as a peer dependency and is built on top of the powerful
+**TanStack Query** library, offering sophisticated features like automatic caching, background
+refetching, and robust error handling.
+
+### Getting Started: A Quick Guide
+
+**1. Install Dependencies**
+
+Install `@gillsdk/react` along with its required peer dependencies.
+
+```bash
+npm install gill @gillsdk/react @tanstack/react-query
+```
+
+**2. Set Up QueryClientProvider and SolanaProvider**
+
+Since `@gillsdk/react` relies on TanStack Query, you need to wrap your app with
+`QueryClientProvider` and `SolanaProvider`. When using Next.js App Router or other React Server
+Component (RSC) frameworks, create a client-side wrapper marked with the `"use client"` directive.
+
+```jsx
+// src/providers/solana-provider.jsx
+"use client";
+import { createSolanaClient } from "gill";
+import { SolanaProvider } from "@gillsdk/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+const solanaClient = createSolanaClient({ urlOrMoniker: "devnet" });
+
+export function SolanaProviderClient({ children }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SolanaProvider client={solanaClient}>{children}</SolanaProvider>
+    </QueryClientProvider>
+  );
+}
+```
+
+Then, use this wrapper in your root layout:
+
+```jsx
+// src/app/layout.jsx
+import { SolanaProviderClient } from "@/providers/solana-provider";
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <SolanaProviderClient>{children}</SolanaProviderClient>
+      </body>
+    </html>
+  );
+}
+```
+
+**3. Use the Hooks in Your Components**
+
+You can now use any of the available hooks to fetch data. Remember to add `"use client"` to any
+component that uses these hooks when working with RSC frameworks.
+
+```jsx
+// src/components/WalletBalance.jsx
+"use client";
+import { lamportsToSol } from "gill";
+import { useBalance } from "@gillsdk/react";
+
+export function WalletBalance({ address }) {
+  const { data: balance, isLoading, isError } = useBalance({ address });
+
+  if (isLoading) return <div>Loading balance...</div>;
+  if (isError) return <div>Error fetching balance.</div>;
+
+  return (
+    <div>
+      <p>Balance: {lamportsToSol(balance)} SOL</p>
+    </div>
+  );
+}
+```
+
+### Available Hooks
+
+`@gillsdk/react` organizes its hooks into logical categories:
+
+#### Client Management Hooks
+
+These hooks are for accessing and managing the core Solana client connection established by your
+`<SolanaProvider>`.
+
+- `useSolanaClient`
+- `useUpdateSolanaClient`
+
+#### Data Fetching Hooks
+
+These are the workhorses of the library, designed to fetch and manage the state of on-chain data.
+
+- `useAccount`
+- `useBalance`
+- `useLatestBlockhash`
+- `useProgramAccounts`
+- `useSignatureStatuses`
+- `useSignaturesForAddress`
+- `useTokenAccount`
+- `useTokenMint`
+
+#### Transaction Hooks (Coming Soon)
+
+Hooks to simplify sending and simulating transactions are planned for a future release. In the
+meantime, use `sendAndConfirmTransaction` from `gill` for transaction operations.
+
+## Part 5: Validating Your Migration
+
+After migrating, verify your application works as expected:
+
+1. **Run Your Tests**: Ensure your existing test suite passes with the new `gill` imports.
+2. **Test Transactions**: Send a test transaction (e.g., a memo transaction) to confirm that
+   `createTransaction` and `sendAndConfirmTransaction` work correctly.
+3. **Check Frontend**: If using `@gillsdk/react`, verify that hooks like `useBalance` return
+   expected data.
+4. **Enable Debug Mode**: Use Gill's Debug Mode to inspect transaction logs and Solana Explorer
+   links for any issues.
+
+By following this guide, you have not only updated your dependencies but also modernized your entire
+Solana development workflow. You're now equipped to build more robust, readable, and efficient dApps
+with the gill .
