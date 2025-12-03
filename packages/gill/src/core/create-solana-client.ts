@@ -77,12 +77,12 @@ export function createSolanaClient<TCluster extends ModifiedClusterUrl>({
     rpc,
     rpcSubscriptions,
     sendAndConfirmTransaction: sendAndConfirmTransactionWithSignersFactory({
-      // @ts-ignore - TODO(FIXME:nick)
+      // @ts-ignore - TODO: Fix type mismatch between generic Rpc and factory requirements
       rpc,
-      // @ts-ignore - TODO(FIXME:nick)
+      // @ts-ignore - TODO: Fix type mismatch between generic RpcSubscriptions and factory requirements
       rpcSubscriptions,
     }),
-    // @ts-ignore
+    // @ts-ignore - TODO: Fix type mismatch
     simulateTransaction: simulateTransactionFactory({ rpc }),
     urlOrMoniker: urlOrMoniker.toString() as TCluster,
   };

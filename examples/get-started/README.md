@@ -27,8 +27,8 @@ Once setup locally, you will be able to run the scripts included within this
 repo using `esrun`:
 
 ```shell
-npx esrun ./src/<script>
-pnpx esrun ./src/<script>
+npx esrun ./scripts/<script>
+pnpx esrun ./scripts/<script>
 ```
 
 > From the [esrun](https://www.npmjs.com/package/esrun) readme:

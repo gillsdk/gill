@@ -1,10 +1,10 @@
 import {
-  createSolanaClient,
-  createTransaction,
-  getExplorerLink,
-  getSignatureFromTransaction,
-  signTransactionMessageWithSigners,
-  SolanaClusterMoniker,
+    createSolanaClient,
+    createTransaction,
+    getExplorerLink,
+    getSignatureFromTransaction,
+    signTransactionMessageWithSigners,
+    type SolanaClusterMoniker,
 } from "gill";
 import { loadKeypairSignerFromFile } from "gill/node";
 import { getAddMemoInstruction } from "gill/programs";
