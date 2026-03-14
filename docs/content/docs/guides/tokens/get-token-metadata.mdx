@@ -1,0 +1,176 @@
+---
+title: Get Token Metadata
+description:
+  Learn how to read and parse token metadata from the Solana blockchain using the gill JavaScript
+  library.
+---
+
+Every Solana token can have metadata associated with it, including a name, symbol, URI pointing to
+off-chain data, and more. The approach to reading this metadata depends on which token program was
+used to create the token:
+
+- **Token Metadata Program (legacy):** Metadata lives in a separate PDA account managed by the
+  Metaplex Token Metadata program.
+- **Token Extensions (Token22):** Metadata is stored inline on the mint account as an extension.
+
+This guide demonstrates how to fetch token metadata using the
+[`gill` package](https://www.npmjs.com/package/gill), covering both approaches.
+
+## Install gill
+
+Install gill using the core `gill` library:
+
+```package-install
+gill
+```
+
+import { PackageBadges } from "@/components/package-badges";
+
+<PackageBadges packageName="gill" />
+
+## Create an RPC connection
+
+In order to fetch data from the Solana blockchain, you will need a client connection. You can easily
+create a Solana client connection using the `createSolanaClient()` function.
+
+The `urlOrMoniker` can be either a Solana network moniker (e.g. `devnet`, `mainnet`, `localnet`) or
+a full URL of your RPC provider.
+
+```ts twoslash
+import { createSolanaClient } from "gill";
+
+const { rpc } = createSolanaClient({
+  urlOrMoniker: "mainnet", // `devnet`, `localnet`, etc
+});
+```
+
+<Callout title="Public RPC endpoints are subject to rate limits">
+  Using a Solana moniker will connect to the public RPC endpoints. These are subject to rate limits
+  and should not be used in production applications. Applications should find their own RPC provider
+  and the URL provided from them.
+</Callout>
+
+## Token Metadata Program (legacy tokens)
+
+For tokens created with the original Token Program and the Metaplex Token Metadata program, metadata
+is stored in a separate PDA account derived from the token's mint address.
+
+### Derive the metadata address
+
+Use `getTokenMetadataAddress()` from `gill/programs` to derive the metadata PDA from the mint
+address:
+
+```ts
+import { address } from "gill";
+import { getTokenMetadataAddress } from "gill/programs";
+
+const mint = address("So11111111111111111111111111111111111111112");
+
+const metadataAddress = await getTokenMetadataAddress(mint);
+```
+
+### Fetch the metadata account
+
+Use `fetchMetadata()` from `gill/programs` to fetch and decode the metadata account:
+
+```ts
+import { fetchMetadata } from "gill/programs";
+
+const metadata = await fetchMetadata(rpc, metadataAddress);
+
+console.log("Name:", metadata.data.name);
+console.log("Symbol:", metadata.data.symbol);
+console.log("URI:", metadata.data.uri);
+console.log("Seller fee:", metadata.data.sellerFeeBasisPoints);
+console.log("Creators:", metadata.data.creators);
+```
+
+The metadata account also contains additional fields:
+
+```ts
+console.log("Update authority:", metadata.updateAuthority);
+console.log("Is mutable:", metadata.isMutable);
+console.log("Collection:", metadata.collection);
+console.log("Token standard:", metadata.tokenStandard);
+```
+
+<Callout title="Use fetchMaybeMetadata for optional lookups">
+  If you are unsure whether a metadata account exists for a given mint, use `fetchMaybeMetadata()`
+  instead. It returns `null` if the account does not exist, rather than throwing an error.
+</Callout>
+
+```ts
+import { fetchMaybeMetadata } from "gill/programs";
+
+const maybeMeta = await fetchMaybeMetadata(rpc, metadataAddress);
+
+if (maybeMeta.exists) {
+  console.log("Name:", maybeMeta.data.name);
+} else {
+  console.log("No metadata account found");
+}
+```
+
+## Token Extensions (Token22)
+
+For tokens created with the Token Extensions program (Token22), metadata can be stored directly on
+the mint account as an extension. No separate PDA is needed.
+
+### Fetch the mint account
+
+Use `fetchMint()` from `gill/programs` to fetch the mint account, which includes any extensions:
+
+```ts
+import { address } from "gill";
+import { fetchMint } from "gill/programs";
+
+const mint = address("your-token22-mint-address");
+
+const mintAccount = await fetchMint(rpc, mint);
+```
+
+### Find the TokenMetadata extension
+
+The mint account's `extensions` array contains all enabled extensions. Use the `isExtension()` type
+guard from `gill/programs` to find the `TokenMetadata` extension:
+
+```ts
+import { fetchMint, isExtension } from "gill/programs";
+
+const mintAccount = await fetchMint(rpc, mint);
+const tokenMetadata = mintAccount.data.extensions?.find((ext) => isExtension("TokenMetadata", ext));
+
+if (tokenMetadata && tokenMetadata.__kind === "TokenMetadata") {
+  console.log("Name:", tokenMetadata.name);
+  console.log("Symbol:", tokenMetadata.symbol);
+  console.log("URI:", tokenMetadata.uri);
+  console.log("Update authority:", tokenMetadata.updateAuthority);
+  console.log("Additional metadata:", tokenMetadata.additionalMetadata);
+}
+```
+
+<Callout title="Token22 metadata differences">
+  Token Extensions metadata includes an `additionalMetadata` field, which is a `Map` of arbitrary
+  key-value string pairs. This is different from the legacy Token Metadata Program, which uses
+  structured fields like `creators` and `collection`.
+</Callout>
+
+## Fetching the off-chain JSON metadata
+
+Both the legacy Token Metadata Program and Token Extensions store a `uri` field that points to an
+off-chain JSON file. This JSON typically contains the token's image, description, attributes, and
+other rich metadata.
+
+Fetching this data is a standard HTTP request, not a Solana RPC call:
+
+```ts
+const response = await fetch(uri);
+const offChainMetadata = await response.json();
+
+console.log("Image:", offChainMetadata.image);
+console.log("Description:", offChainMetadata.description);
+```
+
+The off-chain JSON format generally follows the
+[Metaplex Token Metadata Standard](https://developers.metaplex.com/token-metadata/token-standard),
+which includes fields like `image`, `description`, `attributes`, `external_url`, and more.

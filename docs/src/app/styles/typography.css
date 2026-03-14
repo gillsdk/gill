@@ -10,7 +10,7 @@
   margin-top: 3em;
 } */
 
-.fd-codeblock pre > *,
+figure.shiki pre > *,
 .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
-  font-size: 0.9rem;
+  font-size: 0.9rem !important;
 }

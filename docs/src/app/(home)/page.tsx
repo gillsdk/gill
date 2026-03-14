@@ -25,25 +25,28 @@ export default function Page() {
         <PackageBadges packageName="gill" />
       </section>
 
-      <Tabs items={["npm", "pnpm", "yarn", "bun"]} className="w-full max-w-md mx-auto rounded-lg">
+      <Tabs
+        items={["npm", "pnpm", "yarn", "bun"]}
+        className="fd-codeblock w-full max-w-md mx-auto rounded-lg"
+      >
         <Tab value="npm">
-          <CodeBlock>
-            <Pre>npm install gill</Pre>
+          <CodeBlock className="rounded-none">
+            <Pre className="px-4">npm install gill</Pre>
           </CodeBlock>
         </Tab>
         <Tab value="pnpm">
-          <CodeBlock>
-            <Pre>pnpm add gill</Pre>
+          <CodeBlock className="rounded-none">
+            <Pre className="px-4">pnpm add gill</Pre>
           </CodeBlock>
         </Tab>
         <Tab value="yarn">
-          <CodeBlock>
-            <Pre>yarn add gill</Pre>
+          <CodeBlock className="rounded-none">
+            <Pre className="px-4">yarn add gill</Pre>
           </CodeBlock>
         </Tab>
         <Tab value="bun">
-          <CodeBlock>
-            <Pre>bun install gill</Pre>
+          <CodeBlock className="rounded-none">
+            <Pre className="px-4">bun install gill</Pre>
           </CodeBlock>
         </Tab>
       </Tabs>

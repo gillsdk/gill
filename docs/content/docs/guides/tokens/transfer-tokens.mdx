@@ -1,0 +1,207 @@
+---
+title: Transfer Tokens
+description: Learn how to transfer tokens between wallets using the gill JavaScript library.
+---
+
+Transferring tokens sends existing token supply from one wallet to another via their Associated
+Token Accounts (ATAs). The source wallet's `authority` must sign the transaction to authorize the
+transfer.
+
+This guide demonstrates how to transfer tokens using the
+[`gill` package](https://www.npmjs.com/package/gill), including automatically creating the
+destination wallet's ATA if it does not already exist.
+
+## Install gill
+
+Install gill using the core `gill` library:
+
+```package-install
+gill
+```
+
+import { PackageBadges } from "@/components/package-badges";
+
+<PackageBadges packageName="gill" />
+
+## Create an RPC connection
+
+In order to send transactions and/or fetch data from the Solana blockchain, you will need a client
+connection. You can easily create a Solana client connection using the `createSolanaClient()`
+function.
+
+The `urlOrMoniker` can be either a Solana network moniker (e.g. `devnet`, `mainnet`, `localnet`) or
+a full URL of your RPC provider.
+
+```ts twoslash
+import { createSolanaClient } from "gill";
+
+const { rpc, sendAndConfirmTransaction } = createSolanaClient({
+  urlOrMoniker: "devnet", // `mainnet`, `localnet`, etc
+});
+```
+
+<Callout title="Public RPC endpoints are subject to rate limits">
+  Using a Solana moniker will connect to the public RPC endpoints. These are subject to rate limits
+  and should not be used in production applications. Applications should find their own RPC provider
+  and the URL provided from them.
+</Callout>
+
+## Prepare a Signer
+
+Every Solana transaction requires at least one "signer" to be the fee payer for the transaction.
+When transferring tokens, the `authority` (the source wallet's owner) must also be a signer to
+authorize the transfer.
+
+### Load a signer from a local keypair file
+
+For backend scripts and some server environments, you can load a signer from your local filesystem:
+
+```ts twoslash
+import { type KeyPairSigner } from "gill";
+import { loadKeypairSignerFromFile } from "gill/node";
+
+// This defaults to the file path used by the Solana CLI: `~/.config/solana/id.json`
+const signer: KeyPairSigner = await loadKeypairSignerFromFile();
+console.log("signer:", signer.address);
+```
+
+## Understanding token amounts
+
+When transferring tokens, the `amount` you provide is in raw base units, not human-readable units.
+The conversion depends on the `decimals` value of your token mint.
+
+For example, if your token has `decimals = 9` (the most common for fungible tokens):
+
+- `1_000_000_000` (1e9) = **1 token**
+- `5_000_000_000` (5e9) = **5 tokens**
+- `1_000_000` (1e6) = **0.001 tokens**
+
+<Callout title="Decimals matter">
+  With `decimals = 9`, to transfer **100 tokens** you would set `amount` to `100_000_000_000`
+  (100e9). With `decimals = 6`, to transfer **100 tokens** you would set `amount` to `100_000_000`
+  (100e6). Always check your token's decimals to calculate the correct raw amount.
+</Callout>
+
+## Build the transfer transaction
+
+The simplest way to transfer tokens is using the `buildTransferTokensTransaction()` helper from
+`gill/programs`. It automatically derives the source and destination wallet's ATAs and sets compute
+unit limits (default 31,000 CU).
+
+```ts
+import { buildTransferTokensTransaction } from "gill/programs";
+
+const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+const transaction = await buildTransferTokensTransaction({
+  feePayer: signer,
+  version: "legacy",
+  latestBlockhash,
+  mint: mint.address,
+  authority: signer,
+  destination: destinationWallet,
+  amount: 1_000_000_000, // 1 token (with decimals=9)
+});
+```
+
+Where `mint.address` is the address of the token mint and `destinationWallet` is the wallet address
+that should receive the tokens.
+
+## Manually create the transfer instructions
+
+If you need more control over the transaction, you can use `getTransferTokensInstructions()` to get
+the individual instructions and compose the transaction yourself.
+
+First, derive the ATAs for both the source and destination wallets:
+
+```ts
+import { getAssociatedTokenAccountAddress } from "gill/programs";
+
+const sourceAta = await getAssociatedTokenAccountAddress(mint.address, signer.address);
+const destinationAta = await getAssociatedTokenAccountAddress(mint.address, destinationWallet);
+```
+
+Then create the instructions and build the transaction:
+
+```ts
+import { createTransaction } from "gill";
+import { getTransferTokensInstructions } from "gill/programs";
+
+const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+const instructions = getTransferTokensInstructions({
+  feePayer: signer,
+  mint: mint.address,
+  authority: signer,
+  sourceAta,
+  destination: destinationWallet,
+  destinationAta,
+  amount: 1_000_000_000, // 1 token (with decimals=9)
+});
+
+const transaction = createTransaction({
+  feePayer: signer,
+  version: "legacy",
+  instructions,
+  latestBlockhash,
+});
+```
+
+## Sign and send the transaction
+
+With your transaction fully created, you can now sign and send it:
+
+```ts
+import {
+  signTransactionMessageWithSigners,
+  getSignatureFromTransaction,
+  getExplorerLink,
+} from "gill";
+
+const signedTransaction = await signTransactionMessageWithSigners(transaction);
+
+console.log(
+  "Explorer:",
+  getExplorerLink({
+    cluster: "devnet",
+    transaction: getSignatureFromTransaction(signedTransaction),
+  }),
+);
+```
+
+If your transaction is already fully signed or has all signers available, you can send and confirm
+it on the blockchain:
+
+```ts
+await sendAndConfirmTransaction(signedTransaction);
+```
+
+<Callout title="Pro Tip">
+  If you do not need to know the transaction signature prior to sending the transaction AND all
+  signers are attached to the transaction, you can pass a fully signable transaction to the
+  `sendAndConfirmTransaction()` function initialized from `createSolanaClient()`. It will then
+  perform the signing operations prior to sending and confirming.
+</Callout>
+
+## Using Token Extensions (Token22)
+
+If your token was created with the Token Extensions program (Token22), pass the `tokenProgram`
+parameter to ensure the correct program is used:
+
+```ts
+import { TOKEN_2022_PROGRAM_ADDRESS, buildTransferTokensTransaction } from "gill/programs";
+
+const transaction = await buildTransferTokensTransaction({
+  feePayer: signer,
+  version: "legacy",
+  latestBlockhash,
+  mint: mint.address,
+  authority: signer,
+  destination: destinationWallet,
+  amount: 1_000_000_000,
+  tokenProgram: TOKEN_2022_PROGRAM_ADDRESS,
+});
+```
+
+The same `tokenProgram` parameter is available on `getTransferTokensInstructions()` and
+`getAssociatedTokenAccountAddress()` as well.
