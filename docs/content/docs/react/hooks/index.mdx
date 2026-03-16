@@ -62,8 +62,8 @@ interface HookOptions {
   // Time in milliseconds before data is considered stale
   staleTime?: number;
 
-  // Time in milliseconds to keep data in cache
-  cacheTime?: number;
+  // Time in milliseconds after a query becomes unused to garbage-collect it
+  gcTime?: number;
 
   // Whether to enable the query
   enabled?: boolean;
