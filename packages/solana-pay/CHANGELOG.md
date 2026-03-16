@@ -1,5 +1,14 @@
 # @gillsdk/solana-pay
 
+## 0.8.0
+
+### Minor Changes
+
+- [#347](https://github.com/gillsdk/gill/pull/347)
+  [`c4430e5`](https://github.com/gillsdk/gill/commit/c4430e5caf6f3ed462779af2a69b815e9e2707cc) Thanks
+  [@nickfrosty](https://github.com/nickfrosty)! - made explicit types for parsed and non parsed solana pay transaction
+  request response
+
 ## 0.7.0
 
 ### Minor Changes
